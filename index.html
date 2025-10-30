@@ -24,7 +24,7 @@
     // 載入「最新消息」共用片段
     (async function loadNews(){
       try {
-        const res = await fetch('/partials/news-content.html', { cache: 'no-cache' });
+        const res = await fetch('partials/news-content.html', { cache: 'no-cache' });
         document.getElementById('main-content').innerHTML = await res.text();
       } catch (e) { console.error('無法載入最新消息：', e); }
     })();
