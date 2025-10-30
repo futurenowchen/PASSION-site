@@ -113,3 +113,60 @@ nav { background:#f5c44d; position:sticky; top:0; z-index:1000; }
   .menu li:hover > ul { display:block; }
   .menu-toggle { display:block; }
 }
+
+/* ===== PASSION 導覽列專用樣式（請貼在 styles.css 最底部） ===== */
+nav {
+  background:#8b0010;          /* 深紅色導覽底 */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  color:#fff;
+}
+nav a { color:#fff; text-decoration:none; }   /* 覆蓋全站預設藍色 */
+nav a:hover { color: rgba(255,255,255,.85); }
+
+.nav-container{
+  max-width:1100px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 16px;
+}
+
+/* LOGO */
+.logo img{ height:44px; display:block; }
+
+/* 第一層選單：水平排列 */
+ul.menu{ list-style:none; margin:0; padding:0; display:flex; gap:24px; }
+ul.menu > li{ position:relative; }
+ul.menu > li > a{ display:block; padding:8px 6px; }
+
+/* 第二層以下：下拉選單 */
+ul.menu li ul{
+  list-style:none; margin:0; padding:8px 0;
+  position:absolute; left:0; top:100%; min-width:220px;
+  background:#ffffff; border:1px solid #ddd;
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+  display:none;
+}
+ul.menu li:hover > ul{ display:block; }
+ul.menu li ul li a{
+  color:#333; padding:8px 12px; display:block; white-space:nowrap;
+}
+ul.menu li ul li a:hover{ background:#f6f6f6; }
+
+/* 第三層：往右展開 */
+ul.menu li ul li{ position:relative; }
+ul.menu li ul li ul{ left:100%; top:0; }
+
+/* 手機版：點漢堡展開 */
+.menu-toggle{ display:none; background:none; border:0; font-size:22px; color:#fff; cursor:pointer; }
+@media (max-width: 900px){
+  .menu-toggle{ display:block; }
+  ul.menu{ display:none; flex-direction:column; gap:0; width:100%; }
+  ul.menu.show{ display:flex; }
+  ul.menu > li{ width:100%; }
+  ul.menu li ul{
+    position:static; min-width:unset; border:0; box-shadow:none; background:transparent;
+  }
+  ul.menu li ul li a{ color:#fff; padding:8px 0 8px 12px; }
+  ul.menu li ul li a:hover{ background:rgba(255,255,255,.08); }
+}
