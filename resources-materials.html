@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>教材資源｜PASSION 教育團隊</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+</head>
+<body>
+  <div id="site-nav" aria-label="網站導覽"></div>
+
+  <main>
+    <h1>教材資源</h1>
+    <p>
+      PASSION 教學團隊整合各學科教材與教案，提供教師進行學習扶助課程之備課參考。
+      所有教材均依據診斷結果設計，結合先備知識補強與活動導向教學策略。
+    </p>
+
+    <section>
+      <h2>教材分享平台</h2>
+      <p>
+        平台內含國文、英文、數學等領域之教學資源，教師可登入下載教材範例並分享自編教材。
+      </p>
+      <p>
+        <a href="https://passiontw.net/PubSourceShare/Login.aspx" target="_blank" rel="noopener noreferrer" class="button-link">
+          前往 PASSION 教材資源平台
+        </a>
+      </p>
+    </section>
+
+    <section>
+      <h2>教材特色</h2>
+      <ul>
+        <li>依據學生診斷結果進行適性分組教學。</li>
+        <li>教材銜接正規課程內容，補足基礎概念落差。</li>
+        <li>活動導向設計，提升學習參與度。</li>
+        <li>提供即時回饋機制與學習歷程追蹤。</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    (async function loadNav(){
+      try {
+        const res = await fetch('nav.html', { cache: 'no-cache' });
+        document.getElementById('site-nav').innerHTML = await res.text();
+      } catch (e) { console.error('無法載入導覽列：', e); }
+    })();
+
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      if (menu) menu.classList.toggle('show');
+    }
+    window.toggleMenu = toggleMenu;
+  </script>
+</body>
+</html>

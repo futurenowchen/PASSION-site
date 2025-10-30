@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>教學資源｜PASSION 教育團隊</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+  <style>
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+      padding: 20px 0;
+      border-top: 1px solid #ddd;
+      margin-top: 40px;
+      background-color: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div id="site-nav" aria-label="網站導覽"></div>
+
+  <main>
+    <h1>教學資源總覽</h1>
+
+    <section>
+      <h2>診斷測驗</h2>
+      <ul>
+        <li><a href="https://passion.dacctest.net/index_passion.html" target="_blank" rel="noopener noreferrer">DACC 中文閱讀診斷平台</a></li>
+        <li><a href="https://passion.dcectest.net/sys/index.aspx" target="_blank" rel="noopener noreferrer">DCEC 英語適性診斷平台</a></li>
+        <li><a href="http://passion.dtmctest.net/intro/" target="_blank" rel="noopener noreferrer">DTMC 數學診斷測驗</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>教學平台</h2>
+      <ul>
+        <li><a href="https://smartreading.net/v3/index.aspx" target="_blank" rel="noopener noreferrer">SmartReading</a></li>
+        <li><a href="https://srenglish.net/" target="_blank" rel="noopener noreferrer">SmartReading-English</a></li>
+        <li><a href="https://mandarin.smartreading.net/" target="_blank" rel="noopener noreferrer">SmartReading-Mandarin</a></li>
+        <li><a href="https://www.coolchinese.net/index.aspx?errorStatus=GT001&errorMessage=UserNotLoggedIn." target="_blank" rel="noopener noreferrer">COOL Chinese</a></li>
+        <li><a href="https://smartchinese.org/" target="_blank" rel="noopener noreferrer">全方位中文 Smart Chinese</a></li>
+        <li><a href="https://kids.smartchinese.org/" target="_blank" rel="noopener noreferrer">全方位兒童中文</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>教材資源</h2>
+      <ul>
+        <li><a href="https://passiontw.net/PubSourceShare/Login.aspx" target="_blank" rel="noopener noreferrer">PASSION 教材資源平台</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    PASSION 教育團隊 © National Taiwan Normal University
+  </footer>
+
+  <script>
+    (async function loadNav(){
+      try {
+        const res = await fetch('nav.html', { cache: 'no-cache' });
+        document.getElementById('site-nav').innerHTML = await res.text();
+      } catch (e) { console.error('無法載入導覽列：', e); }
+    })();
+
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      if (menu) menu.classList.toggle('show');
+    }
+    window.toggleMenu = toggleMenu;
+  </script>
+</body>
+</html>

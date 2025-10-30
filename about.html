@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>團隊簡介｜PASSION 教育團隊</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="site-nav" aria-label="網站導覽"></div>
+
+  <main>
+    <h1>團隊簡介</h1>
+
+    <section class="narrow-paragraph">
+      <p>
+        　　2016年於臺灣師範大學心測中心成立PASSION扎根教學團隊，由宋曜廷副校長領軍、胡翠君教授統籌執行，致力於優化學習扶助品質，陸續接受國教署委託，協助臺北、新北、桃園、花蓮、臺東等縣市學校。
+      </p>
+
+      <p>
+        　　本團隊以雙軌模式，協助偏鄉及弱勢地區，提升基礎學科素養：第一軌，運用「PASSION扎根教學創新教學模組」，即「適性診斷、篩選分流、全方位教學培育」，輔導合作學校，提升教學品質與成效；第二軌，全國首創「PASSION偏鄉優質教育學分學程」，培育臺灣大學聯盟學生成為偏鄉專業教學人才。
+      </p>
+
+      <p>
+        　　本團隊持續善用既有資源，研發最佳教學模組與實踐型態，務實地以SDG4「優質教育」為核心目標，進而實現SDG10「減少不平等」，消弭城鄉學習落差，更期許以SDG17「夥伴關係」，成為支援各地偏鄉教育的堅實組織。
+      </p>
+
+      <p>
+        　　PASSION除代表熱情之外，亦是本團隊專業教學模組：「診斷、篩選分流、全方位適性教學配套」三步驟之縮寫（Project of Adaptive Screening，Streaming，and Instruction for Omni-directional Nurturing），如圖所示，具體助益如下：
+      </p>
+    </section>
+
+    <figure style="text-align:center;">
+      <img src="images/04d5531f-9662-44aa-8db6-9110e9fafffc.png" alt="PASSION教學模組流程圖" class="responsive-image" />
+      <figcaption>PASSION 教學模組三步驟示意圖</figcaption>
+    </figure>
+
+    <section class="narrow-paragraph">
+      <ol>
+        <li>
+          （一）以精確學習診斷工具協助篩選分流學生，作為適性教學依據<br>
+          　　為精確診斷偏鄉學生學習待加強處，以羅列學生學習盲點，作為即時教學介入參考，本團隊將提供國文閱讀（DACC）、英文科（DCEC）、數學科（DTMC）三科診斷測驗，此三套診斷工具可有效克服現有測評工具在診斷學生垂直能力（即能力年段）效率不足和診斷學生水平能力（即各年段未具備能力）精確性不足的問題，作為分班適性教學參考依據。
+        </li>
+        <li>
+          （二）以創新PASSION教學配套提升低成就學生學習品質<br>
+          　　本團隊以診斷結果為參考，提供國英數三科適性教材教法，教材之重要特色為同步銜接原班上課內容，針對學習內容落差，將各學科所需之先備知識融入教材中，以利後續學習。另在教學法上，PASSION教學更以活動為導向取代傳統教師講授方式，並設定獎勵制度，以獎勵方式鼓勵學生積極投入活動學習。
+        </li>
+        <li>
+          （三）以優質PASSION師資培育強化教師教學品質<br>
+          　　有鑑於師資為學習扶助成功與否的最重要關鍵，且低成就學習者在學習上有其獨特的需求，師資養成在班級經營和教學策略上應針對其特質建構適合的教學模式。因此，PASSION教學團隊將積極辦理分科增能研習，並邀請資深學習扶助教師密集入班觀課，實地實境瞭解班級情況，適時給予教學技巧、班級經營等專業建議及教學回饋，以提升課堂效能。
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <script>
+    // 載入導覽列
+    (async function loadNav(){
+      try {
+        const res = await fetch('nav.html', { cache: 'no-cache' });
+        document.getElementById('site-nav').innerHTML = await res.text();
+      } catch (e) { console.error('無法載入導覽列：', e); }
+    })();
+
+    // 手機版選單切換
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      if (menu) menu.classList.toggle('show');
+    }
+    window.toggleMenu = toggleMenu;
+  </script>
+</body>
+</html>

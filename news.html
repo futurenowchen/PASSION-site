@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>最新消息｜PASSION 教育團隊</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+</head>
+<body>
+  <div id="site-nav" aria-label="網站導覽"></div>
+
+  <main>
+    <h1>最新消息</h1>
+    <section class="news-gallery">
+      <article>
+        <img src="images/N閱讀.jpg" alt="PASSION 中文閱讀教學" />
+        <h2>PASSION 中文閱讀教學診斷平台上線</h2>
+        <p>透過 DACC 平台，協助教師了解學生閱讀能力層次，提供即時學習回饋。</p>
+      </article>
+
+      <article>
+        <img src="images/N英語.jpg" alt="PASSION 英語學習計畫" />
+        <h2>PASSION 英語學習計畫啟動</h2>
+        <p>以 DCEC 平台搭配創新教學模組，協助學生提升英語文理解力。</p>
+      </article>
+
+      <article>
+        <img src="images/N數學.jpg" alt="PASSION 數學診斷教學" />
+        <h2>PASSION 數學診斷教學平台更新</h2>
+        <p>DTMC 平台全面升級，新增學生學習歷程報告功能，讓教學更精準。</p>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    (async function loadNav(){
+      try {
+        const res = await fetch('nav.html', { cache: 'no-cache' });
+        document.getElementById('site-nav').innerHTML = await res.text();
+      } catch (e) { console.error('無法載入導覽列：', e); }
+    })();
+
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      if (menu) menu.classList.toggle('show');
+    }
+    window.toggleMenu = toggleMenu;
+  </script>
+</body>
+</html>

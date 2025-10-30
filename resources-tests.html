@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>診斷測驗｜PASSION 教育團隊</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+</head>
+<body>
+  <div id="site-nav" aria-label="網站導覽"></div>
+
+  <main>
+    <h1>診斷測驗</h1>
+    <p class="narrow-paragraph">
+      PASSION 扎根教學團隊研發三大學科診斷測驗，協助教師精準掌握學生學習盲點，
+      作為適性教學的重要依據。
+    </p>
+
+    <section>
+      <h2>DACC 中文閱讀診斷平台</h2>
+      <p>
+        用於分析學生的閱讀理解能力，提供即時回饋與能力分級。
+        <br/>
+        <a href="https://passion.dacctest.net/index_passion.html" target="_blank" rel="noopener noreferrer" class="button-link">
+          前往 DACC 平台
+        </a>
+      </p>
+    </section>
+
+    <section>
+      <h2>DCEC 英語適性診斷平台</h2>
+      <p>
+        檢測學生聽力、閱讀與語法能力，分析英語核心素養的強弱項。
+        <br/>
+        <a href="https://passion.dcectest.net/sys/index.aspx" target="_blank" rel="noopener noreferrer" class="button-link">
+          前往 DCEC 平台
+        </a>
+      </p>
+    </section>
+
+    <section>
+      <h2>DTMC 數學診斷測驗</h2>
+      <p>
+        以能力年段為基礎，精確診斷學生在數學概念上的不足，
+        提供分流教學參考。
+        <br/>
+        <a href="http://passion.dtmctest.net/intro/" target="_blank" rel="noopener noreferrer" class="button-link">
+          前往 DTMC 平台
+        </a>
+      </p>
+    </section>
+  </main>
+
+  <script>
+    (async function loadNav(){
+      try {
+        const res = await fetch('nav.html', { cache: 'no-cache' });
+        document.getElementById('site-nav').innerHTML = await res.text();
+      } catch (e) { console.error('無法載入導覽列：', e); }
+    })();
+
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      if (menu) menu.classList.toggle('show');
+    }
+    window.toggleMenu = toggleMenu;
+  </script>
+</body>
+</html>
