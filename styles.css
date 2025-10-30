@@ -1,0 +1,178 @@
+body {
+    color: #3e3e3e;
+    background-color: #FFF9E5;
+    font-family: "Heiti TC", sans-serif;
+    font-size: 20px;
+    margin: 0;
+  }
+  
+  li { list-style-type: none; }
+  
+  /* 導覽列樣式 */
+  nav {
+    background-color: #FFD966;
+    padding: 0 0;
+    position: relative;
+  }
+  
+  .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+  }
+  
+  .logo img { height: 60px; }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .logo span { margin-left: 0; }
+  
+  .menu-toggle {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  ul.menu {
+    font-size: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  ul.menu > li {
+    position: relative;
+    margin-right: 10px;
+  }
+  
+  ul.menu > li > a {
+    text-decoration: none;
+    color: #3e3e3e;
+    padding: 8px 12px;
+    display: block;
+  }
+  
+  ul.menu li ul {
+    font-size: 18px;
+    display: none;
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    background-color: #FFECB3;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 100;
+  }
+  
+  ul.menu li:hover > ul { display: block; }
+  
+  ul.menu li ul li { position: relative; }
+  
+  ul.menu li ul li a {
+    white-space: nowrap;
+    padding: 8px 12px;
+    display: block;
+  }
+  
+  /* 第三層選單 */
+  ul.menu li ul li ul {
+    font-size: 16px;
+    display: none;
+    position: absolute;
+    top: 35px;
+    left: 50%;
+    background-color: #D8F3FF;
+    min-width: 160px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  ul.menu li ul li:hover > ul { display: block; }
+  
+  /* 社群圖示 */
+  .social-icons {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-100%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    z-index: 1000;
+  }
+  
+  .social-icons a img {
+    width: 40px;
+    height: 40px;
+    transition: transform 0.2s;
+  }
+  
+  .social-icons a img:hover { transform: scale(1.1); }
+  
+  /* 主要內容 */
+  main {
+    padding: 50px;
+    line-height: 1.8;
+  }
+  
+  .narrow-paragraph {
+    width: 90%;
+    margin: 0 auto;
+  }
+  
+  .responsive-image {
+    max-width: 95%;
+    height: auto;
+  }
+  
+  a:hover {
+    /* 設定滑鼠移經的連結 */
+    text-decoration: none;
+    background-color: #fafafa;
+    color: black;
+  }
+  
+  /* RWD */
+  @media (max-width: 768px) {
+    .menu-toggle { display: block; }
+  
+    ul.menu {
+      display: none;
+      flex-direction: column;
+      background-color: #FFD966;
+      width: 100%;
+    }
+  
+    ul.menu.show { display: flex; }
+  
+    ul.menu > li {
+      margin: 0;
+      border-top: 1px solid #e0c766;
+    }
+  
+    ul.menu li:hover ul,
+    ul.menu li ul li:hover ul {
+      position: static;
+      box-shadow: none;
+    }
+  
+    ul.menu li ul {
+      background-color: #FFEFB7;
+      padding-left: 20px;
+    }
+  
+    ul.menu li ul li ul {
+      padding-left: 20px;
+      background-color: #FFF6D5;
+    }
+  }
+  

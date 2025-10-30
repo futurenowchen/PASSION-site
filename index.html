@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>臺師大心測中心 PASSION 扎根教學團隊</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- 這裡由主檔動態載入 nav.html -->
+  <div id="site-nav" aria-label="網站導覽"></div>
+
+  <!-- 社群浮動圖示 -->
+  <div class="social-icons">
+    <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">
+      <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook">
+    </a>
+    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+    </a>
+  </div>
+
+  <!-- 主要內容 -->
+  <main>
+    <h1>歡迎來到 PASSION 教育網站</h1>
+    <p>這是一個展示教學資源與團隊成果的響應式範例網站。</p>
+
+    <img src="N閱讀.jpg" class="responsive-image" alt="中文閱讀教學示意">
+    <p>這是一個展示教學資源與團隊成果的響應式範例網站。</p>
+
+    <img src="N英語.jpg" class="responsive-image" alt="英語教學示意">
+    <p>這是一個展示教學資源與團隊成果的響應式範例網站。</p>
+
+    <img src="N數學.jpg" class="responsive-image" alt="數學教學示意">
+    <p>這是一個展示教學資源與團隊成果的響應式範例網站。</p>
+
+    <h2 id="team-intro">團隊簡介</h2>
+    <p class="narrow-paragraph">
+      2016年於臺灣師範大學心測中心成立PASSION扎根教學團隊，由宋曜廷副校長領軍、胡翠君教授統籌執行，致力於優化學習扶助品質...
+    </p>
+
+    <h2 id="PASSION-vision">願景</h2>
+    <p class="narrow-paragraph">
+      我們的願景<br>我們的願景<br>我們的願景<br>我們的願景<br>
+    </p>
+
+    <h2 id="Org-Chart">組織架構</h2>
+    <p class="narrow-paragraph">
+      我們的團隊<br>中文閱讀教學團隊<br>英語文教學團隊<br>數學教學團隊<br>
+    </p>
+
+    <h2 id="contactUS">聯絡方式</h2>
+    <p class="narrow-paragraph">
+      地址：臺北市和平東路一段162號 普通大樓三樓 316 辦公室<br>
+      電話：02-7749-1375
+    </p>
+  </main>
+
+  <script>
+    // 動態載入導覽列
+    async function loadNav() {
+      try {
+        const res = await fetch('nav.html', { cache: 'no-cache' });
+        const html = await res.text();
+        document.getElementById('site-nav').innerHTML = html;
+      } catch (e) {
+        console.error('無法載入導覽列：', e);
+      }
+    }
+    loadNav();
+
+    // 供 nav.html 內按鈕呼叫
+    function toggleMenu() {
+      const menu = document.getElementById('menu');
+      if (menu) menu.classList.toggle('show');
+    }
+    // 將函式掛到全域（確保 nav.html 的 onclick 可用）
+    window.toggleMenu = toggleMenu;
+  </script>
+</body>
+</html>
