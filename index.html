@@ -2,39 +2,104 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PASSION 教育團隊｜最新消息</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PASSION 教育團隊以診斷、篩選分流與全方位適性教學，支持偏鄉與弱勢地區的學習與師資培育。" />
+  <title>PASSION 教育團隊</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="images/favicon.png" type="image/png" />
 </head>
 <body>
   <div id="site-nav" aria-label="網站導覽"></div>
 
-  <main id="main-content"></main>
+  <main class="home-main" id="main-content">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow">PASSION 教育團隊</div>
+          <h1>
+            讓適性教學
+            <span>真正走進偏鄉教育現場</span>
+          </h1>
+          <p class="hero-lead">
+            從精準診斷、篩選分流，到全方位教學與師資培育，
+            PASSION 以可實踐、可擴散的教育支持模式，陪伴學校與教師回應學生真正的學習需求。
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="about.html">認識 PASSION <span aria-hidden="true">→</span></a>
+            <a class="button button-secondary" href="resources.html">探索教學資源</a>
+          </div>
+        </div>
 
-  <script>
-    // 載入 nav
-    (async function loadNav(){
-      try {
-        const res = await fetch('nav.html', { cache: 'no-cache' });
-        document.getElementById('site-nav').innerHTML = await res.text();
-      } catch (e) { console.error('無法載入導覽列：', e); }
-    })();
+        <div class="hero-visual" aria-label="PASSION 教學模組示意圖">
+          <div class="hero-visual-card">
+            <img src="images/04d5531f-9662-44aa-8db6-9110e9fafffc.png" alt="PASSION 診斷、篩選分流與全方位適性教學模組" />
+          </div>
+        </div>
+      </div>
+    </section>
 
-    // 載入「最新消息」共用片段
-    (async function loadNews(){
-      try {
-        const res = await fetch('partials/news-content.html', { cache: 'no-cache' });
-        document.getElementById('main-content').innerHTML = await res.text();
-      } catch (e) { console.error('無法載入最新消息：', e); }
-    })();
+    <section class="home-section" aria-labelledby="model-heading">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Adaptive Learning Support</div>
+          <h2 id="model-heading">從看見差異，到真正支持每一位學生</h2>
+        </div>
+        <p>
+          PASSION 是 Project of Adaptive Screening, Streaming, and Instruction for Omni-directional Nurturing 的縮寫。
+          團隊以三個連續步驟，將診斷資料轉化為現場可用的教學行動。
+        </p>
+      </div>
 
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      if (menu) menu.classList.toggle('show');
-    }
-    window.toggleMenu = toggleMenu;
-  </script>
+      <div class="pillars">
+        <article class="pillar-card" data-step="01">
+          <div class="pillar-kicker">01</div>
+          <h3>適性診斷</h3>
+          <p>透過國文閱讀、英語與數學診斷工具，精確掌握學生能力層次與學習盲點。</p>
+        </article>
+        <article class="pillar-card" data-step="02">
+          <div class="pillar-kicker">02</div>
+          <h3>篩選分流</h3>
+          <p>依據診斷結果安排更符合學生現況的分組與教學起點，降低學習內容與先備能力的落差。</p>
+        </article>
+        <article class="pillar-card" data-step="03">
+          <div class="pillar-kicker">03</div>
+          <h3>全方位教學培育</h3>
+          <p>結合教材、教法、教師增能與觀課回饋，讓教學支持不只停留在測驗結果。</p>
+        </article>
+      </div>
+    </section>
 
+    <div class="home-news">
+      <section class="home-section" aria-labelledby="news-heading">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Latest</div>
+            <h2 id="news-heading">最新消息</h2>
+          </div>
+          <p>保留原初模既有消息內容，先用更清楚的資訊層級呈現；後續再決定正式網站的消息管理方式。</p>
+        </div>
+
+        <div class="news-list">
+          <article class="news-card">
+            <time datetime="2025-10-30">2025.10.30</time>
+            <h3>PASSION 教育團隊網站全新改版上線</h3>
+            <p>提供更清晰的導覽與響應式設計。</p>
+          </article>
+          <article class="news-card">
+            <time datetime="2025-10-15">2025.10.15</time>
+            <h3>偏鄉教學支持計畫開放申請</h3>
+            <p>邀請教師與學校共同參與教育扎根行動。</p>
+          </article>
+          <article class="news-card">
+            <time datetime="2025-09-25">2025.09.25</time>
+            <h3>新增教學資源分享專區</h3>
+            <p>整合語文與數學教材供教師使用。</p>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="site.js"></script>
 </body>
 </html>
