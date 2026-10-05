@@ -2,74 +2,53 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>教學資源｜PASSION 教育團隊</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="images/favicon.png" type="image/png" />
-  <style>
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #555;
-      padding: 20px 0;
-      border-top: 1px solid #ddd;
-      margin-top: 40px;
-      background-color: #fafafa;
-    }
-  </style>
 </head>
 <body>
   <div id="site-nav" aria-label="網站導覽"></div>
 
-  <main>
-    <h1>教學資源總覽</h1>
+  <main id="main-content">
+    <header class="page-hero">
+      <div class="eyebrow">Resources</div>
+      <h1>教學資源</h1>
+      <p>把診斷、教學平台與教材資源放在同一個清楚入口，方便教師快速找到真正要用的工具。</p>
+    </header>
 
-    <section>
-      <h2>診斷測驗</h2>
-      <ul>
-        <li><a href="https://passion.dacctest.net/index_passion.html" target="_blank" rel="noopener noreferrer">DACC 中文閱讀診斷平台</a></li>
-        <li><a href="https://passion.dcectest.net/sys/index.aspx" target="_blank" rel="noopener noreferrer">DCEC 英語適性診斷平台</a></li>
-        <li><a href="http://passion.dtmctest.net/intro/" target="_blank" rel="noopener noreferrer">DTMC 數學診斷測驗</a></li>
-      </ul>
-    </section>
+    <div class="resource-grid">
+      <section class="resource-card">
+        <span class="resource-label">診斷測驗</span>
+        <h2>掌握學生真正的學習起點</h2>
+        <ul class="link-list">
+          <li><a href="https://passion.dacctest.net/index_passion.html" target="_blank" rel="noopener noreferrer">DACC 中文閱讀診斷平台</a></li>
+          <li><a href="https://passion.dcectest.net/sys/index.aspx" target="_blank" rel="noopener noreferrer">DCEC 英語適性診斷平台</a></li>
+          <li><a href="http://passion.dtmctest.net/intro/" target="_blank" rel="noopener noreferrer">DTMC 數學診斷測驗</a></li>
+        </ul>
+        <a class="button-link" href="resources-tests.html">了解診斷測驗</a>
+      </section>
 
-    <section>
-      <h2>教學平台</h2>
-      <ul>
-        <li><a href="https://smartreading.net/v3/index.aspx" target="_blank" rel="noopener noreferrer">SmartReading</a></li>
-        <li><a href="https://srenglish.net/" target="_blank" rel="noopener noreferrer">SmartReading-English</a></li>
-        <li><a href="https://mandarin.smartreading.net/" target="_blank" rel="noopener noreferrer">SmartReading-Mandarin</a></li>
-        <li><a href="https://www.coolchinese.net/index.aspx?errorStatus=GT001&errorMessage=UserNotLoggedIn." target="_blank" rel="noopener noreferrer">COOL Chinese</a></li>
-        <li><a href="https://smartchinese.org/" target="_blank" rel="noopener noreferrer">全方位中文 Smart Chinese</a></li>
-        <li><a href="https://kids.smartchinese.org/" target="_blank" rel="noopener noreferrer">全方位兒童中文</a></li>
-      </ul>
-    </section>
+      <section class="resource-card">
+        <span class="resource-label">教學平台</span>
+        <h2>延伸適性閱讀與語文學習</h2>
+        <ul class="link-list">
+          <li><a href="https://smartreading.net/v3/index.aspx" target="_blank" rel="noopener noreferrer">SmartReading</a></li>
+          <li><a href="https://srenglish.net/" target="_blank" rel="noopener noreferrer">SmartReading-English</a></li>
+          <li><a href="https://mandarin.smartreading.net/" target="_blank" rel="noopener noreferrer">SmartReading-Mandarin</a></li>
+        </ul>
+        <a class="button-link" href="resources-platforms.html">查看全部平台</a>
+      </section>
 
-    <section>
-      <h2>教材資源</h2>
-      <ul>
-        <li><a href="https://passiontw.net/PubSourceShare/Login.aspx" target="_blank" rel="noopener noreferrer">PASSION 教材資源平台</a></li>
-      </ul>
-    </section>
+      <section class="resource-card">
+        <span class="resource-label">教材資源</span>
+        <h2>把診斷結果接回課堂教學</h2>
+        <p>整合國文、英文、數學領域教材與教案，支援學習扶助課程備課與適性教學。</p>
+        <a class="button-link" href="resources-materials.html">瀏覽教材資源</a>
+      </section>
+    </div>
   </main>
 
-  <footer>
-    PASSION 教育團隊 © National Taiwan Normal University
-  </footer>
-
-  <script>
-    (async function loadNav(){
-      try {
-        const res = await fetch('nav.html', { cache: 'no-cache' });
-        document.getElementById('site-nav').innerHTML = await res.text();
-      } catch (e) { console.error('無法載入導覽列：', e); }
-    })();
-
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      if (menu) menu.classList.toggle('show');
-    }
-    window.toggleMenu = toggleMenu;
-  </script>
+  <script src="site.js"></script>
 </body>
 </html>
