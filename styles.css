@@ -1378,3 +1378,94 @@ main section a:not(.button):not(.button-link) {
     padding-top: 32px;
   }
 }
+
+/* About page restructure */
+.about-page-hero {
+  max-width: none;
+}
+.about-page-hero > p {
+  max-width: 1120px;
+  white-space: normal;
+}
+.about-intro,
+.about-model,
+.about-sdg,
+.about-passion {
+  margin: 24px 0;
+}
+.about-section-heading {
+  margin-bottom: 22px;
+}
+.about-section-heading h2 {
+  max-width: 900px;
+  margin-bottom: 10px;
+}
+.about-section-heading > p:last-child:not(.activity-kicker) {
+  max-width: 780px;
+  margin: 0;
+  color: var(--muted);
+}
+.about-intro > p,
+.about-sdg > p,
+.about-passion > p {
+  max-width: 920px;
+  margin-bottom: 0;
+  color: #4d4547;
+  font-size: 1.04rem;
+  line-height: 1.9;
+}
+.about-track-grid,
+.about-step-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.about-track-card,
+.about-step-card {
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(155deg, #fff 0%, #fffafa 100%);
+}
+.about-track-number {
+  margin-bottom: 18px;
+  color: rgba(139, 0, 16, 0.22);
+  font-size: 2.6rem;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.about-track-card h3,
+.about-step-card h3 {
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-size: 1.2rem;
+}
+.about-track-card p,
+.about-step-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.about-step-label {
+  display: inline-flex;
+  margin-bottom: 15px;
+  padding: 0.26rem 0.55rem;
+  border-radius: 999px;
+  color: var(--brand);
+  background: var(--brand-soft);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.about-model-figure {
+  max-width: 980px;
+  margin: 34px auto 38px;
+}
+@media (max-width: 900px) {
+  .about-track-grid,
+  .about-step-grid {
+    grid-template-columns: 1fr;
+  }
+}
