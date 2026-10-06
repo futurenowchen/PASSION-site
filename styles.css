@@ -2770,7 +2770,7 @@ main section a:not(.button):not(.button-link) {
 }
 
 .home-hero-full .hero-copy {
-  max-width: 560px;
+  max-width: min(920px, 100%);
   margin-left: 0;
   margin-right: auto;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
@@ -2781,17 +2781,19 @@ main section a:not(.button):not(.button-link) {
 }
 
 .home-hero-full h1 {
-  max-width: 560px;
+  max-width: none;
   font-size: clamp(2.8rem, 4.8vw, 5rem);
   line-height: 0.98;
   letter-spacing: -0.045em;
+  white-space: nowrap;
 }
 
 .home-hero-full h1 span {
-  max-width: 560px;
+  max-width: none;
   margin-top: 14px;
   font-size: 0.42em;
   line-height: 1.24;
+  white-space: nowrap;
 }
 
 .home-hero-full .hero-lead {
@@ -2830,11 +2832,13 @@ main section a:not(.button):not(.button-link) {
   .home-hero-full h1 {
     font-size: clamp(2.25rem, 10vw, 3.7rem);
     line-height: 1.02;
+    white-space: normal;
   }
 
   .home-hero-full h1 span {
     font-size: 0.5em;
     line-height: 1.3;
+    white-space: normal;
   }
 
   .home-hero-full .hero-lead {
