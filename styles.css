@@ -1159,3 +1159,58 @@ main section a:not(.button):not(.button-link) {
 
 /* Activity archive */
 .activity-page-hero{margin-bottom:30px}.activity-browser{padding-top:0}.activity-browser-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:24px}.activity-browser-head h2{margin:0}.activity-kicker{margin:0 0 5px;color:var(--brand);font-size:.8rem;font-weight:800;letter-spacing:.14em}.activity-count{margin:0;color:var(--muted);font-size:.9rem;font-weight:650}.activity-filter-block{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:start;gap:12px;margin-bottom:14px}.activity-filter-label{padding-top:.55rem;color:var(--muted);font-size:.82rem;font-weight:750}.activity-filters{display:flex;flex-wrap:wrap;gap:8px}.activity-filter{padding:.55rem .9rem;border:1px solid var(--line);border-radius:999px;color:var(--brand);background:#fff;font:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:color .18s ease,background .18s ease,border-color .18s ease}.activity-filter:hover,.activity-filter:focus-visible,.activity-filter.is-active{border-color:var(--brand);color:#fff;background:var(--brand)}.activity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:28px}.activity-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-md);background:#fff;box-shadow:0 12px 30px rgba(73,22,31,.07)}.activity-cover{aspect-ratio:16/9;overflow:hidden;background:#f6edef}.activity-cover img{display:block;width:100%;height:100%;object-fit:cover}.activity-cover-placeholder{width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;padding:22px;color:var(--brand);background:radial-gradient(circle at 78% 24%,rgba(139,0,16,.08),transparent 28%),linear-gradient(145deg,#fff,#f8e9eb)}.activity-cover-placeholder span{font-size:clamp(2.2rem,6vw,4rem);font-weight:800;line-height:.9;letter-spacing:-.05em;opacity:.16}.activity-cover-placeholder strong{font-size:.9rem;letter-spacing:.04em}.activity-card-body{padding:22px}.activity-meta{display:flex;flex-wrap:wrap;gap:7px 12px;margin-bottom:10px;color:var(--muted);font-size:.82rem;font-weight:650}.activity-meta time{color:var(--brand);font-weight:800}.activity-card h3{margin:0 0 10px;color:var(--ink);font-size:clamp(1.08rem,1.9vw,1.3rem);line-height:1.48}.activity-summary{margin:0;color:var(--muted);line-height:1.75}.activity-source-note{margin-top:16px;color:#8a7478;font-size:.78rem}.activity-details{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.activity-details summary{width:fit-content;color:var(--brand);font-size:.86rem;font-weight:750;cursor:pointer}.activity-fulltext{margin-top:14px;color:var(--text);font-size:.92rem;line-height:1.8}.activity-empty{padding:42px 0;color:var(--muted);text-align:center}@media(max-width:820px){.activity-browser-head{align-items:flex-start;flex-direction:column;gap:8px}.activity-filter-block{grid-template-columns:1fr;gap:5px}.activity-filter-label{padding-top:0}.activity-grid{grid-template-columns:1fr}}
+
+.activity-read-more {
+  display: inline-flex;
+  margin-top: 16px;
+  color: var(--brand);
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+.activity-read-more:hover { text-decoration: underline; }
+
+.activity-detail {
+  width: min(calc(100% - 32px), 900px);
+  margin: 0 auto;
+  padding: 44px 0 72px;
+}
+.activity-back {
+  display: inline-flex;
+  margin-bottom: 28px;
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: none;
+}
+.activity-detail-header h1 {
+  margin: 8px 0 0;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.2;
+}
+.activity-detail-cover {
+  margin: 30px 0 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+.activity-detail-cover img {
+  display: block;
+  width: 100%;
+  max-height: 580px;
+  object-fit: cover;
+}
+.activity-detail-body {
+  margin-top: 30px;
+  color: var(--text);
+  font-size: 1.04rem;
+  line-height: 1.95;
+}
+.activity-provenance {
+  display: flex;
+  gap: 12px;
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.activity-provenance strong { color: var(--brand); }
