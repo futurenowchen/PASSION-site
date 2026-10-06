@@ -924,6 +924,38 @@ main section a:not(.button):not(.button-link) {
   text-decoration-color: rgba(139, 0, 16, 0.25);
 }
 
+.report-media-details {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.report-media-details summary {
+  width: fit-content;
+  color: var(--brand);
+  font-size: 0.9rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.report-media-details[open] summary {
+  margin-bottom: 10px;
+}
+
+.report-media-list {
+  margin-top: 0;
+}
+
+.report-media-text {
+  color: var(--text);
+}
+
+.report-media-source {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--line);
