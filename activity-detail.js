@@ -31,10 +31,6 @@
       }
 
       const category = labels[item.category] || '活動紀實';
-      const media = [];
-      if (item.image_count) media.push('原貼文 ' + item.image_count + ' 張相片');
-      if (item.video_count) media.push(item.video_count + ' 段影片');
-
       document.title = item.title + '｜PASSION 活動紀實';
 
       host.innerHTML =
@@ -42,7 +38,6 @@
           '<div class="activity-meta"><time datetime="' + escapeHtml(item.date) + '">' +
           escapeHtml(item.date.replace(/-/g, '.')) + '</time><span>' + escapeHtml(category) + '</span></div>' +
           '<h1>' + escapeHtml(item.title) + '</h1>' +
-          (media.length ? '<p class="activity-source-note">' + escapeHtml(media.join(' · ')) + '</p>' : '') +
         '</header>' +
         (item.cover ? '<figure class="activity-detail-cover"><img src="' + escapeHtml(item.cover) + '" alt="" /></figure>' : '') +
         '<div class="activity-detail-body">' + escapeHtml(item.body).replace(/\n/g, '<br />') + '</div>';
