@@ -27,7 +27,7 @@
       const category=labels[item.category]||'活動紀實';
       const cover=item.cover?'<img src="'+escapeHtml(item.cover)+'" alt="" loading="lazy" />':'<div class="activity-cover-placeholder"><span>'+escapeHtml(item.year)+'</span><strong>'+escapeHtml(category)+'</strong></div>';
       const media=mediaNote(item);
-      return '<article class="activity-card"><div class="activity-cover">'+cover+'</div><div class="activity-card-body"><div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div><h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+(media?'<div class="activity-source-note">'+escapeHtml(media)+'</div>':'')+'<details class="activity-details"><summary>閱讀完整紀實</summary><div class="activity-fulltext">'+escapeHtml(item.body).replace(/\n/g,'<br />')+'</div></details></div></article>';
+      return '<article class="activity-card"><div class="activity-cover">'+cover+'</div><div class="activity-card-body"><div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div><h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+(media?'<div class="activity-source-note">'+escapeHtml(media)+'</div>':'')+'<a class="activity-read-more" href="activity-detail.html?id='+encodeURIComponent(item.id)+'">閱讀完整紀實 →</a></div></article>';
     }).join('');
   }
   function setFilter(container,value,type){container.querySelectorAll('.activity-filter').forEach((button)=>button.classList.toggle('is-active',button.dataset[type]===value));}
