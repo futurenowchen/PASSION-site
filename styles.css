@@ -948,6 +948,133 @@ main section a:not(.button):not(.button-link) {
 
 
 
+/* Team */
+.team-page-hero {
+  margin-bottom: 42px;
+}
+
+.team-section {
+  padding-top: 0;
+}
+
+.team-section + .team-section {
+  margin-top: 58px;
+}
+
+.team-section-heading {
+  margin-bottom: 24px;
+}
+
+.team-section-heading h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.65rem);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.team-grid-leadership {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.team-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(73, 22, 31, 0.07);
+}
+
+.team-photo {
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #f5edef;
+}
+
+.team-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(105, 0, 12, 0.54);
+  background:
+    radial-gradient(circle at 75% 20%, rgba(139, 0, 16, 0.08), transparent 30%),
+    linear-gradient(145deg, #fffafa 0%, #f4e7e9 100%);
+}
+
+.team-photo-placeholder span {
+  padding: 0.48rem 0.78rem;
+  border: 1px solid rgba(139, 0, 16, 0.16);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.team-card-body {
+  padding: 20px 20px 22px;
+}
+
+.team-role {
+  margin: 0 0 7px;
+  color: var(--brand);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.team-card h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.team-duty {
+  margin: 11px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.team-card-pending {
+  border-style: dashed;
+}
+
+@media (max-width: 1080px) {
+  .team-grid,
+  .team-grid-leadership {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .team-section + .team-section {
+    margin-top: 42px;
+  }
+
+  .team-grid,
+  .team-grid-leadership {
+    grid-template-columns: 1fr;
+  }
+
+  .team-photo {
+    aspect-ratio: 5 / 4;
+  }
+}
+
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--line);
