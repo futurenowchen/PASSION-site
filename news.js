@@ -7,18 +7,29 @@
   const esc=(value='')=>value.replace(/[&<>"']/g,(c)=>({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
   }[c]));
+  const withBreaks=(value='')=>esc(value).replace(/\n/g,'<br />');
+  const newsType=(item)=>{
+    const text=(item.title+' '+item.summary).replace(/\s+/g,' ');
+    if(/說明會/.test(text))return '說明會';
+    if(/招生|招募|報名|申請|甄選|徵選/.test(text))return '招生／報名';
+    if(/預告|活動|論壇|成果展|講座|工作坊/.test(text))return '活動預告';
+    return '最新消息';
+  };
   function render(){
     const visible=items.filter((item)=>year==='all'||item.year===year);
     count.textContent=visible.length+' 則消息';
     filters.querySelectorAll('button').forEach((button)=>{
       button.classList.toggle('is-active',button.dataset.year===year);
     });
-    list.innerHTML=visible.map((item)=>
-      '<article class="news-row">'+
-        '<time>'+esc(item.date.replace(/-/g,'.'))+'</time>'+
-        '<div><h2>'+esc(item.title)+'</h2><p>'+esc(item.summary)+'</p></div>'+
-      '</article>'
-    ).join('');
+    list.innerHTML=visible.map((item)=>{
+      const full=item.body||item.summary||'';
+      return '<article class="news-row">'+
+        '<div class="news-row-meta"><time datetime="'+esc(item.date)+'">'+esc(item.date.replace(/-/g,'.'))+'</time><span class="news-type">'+esc(newsType(item))+'</span></div>'+
+        '<div class="news-row-copy"><h2>'+esc(item.title)+'</h2><p class="news-summary">'+esc(item.summary)+'</p>'+
+          (full?'<details class="news-details"><summary>閱讀全文</summary><div class="news-fulltext">'+withBreaks(full)+'</div></details>':'')+
+        '</div>'+
+      '</article>';
+    }).join('');
   }
   fetch('data/news.json',{cache:'no-cache'})
     .then((r)=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})

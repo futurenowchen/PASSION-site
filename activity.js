@@ -25,9 +25,13 @@
     empty.hidden=visible.length>0;
     list.innerHTML=visible.map((item)=>{
       const category=labels[item.category]||'活動紀實';
-      const cover=item.cover?'<img src="'+escapeHtml(item.cover)+'" alt="" loading="lazy" />':'<div class="activity-cover-placeholder"><span>'+escapeHtml(item.year)+'</span><strong>'+escapeHtml(category)+'</strong></div>';
       const media=mediaNote(item);
-      return '<article class="activity-card"><div class="activity-cover">'+cover+'</div><div class="activity-card-body"><div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div><h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+(media?'<div class="activity-source-note">'+escapeHtml(media)+'</div>':'')+'<a class="activity-read-more" href="activity-detail.html?id='+encodeURIComponent(item.id)+'">閱讀完整紀實 →</a></div></article>';
+      const meta='<div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div>';
+      const content=meta+'<h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+(media?'<div class="activity-source-note">'+escapeHtml(media)+'</div>':'')+'<a class="activity-read-more" href="activity-detail.html?id='+encodeURIComponent(item.id)+'">閱讀完整紀實 →</a>';
+      if(item.cover){
+        return '<article class="activity-card"><div class="activity-cover"><img src="'+escapeHtml(item.cover)+'" alt="" loading="lazy" /></div><div class="activity-card-body">'+content+'</div></article>';
+      }
+      return '<article class="activity-card is-text-only"><div class="activity-card-body"><div class="activity-record-label"><span aria-hidden="true">▤</span>文字紀錄</div>'+content+'<div class="activity-source-note activity-no-photo-note">原始備份未留存活動照片</div></div></article>';
     }).join('');
   }
   function setFilter(container,value,type){container.querySelectorAll('.activity-filter').forEach((button)=>button.classList.toggle('is-active',button.dataset[type]===value));}
