@@ -15,8 +15,8 @@
   --radius-sm: 14px;
   --radius-md: 22px;
   --radius-lg: 34px;
-  --container: 1180px;
-  --reading: 820px;
+  --container: 1140px;
+  --reading: 780px;
 }
 
 *,
@@ -27,6 +27,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 17px;
 }
 
 body {
@@ -2529,5 +2530,214 @@ main section a:not(.button):not(.button-link) {
 
   .home-milestone-strip article::before {
     left: 30px;
+  }
+}
+
+
+/* Reading scale + clearer PASSION process/tracks */
+.home-v2 .section-heading {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 52px;
+}
+
+.home-v2 .section-heading > p {
+  max-width: 600px;
+  font-size: 1.08rem;
+  line-height: 1.85;
+}
+
+.home-method-block {
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: #fff;
+}
+
+.home-method-block + .home-method-block {
+  margin-top: 28px;
+}
+
+.home-method-label {
+  display: grid;
+  grid-template-columns: 190px minmax(220px, 0.8fr) minmax(0, 1.2fr);
+  gap: 22px;
+  align-items: baseline;
+  margin-bottom: 26px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-method-label > span {
+  color: var(--brand);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.home-method-label > strong {
+  color: var(--ink);
+  font-size: 1.28rem;
+}
+
+.home-method-label > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.home-process-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr) 42px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.home-process-step {
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  gap: 15px;
+  min-width: 0;
+  padding: 8px 4px;
+}
+
+.home-process-number {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--brand);
+  background: var(--brand-soft);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.home-process-step strong {
+  display: block;
+  margin: 1px 0 8px;
+  color: var(--ink);
+  font-size: 1.15rem;
+}
+
+.home-process-step p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.78;
+}
+
+.home-process-arrow {
+  display: grid;
+  place-items: center;
+  color: rgba(139, 0, 16, 0.42);
+  font-size: 1.55rem;
+  font-weight: 500;
+}
+
+.home-collaboration-block {
+  background: var(--surface-soft);
+}
+
+.home-collaboration-block .home-track-grid {
+  gap: 12px;
+}
+
+.home-collaboration-block .home-track-card {
+  min-height: 220px;
+  border-color: transparent;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(71, 25, 31, 0.045);
+}
+
+.home-track-tag {
+  width: fit-content;
+  padding: 0.28rem 0.58rem;
+  border-radius: 999px;
+  color: var(--brand);
+  background: var(--brand-soft);
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.home-collaboration-block .home-track-card strong {
+  margin-top: 20px;
+  font-size: 1.18rem;
+}
+
+.home-collaboration-block .home-track-card p {
+  font-size: 0.98rem;
+  line-height: 1.78;
+}
+
+.home-news-item p,
+.home-decade-copy > p,
+.home-resource-card p {
+  font-size: 0.98rem;
+}
+
+.home-news-meta,
+.home-activity-meta,
+.home-panel-head > a,
+.home-inline-link,
+.home-track-link {
+  font-size: 0.84rem;
+}
+
+@media (max-width: 1080px) {
+  .home-v2 .section-heading {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .home-method-label {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .home-method-label > p {
+    max-width: 720px;
+  }
+
+  .home-process-flow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .home-process-step {
+    padding: 18px 6px;
+  }
+
+  .home-process-arrow {
+    width: 46px;
+    height: 34px;
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 700px) {
+  html {
+    font-size: 16px;
+  }
+
+  .home-method-block {
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .home-method-label {
+    margin-bottom: 14px;
+    padding-bottom: 18px;
+  }
+
+  .home-process-step {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .home-process-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
   }
 }
