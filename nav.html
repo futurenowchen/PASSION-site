@@ -1,63 +1,51 @@
-<nav>
-  <div class="nav-container">
-    <div class="logo">
-      <a href="index.html">
-        <img src="images/logo.png" alt="Logo" />
-      </a>
-      <span></span>
-    </div>
+<a class="skip-link" href="#main-content">跳到主要內容</a>
+<header class="site-header">
+  <nav class="nav-shell" aria-label="主要導覽">
+    <a class="brand" href="index.html" aria-label="PASSION 扎根教學團隊首頁">
+      <span class="brand-mark" aria-hidden="true">
+        <img src="images/favicon.png" alt="" />
+      </span>
+      <span class="brand-copy">
+        <strong class="brand-title">
+          <span class="brand-title-full">PASSION 扎根教學團隊</span>
+          <span class="brand-title-mobile">PASSION</span>
+        </strong>
+        <span class="brand-institution">國立臺灣師範大學心理與教育測驗研究發展中心</span>
+      </span>
+    </a>
+
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu">
+      <span class="menu-toggle-lines" aria-hidden="true"></span>
+      <span class="sr-only">開啟網站選單</span>
+    </button>
 
     <ul class="menu" id="menu">
-      <li><a href="about.html">關於我們</a>
-        <ul>
-          <li><a href="about.html" style="text-decoration:none;">團隊簡介</a></li>
-          <li><a href="vision.html" style="text-decoration:none;">願景</a></li>
-          <li><a href="org-chart.html" style="text-decoration:none;">組織架構</a></li>
+      <li><a href="about.html">關於我們</a></li>
+      <li><a href="news.html">最新消息</a></li>
+      <li><a href="activity.html">活動紀實</a></li>
+      <li><a href="milestones.html">團隊大事紀</a></li>
+      <li><a href="outcomes-public.html">媒體報導</a></li>
+      <li><a href="awards.html">獎項肯定</a></li>
+      <li class="has-submenu">
+        <a href="resources.html">教學資源</a>
+        <ul class="submenu">
+          <li><a href="resources-tests.html">診斷測驗</a></li>
+          <li><a href="resources-platforms.html">教學平台</a></li>
+          <li><a href="resources-materials.html">教材資源</a></li>
         </ul>
       </li>
-
-      <li><a href="news.html">最新消息</a>
+      <li class="nav-program">
+        <a href="https://passiontw.net/usr/" target="_blank" rel="noopener noreferrer">
+          PASSION偏鄉優質教育學分學程
+          <span aria-hidden="true">↗</span>
+        </a>
       </li>
-
-      <li><a href="milestones.html">團隊大事紀</a>
-      </li>
-
-      <li><a href="outcomes-public.html">歷年成果與新聞報導</a>
-      </li>
-
-      <li><a href="resources.html">教學資源</a>
-        <ul>
-          <li><a href="resources-tests.html" style="text-decoration:none;">診斷測驗</a>
-            <ul>
-              <li><a href="https://passion.dacctest.net/index_passion.html" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">DACC中文閱讀診斷平台</a></li>
-              <li><a href="https://passion.dcectest.net/sys/index.aspx" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">DCEC英語適性診斷平台</a></li>
-              <li><a href="http://passion.dtmctest.net/intro/" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">DTMC數學診斷測驗</a></li>
-            </ul>
-          </li>
-          <li><a href="resources-platforms.html" style="text-decoration:none;">教學平台</a>
-            <ul>
-              <li><a href="https://smartreading.net/v3/index.aspx" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">SmartReading</a></li>
-              <li><a href="https://srenglish.net/" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">SmartReading-English</a></li>
-              <li><a href="https://mandarin.smartreading.net/" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">SmartReading-Mandarin</a></li>
-              <li><a href="https://www.coolchinese.net/index.aspx?errorStatus=GT001&errorMessage=UserNotLoggedIn." style="text-decoration:none;" target="_blank" rel="noopener noreferrer">COOL Chinese</a></li>
-              <li><a href="https://smartchinese.org/" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">全方位中文Smart Chinese</a></li>
-              <li><a href="https://kids.smartchinese.org/" style="text-decoration:none;" target="_blank" rel="noopener noreferrer">全方位兒童中文</a></li>
-            </ul>
-          </li>
-          <li><a href="resources-materials.html" style="text-decoration:none;">教材資源</a></li>
-        </ul>
-      </li>
-
-      <li><a href="column-feedback.html">PASSION專欄</a>
-      </li>
-
-      <li><a href="contact.html">聯絡我們</a>
-      </li>
-
-      <li><a href="https://www.facebook.com/PASSION.Teaching.Learning/?locale=zh_TW" target="_blank" rel="noopener noreferrer">Facebook 粉絲頁</a>
+      <li class="nav-external">
+        <a href="https://www.facebook.com/PASSION.Teaching.Learning/?locale=zh_TW" target="_blank" rel="noopener noreferrer">
+          Facebook
+          <span aria-hidden="true">↗</span>
+        </a>
       </li>
     </ul>
-
-    <button class="menu-toggle" onclick="toggleMenu()" aria-label="切換選單">☰</button>
-  </div>
-</nav>
+  </nav>
+</header>

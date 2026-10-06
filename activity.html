@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>活動紀實｜PASSION 教育團隊</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="images/favicon.png" type="image/png" />
+</head>
+<body>
+  <div id="site-nav" aria-label="網站導覽"></div>
+  <main id="main-content">
+    <header class="page-hero activity-page-hero">
+      <div class="eyebrow">Activities</div>
+      <h1>活動紀實</h1>
+      <p>記錄 PASSION 在偏鄉教學、師資培育、遠距陪伴、國際服務與教育交流的實踐。</p>
+    </header>
+    <section class="activity-browser" aria-labelledby="activity-archive-title">
+      <div class="activity-browser-head">
+        <div><p class="activity-kicker">PASSION ARCHIVE</p><h2 id="activity-archive-title">歷年活動紀實</h2></div>
+        <p class="activity-count" id="activity-count" aria-live="polite">載入中…</p>
+      </div>
+      <div class="activity-filter-block">
+        <div class="activity-filter-label">年份</div>
+        <div class="activity-filters" id="activity-year-filters" aria-label="依年份篩選"></div>
+      </div>
+      <div class="activity-filter-block">
+        <div class="activity-filter-label">類別</div>
+        <div class="activity-filters" id="activity-category-filters" aria-label="依活動類別篩選">
+          <button class="activity-filter is-active" type="button" data-category="all">全部</button>
+          <button class="activity-filter" type="button" data-category="summer">暑期實習</button>
+          <button class="activity-filter" type="button" data-category="international">國際志工</button>
+          <button class="activity-filter" type="button" data-category="training">師資培育</button>
+          <button class="activity-filter" type="button" data-category="remote">遠距教學</button>
+          <button class="activity-filter" type="button" data-category="exchange">交流合作</button>
+          <button class="activity-filter" type="button" data-category="field">教學現場</button>
+        </div>
+      </div>
+      <div id="activity-list" class="activity-grid" aria-live="polite"></div>
+      <p id="activity-empty" class="activity-empty" hidden>目前沒有符合條件的活動紀實。</p>
+    </section>
+  </main>
+  <script src="site.js"></script>
+  <script src="activity.js"></script>
+</body>
+</html>

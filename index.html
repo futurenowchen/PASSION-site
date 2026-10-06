@@ -2,39 +2,230 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PASSION 教育團隊｜最新消息</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PASSION 扎根教學團隊以適性診斷、篩選分流、教材教法、教師培育與跨域協作，長期支持偏鄉與弱勢學生的學習。" />
+  <title>PASSION 扎根教學團隊｜國立臺灣師範大學</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="images/favicon.png" type="image/png" />
 </head>
 <body>
   <div id="site-nav" aria-label="網站導覽"></div>
 
-  <main id="main-content"></main>
+  <main class="home-main home-v2" id="main-content">
+    <section class="hero home-hero home-hero-full page-hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow">PASSION 扎根教學團隊 · 2016—2026</div>
+          <h1>
+            PASSION 十年深耕：
+            <span>從偏鄉學校現場建立全方位教學支持系統</span>
+          </h1>
+          <div class="hero-actions">
+            <a class="button button-primary" href="about.html">認識 PASSION <span aria-hidden="true">→</span></a>
+            <a class="button button-secondary" href="activity.html">看我們如何實踐</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <script>
-    // 載入 nav
-    (async function loadNav(){
-      try {
-        const res = await fetch('nav.html', { cache: 'no-cache' });
-        document.getElementById('site-nav').innerHTML = await res.text();
-      } catch (e) { console.error('無法載入導覽列：', e); }
-    })();
+    <section class="home-section home-method" aria-labelledby="method-heading">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">How PASSION Works</div>
+          <h2 id="method-heading">看見需要，成為支持</h2>
+        </div>
+      </div>
 
-    // 載入「最新消息」共用片段
-    (async function loadNews(){
-      try {
-        const res = await fetch('partials/news-content.html', { cache: 'no-cache' });
-        document.getElementById('main-content').innerHTML = await res.text();
-      } catch (e) { console.error('無法載入最新消息：', e); }
-    })();
+      <div class="home-method-block">
+        <div class="home-method-label">
+          <span>TEACHING PROCESS</span>
+          <strong>PASSION扎根教學模組</strong>
+        </div>
 
-    function toggleMenu() {
-      const menu = document.getElementById('menu');
-      if (menu) menu.classList.toggle('show');
-    }
-    window.toggleMenu = toggleMenu;
-  </script>
+        <div class="home-process-flow" aria-label="PASSION 教學現場三步驟">
+          <article class="home-process-step">
+            <span class="home-process-number">01</span>
+            <div>
+              <strong>適性診斷</strong>
+              <p>以國文閱讀、英語、數學與華語文等診斷工具，掌握學生的能力起點與學習盲點。</p>
+            </div>
+          </article>
+          <div class="home-process-arrow" aria-hidden="true">→</div>
+          <article class="home-process-step">
+            <span class="home-process-number">02</span>
+            <div>
+              <strong>篩選分流</strong>
+              <p>依據診斷結果安排適切的學習起點與分組，讓教學回應學生真實的能力差異。</p>
+            </div>
+          </article>
+          <div class="home-process-arrow" aria-hidden="true">→</div>
+          <article class="home-process-step">
+            <span class="home-process-number">03</span>
+            <div>
+              <strong>全方位教學培育</strong>
+              <p>串接教材教法、教師增能、觀議課與教學回饋，讓支持持續發生在課堂現場。</p>
+            </div>
+          </article>
+        </div>
+      </div>
 
+      <div class="home-method-block home-collaboration-block">
+        <div class="home-method-label">
+          <span>THREE-TRACK COLLABORATION</span>
+          <strong>團隊推動｜三軌協作</strong>
+        </div>
+
+        <div class="home-track-grid">
+          <a class="home-track-card" href="about.html">
+            <span class="home-track-tag">教學研發</span>
+            <strong>教學研發與現場支持</strong>
+            <p>把診斷資料轉化為可操作的教材、教法、教師增能與觀議課支持。</p>
+            <span class="home-track-link">了解團隊方法 →</span>
+          </a>
+          <a class="home-track-card" href="https://passiontw.net/usr/" target="_blank" rel="noopener noreferrer">
+            <span class="home-track-tag">人才培育</span>
+            <strong>專業人才培育</strong>
+            <p>透過學分學程、暑期實習與遠距教學，培育能真正站上教學現場的人才。</p>
+            <span class="home-track-link">前往學分學程 ↗</span>
+          </a>
+          <a class="home-track-card" href="milestones.html">
+            <span class="home-track-tag">夥伴協作</span>
+            <strong>跨域夥伴協作</strong>
+            <p>串聯學校、公部門、非營利組織與國際夥伴，擴大長期教育影響力。</p>
+            <span class="home-track-link">查看發展歷程 →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="home-live">
+      <section class="home-section" aria-labelledby="live-heading">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Now at PASSION</div>
+            <h2 id="live-heading">現在的 PASSION</h2>
+          </div>
+        </div>
+
+        <div class="home-live-grid">
+          <section class="home-news-panel" aria-labelledby="home-news-heading">
+            <div class="home-panel-head">
+              <div>
+                <span class="home-panel-kicker">NEWS</span>
+                <h3 id="home-news-heading">最新消息</h3>
+              </div>
+              <a href="news.html">全部消息 →</a>
+            </div>
+            <div class="home-news-feed" id="home-news-list" aria-live="polite">
+              <p class="home-loading">載入最新消息中…</p>
+            </div>
+          </section>
+
+          <section class="home-activity-panel" aria-labelledby="home-activity-heading">
+            <div class="home-panel-head">
+              <div>
+                <span class="home-panel-kicker">FIELD NOTES</span>
+                <h3 id="home-activity-heading">近期活動紀實</h3>
+              </div>
+              <a href="activity.html">全部紀實 →</a>
+            </div>
+            <div class="home-activity-grid" id="home-activity-list" aria-live="polite">
+              <p class="home-loading">載入活動紀實中…</p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <section class="home-section home-decade" aria-labelledby="decade-heading">
+      <div class="home-decade-copy">
+        <div class="eyebrow">A Decade of Practice</div>
+        <h2 id="decade-heading">十年扎根，讓一次教學成為可以延續的教育力量</h2>
+        <p>
+          PASSION 自 2016 年成立，從偏鄉學習扶助出發，逐步發展學分學程、暑期與遠距實習、
+          跨組織合作及國際教育服務。網站將這段歷程拆成大事紀、媒體報導與獎項肯定，
+          讓每一項成果都能回到可追溯的脈絡。
+        </p>
+        <div class="home-decade-links">
+          <a href="milestones.html">團隊大事紀 →</a>
+          <a href="outcomes-public.html">媒體報導 →</a>
+          <a href="awards.html">獎項肯定 →</a>
+        </div>
+      </div>
+
+      <div class="home-milestone-strip" aria-label="PASSION 重要發展節點">
+        <article>
+          <span>2016</span>
+          <strong>團隊成立</strong>
+          <p>於國立臺灣師範大學心理與教育測驗研究發展中心成立。</p>
+        </article>
+        <article>
+          <span>2018</span>
+          <strong>人才培育成形</strong>
+          <p>全國首創 PASSION 偏鄉優質教育學分學程。</p>
+        </article>
+        <article>
+          <span>2019</span>
+          <strong>長期實作展開</strong>
+          <p>開辦暑期實習與遠距教學實習，建立持續陪伴機制。</p>
+        </article>
+        <article>
+          <span>2026</span>
+          <strong>走進下一個十年</strong>
+          <p>持續擴大偏鄉教育、人才培育與跨域合作的實踐網絡。</p>
+        </article>
+      </div>
+    </section>
+
+    <div class="home-resources-wrap">
+      <section class="home-section" aria-labelledby="resources-heading">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Teaching Resources</div>
+            <h2 id="resources-heading">把研究成果變成教師真正用得到的工具</h2>
+          </div>
+        </div>
+
+        <div class="home-resource-grid">
+          <a href="resources-tests.html" class="home-resource-card">
+            <span>診斷測驗</span>
+            <strong>掌握學生真正的學習起點</strong>
+            <p>DACC、DCEC、DTMC 等工具，協助教師辨識學生能力與學習盲點。</p>
+            <b>查看診斷工具 →</b>
+          </a>
+          <a href="resources-platforms.html" class="home-resource-card">
+            <span>教學平台</span>
+            <strong>延伸適性閱讀與語文學習</strong>
+            <p>整合 SmartReading 系列平台，支持閱讀、英語與華語文學習。</p>
+            <b>查看教學平台 →</b>
+          </a>
+          <a href="resources-materials.html" class="home-resource-card">
+            <span>教材資源</span>
+            <strong>把診斷結果接回課堂教學</strong>
+            <p>整合國文、英文與數學教材教法，支援學習扶助與適性教學。</p>
+            <b>瀏覽教材資源 →</b>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <section class="home-section home-join" aria-labelledby="join-heading">
+      <div class="home-join-copy">
+        <div class="eyebrow">Join PASSION</div>
+        <h2 id="join-heading">把熱情培養成能帶得走的專業</h2>
+        <p>
+          PASSION 偏鄉優質教育學分學程結合理論、教材教法、暑期實習與長期遠距教學，
+          讓大學生在真實教育現場中累積教學能力，也讓偏鄉獲得穩定而持續的專業支持。
+        </p>
+      </div>
+      <div class="home-join-actions">
+        <a class="button button-primary" href="https://passiontw.net/usr/" target="_blank" rel="noopener noreferrer">前往學分學程網站 ↗</a>
+        <a class="button home-outline-button" href="news.html">查看招生與說明會</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="site.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>
