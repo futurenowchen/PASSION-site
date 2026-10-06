@@ -150,7 +150,11 @@ a {
   display: block;
   width: 42px;
   height: 42px;
-  object-fit: contain;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow:
+    0 0 0 1.5px rgba(255, 255, 255, 0.55),
+    0 4px 12px rgba(49, 0, 7, 0.16);
 }
 
 .brand-copy {
@@ -162,7 +166,7 @@ a {
 
 .brand-title {
   color: #fff;
-  font-size: 0.95rem;
+  font-size: 1.08rem;
   font-weight: 800;
   letter-spacing: 0.015em;
   white-space: nowrap;
@@ -173,10 +177,10 @@ a {
 }
 
 .brand-institution {
-  max-width: 320px;
+  max-width: 360px;
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   text-overflow: ellipsis;
@@ -1093,7 +1097,7 @@ main section a:not(.button):not(.button-link) {
   }
 
   .brand-title {
-    font-size: 0.94rem;
+    font-size: 1rem;
   }
 
   .brand-institution {
@@ -1731,7 +1735,7 @@ main section a:not(.button):not(.button-link) {
   }
 
   .brand-title {
-    font-size: 0.88rem;
+    font-size: 0.98rem;
   }
 
   .menu > li > a {
