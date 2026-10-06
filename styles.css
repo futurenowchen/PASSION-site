@@ -115,29 +115,72 @@ a {
 }
 
 .nav-shell {
-  width: min(calc(100% - 32px), 1440px);
-  min-height: 96px;
+  width: min(calc(100% - 32px), 1480px);
+  min-height: 82px;
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 20px;
 }
 
 .brand {
   display: inline-flex;
+  min-width: 0;
   align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 78px;
-  height: 78px;
+  gap: 11px;
+  flex: 0 1 auto;
+  color: #fff;
   text-decoration: none;
 }
 
-.brand img {
+.brand:hover {
+  color: #fff;
+}
+
+.brand-mark {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-mark img {
   display: block;
-  width: 72px;
-  height: 72px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
+}
+
+.brand-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.brand-title {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.015em;
+  white-space: nowrap;
+}
+
+.brand-title-mobile {
+  display: none;
+}
+
+.brand-institution {
+  max-width: 320px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .menu {
@@ -932,10 +975,10 @@ main section a:not(.button):not(.button-link) {
 
   .menu {
     position: fixed;
-    top: 96px;
+    top: 82px;
     right: 0;
     left: 0;
-    height: calc(100dvh - 96px);
+    height: calc(100dvh - 82px);
     display: none;
     flex-direction: column;
     align-items: stretch;
@@ -1022,22 +1065,44 @@ main section a:not(.button):not(.button-link) {
 @media (max-width: 700px) {
   .nav-shell {
     width: min(calc(100% - 24px), var(--container));
-    min-height: 78px;
+    min-height: 70px;
+    gap: 12px;
   }
 
   .brand {
-    width: 60px;
-    height: 60px;
+    gap: 9px;
   }
 
-  .brand img {
-    width: 56px;
-    height: 56px;
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+
+  .brand-mark img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-title-full {
+    display: none;
+  }
+
+  .brand-title-mobile {
+    display: inline;
+  }
+
+  .brand-title {
+    font-size: 0.94rem;
+  }
+
+  .brand-institution {
+    display: none;
   }
 
   .menu {
-    top: 78px;
-    height: calc(100dvh - 78px);
+    top: 70px;
+    height: calc(100dvh - 70px);
   }
 
   main {
@@ -1656,5 +1721,22 @@ main section a:not(.button):not(.button-link) {
   }
   .passion-stage-cell {
     min-height: 76px;
+  }
+}
+
+
+@media (min-width: 1181px) and (max-width: 1390px) {
+  .brand-institution {
+    display: none;
+  }
+
+  .brand-title {
+    font-size: 0.88rem;
+  }
+
+  .menu > li > a {
+    padding-right: 0.58rem;
+    padding-left: 0.58rem;
+    font-size: 0.84rem;
   }
 }
