@@ -13,20 +13,13 @@
     const years=[...new Set(activities.map((item)=>item.year))].sort((a,b)=>b.localeCompare(a));
     yearFilters.innerHTML=['<button class="activity-filter" type="button" data-year="all">全部年份</button>',...years.map((year)=>'<button class="activity-filter'+(year===activeYear?' is-active':'')+'" type="button" data-year="'+year+'">'+year+'</button>')].join('');
   }
-  function mediaNote(item){
-    const parts=[];
-    if(item.image_count)parts.push('原貼文 '+item.image_count+' 張相片');
-    if(item.video_count)parts.push(item.video_count+' 段影片');
-    return parts.join(' · ');
-  }
   function render(){
     const visible=activities.filter((item)=>(activeYear==='all'||item.year===activeYear)&&(activeCategory==='all'||item.category===activeCategory));
     count.textContent=visible.length+' 筆活動紀實';
     empty.hidden=visible.length>0;
     list.innerHTML=visible.map((item)=>{
       const category=labels[item.category]||'活動紀實';
-      const media=mediaNote(item);
-      return '<article class="activity-card"><div class="activity-cover"><img src="'+escapeHtml(item.cover)+'" alt="" loading="lazy" /></div><div class="activity-card-body"><div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div><h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+(media?'<div class="activity-source-note">'+escapeHtml(media)+'</div>':'')+'<a class="activity-read-more" href="activity-detail.html?id='+encodeURIComponent(item.id)+'">閱讀完整紀實 →</a></div></article>';
+      return '<article class="activity-card"><div class="activity-cover"><img src="'+escapeHtml(item.cover)+'" alt="" loading="lazy" /></div><div class="activity-card-body"><div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div><h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+'<a class="activity-read-more" href="activity-detail.html?id='+encodeURIComponent(item.id)+'">閱讀完整紀實 →</a></div></article>';
     }).join('');
   }
   function setFilter(container,value,type){container.querySelectorAll('.activity-filter').forEach((button)=>button.classList.toggle('is-active',button.dataset[type]===value));}
