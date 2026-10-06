@@ -144,7 +144,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 3px;
+  min-height: 48px;
   margin: 0 0 0 auto;
   padding: 0;
   list-style: none;
@@ -152,18 +153,26 @@ a {
 
 .menu > li {
   position: relative;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  margin: 0;
 }
 
 .menu > li > a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 0.62rem 0.78rem;
+  height: 48px;
+  padding: 0 0.72rem;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.91rem;
+  font-size: 0.88rem;
   font-weight: 650;
+  line-height: 1;
   letter-spacing: 0.01em;
+  white-space: nowrap;
   text-decoration: none;
   transition: color 0.2s ease, background 0.2s ease;
 }
@@ -940,12 +949,19 @@ main section a:not(.button):not(.button-link) {
     display: flex;
   }
 
+  .menu > li {
+    width: 100%;
+    height: auto;
+  }
+
   .menu > li > a {
     width: 100%;
+    height: auto;
     justify-content: space-between;
     padding: 0.9rem 1rem;
     border-radius: 12px;
     font-size: 1.05rem;
+    line-height: 1.4;
   }
 
   .submenu {
