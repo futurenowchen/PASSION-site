@@ -4,7 +4,7 @@
   const empty=document.getElementById('activity-empty');
   const yearFilters=document.getElementById('activity-year-filters');
   const categoryFilters=document.getElementById('activity-category-filters');
-  const labels={summer:'暑期實習',international:'國際志工',training:'師資培育',remote:'遠距教學',exchange:'交流合作',field:'教學現場'};
+  const labels={summer:'暑期實習',international:'國際志工','國際志工':'國際志工',training:'師資培育',remote:'遠距教學',exchange:'交流合作',field:'教學現場'};
   let activities=[],activeYear='2026',activeCategory='all';
   const escapeHtml=(value='')=>value.replace(/[&<>"']/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
   const formatDate=(date)=>date.replace(/-/g,'.');
@@ -14,7 +14,7 @@
     yearFilters.innerHTML=['<button class="activity-filter" type="button" data-year="all">全部年份</button>',...years.map((year)=>'<button class="activity-filter'+(year===activeYear?' is-active':'')+'" type="button" data-year="'+year+'">'+year+'</button>')].join('');
   }
   function render(){
-    const visible=activities.filter((item)=>(activeYear==='all'||item.year===activeYear)&&(activeCategory==='all'||item.category===activeCategory));
+    const visible=activities.filter((item)=>(activeYear==='all'||item.year===activeYear)&&(activeCategory==='all'||item.category===activeCategory||(activeCategory==='international'&&item.category==='國際志工')||(activeCategory==='國際志工'&&item.category==='international')));
     count.textContent=visible.length+' 筆活動紀實';
     empty.hidden=visible.length>0;
     list.innerHTML=visible.map((item)=>{

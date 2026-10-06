@@ -3,6 +3,7 @@
   const labels = {
     summer: '暑期實習',
     international: '國際志工',
+    '國際志工': '國際志工',
     training: '師資培育',
     remote: '遠距教學',
     exchange: '交流合作',
