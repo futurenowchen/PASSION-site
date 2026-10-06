@@ -2741,3 +2741,78 @@ main section a:not(.button):not(.button-link) {
     border-radius: 12px;
   }
 }
+
+/* Homepage full-bleed hero */
+.home-v2 > .home-hero-full {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgba(43, 8, 14, 0.88) 0%, rgba(43, 8, 14, 0.68) 43%, rgba(43, 8, 14, 0.30) 78%, rgba(43, 8, 14, 0.20) 100%),
+    url("images/activity/2026/2026-07-27-01.jpg") center 42% / cover no-repeat;
+  box-shadow: none;
+}
+
+.home-v2 > .home-hero-full::after {
+  display: none;
+}
+
+.home-hero-full .hero-inner {
+  min-height: clamp(640px, 76vh, 820px);
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 104px 0 108px;
+}
+
+.home-hero-full .hero-copy {
+  max-width: 900px;
+}
+
+.home-hero-full h1 {
+  max-width: 900px;
+  font-size: clamp(3.25rem, 6.6vw, 6.2rem);
+  line-height: 1;
+}
+
+.home-hero-full h1 span {
+  max-width: 830px;
+  margin-top: 18px;
+  font-size: 0.48em;
+  line-height: 1.28;
+}
+
+.home-hero-full .hero-lead {
+  max-width: 720px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.home-v2 .section-heading:not(:has(> p)) {
+  grid-template-columns: 1fr;
+}
+
+.home-method-label:not(:has(> p)) {
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+@media (max-width: 760px) {
+  .home-hero-full .hero-inner {
+    min-height: 600px;
+    padding: 86px 0 72px;
+    align-items: end;
+  }
+
+  .home-hero-full h1 {
+    font-size: clamp(2.65rem, 13vw, 4.25rem);
+  }
+
+  .home-hero-full h1 span {
+    font-size: 0.54em;
+    line-height: 1.35;
+  }
+
+  .home-method-label:not(:has(> p)) {
+    grid-template-columns: 1fr;
+  }
+}
+
