@@ -946,15 +946,7 @@ main section a:not(.button):not(.button-link) {
   margin-top: 0;
 }
 
-.report-media-text {
-  color: var(--text);
-}
 
-.report-media-source {
-  margin: 12px 0 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
 
 /* Footer */
 .site-footer {
