@@ -25,9 +25,7 @@
       if (!href || href.startsWith('http') || href.startsWith('#')) return;
 
       const target = href.split('/').pop().toLowerCase();
-      if (target === current) {
-        link.setAttribute('aria-current', 'page');
-      }
+      if (target === current) link.setAttribute('aria-current', 'page');
     });
 
     if (toggle && menu) {
@@ -68,15 +66,16 @@
     footer.className = 'site-footer';
     footer.innerHTML = `
       <div class="footer-inner">
-        <div class="footer-brand">
-          <img src="images/logo.png" alt="PASSION 教育團隊" />
-          <p>PASSION 教育團隊 · National Taiwan Normal University</p>
+        <div class="footer-identity">
+          <strong>PASSION 扎根教學團隊</strong>
+          <span>國立臺灣師範大學 · 心理與教育測驗研究發展中心</span>
         </div>
-        <div class="footer-links">
+        <nav class="footer-links" aria-label="頁尾導覽">
           <a href="about.html">關於我們</a>
           <a href="resources.html">教學資源</a>
-          <a href="https://www.facebook.com/PASSION.Teaching.Learning/?locale=zh_TW" target="_blank" rel="noopener noreferrer">Facebook</a>
-        </div>
+          <a href="https://passiontw.net/usr/" target="_blank" rel="noopener noreferrer">PASSION偏鄉優質教育學分學程 ↗</a>
+          <a href="https://www.facebook.com/PASSION.Teaching.Learning/?locale=zh_TW" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
+        </nav>
       </div>
     `;
     document.body.appendChild(footer);
