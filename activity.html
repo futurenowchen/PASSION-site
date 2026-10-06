@@ -9,174 +9,38 @@
 </head>
 <body>
   <div id="site-nav" aria-label="網站導覽"></div>
-
   <main id="main-content">
     <header class="page-hero activity-page-hero">
       <div class="eyebrow">Activities</div>
       <h1>活動紀實</h1>
-      <p>記錄 PASSION 在偏鄉教學、師資培育、遠距陪伴、國際服務與教育交流中的實踐歷程。</p>
+      <p>從 2018 年至今，記錄 PASSION 在偏鄉教學、師資培育、遠距陪伴、國際服務與教育交流中的實踐歷程。</p>
     </header>
-
-    <section class="activity-browser" aria-labelledby="activity-2026-title">
+    <section class="activity-browser" aria-labelledby="activity-archive-title">
       <div class="activity-browser-head">
-        <div>
-          <p class="activity-kicker">2026</p>
-          <h2 id="activity-2026-title">2026 活動紀實</h2>
+        <div><p class="activity-kicker">PASSION ARCHIVE</p><h2 id="activity-archive-title">歷年活動紀實</h2></div>
+        <p class="activity-count" id="activity-count" aria-live="polite">載入中…</p>
+      </div>
+      <div class="activity-filter-block">
+        <div class="activity-filter-label">年份</div>
+        <div class="activity-filters" id="activity-year-filters" aria-label="依年份篩選"></div>
+      </div>
+      <div class="activity-filter-block">
+        <div class="activity-filter-label">類別</div>
+        <div class="activity-filters" id="activity-category-filters" aria-label="依活動類別篩選">
+          <button class="activity-filter is-active" type="button" data-category="all">全部</button>
+          <button class="activity-filter" type="button" data-category="summer">暑期實習</button>
+          <button class="activity-filter" type="button" data-category="international">國際志工</button>
+          <button class="activity-filter" type="button" data-category="training">師資培育</button>
+          <button class="activity-filter" type="button" data-category="remote">遠距教學</button>
+          <button class="activity-filter" type="button" data-category="exchange">交流合作</button>
+          <button class="activity-filter" type="button" data-category="field">教學現場</button>
         </div>
-        <div class="activity-year-note">歷年資料將陸續整理上線</div>
       </div>
-
-      <div class="activity-filters" role="group" aria-label="活動分類篩選">
-        <button class="activity-filter is-active" type="button" data-filter="all">全部</button>
-        <button class="activity-filter" type="button" data-filter="summer">暑期實習</button>
-        <button class="activity-filter" type="button" data-filter="international">國際志工</button>
-        <button class="activity-filter" type="button" data-filter="training">師資培育</button>
-        <button class="activity-filter" type="button" data-filter="remote">遠距教學</button>
-        <button class="activity-filter" type="button" data-filter="exchange">交流合作</button>
-      </div>
-
-      <div class="activity-grid">
-        <article class="activity-card activity-card-featured" data-category="summer">
-          <div class="activity-visual activity-visual-summer" aria-hidden="true">
-            <span class="activity-visual-label">暑期實習</span>
-            <span class="activity-media-count">11 張相片</span>
-          </div>
-          <div class="activity-card-body">
-            <div class="activity-meta">
-              <time datetime="2026-07-23">2026.07.23</time>
-              <span>暑期實習</span>
-            </div>
-            <h3>115年 PASSION 暑期實習課程七校聯合成果展</h3>
-            <p>適逢 PASSION 十週年，來自花蓮與臺東七所國中齊聚玉里高中，共同舉行暑期銜接課程聯合成果展，透過多元評量與跨校交流，看見學生一段時間以來的學習成果與成長。</p>
-            <div class="activity-source-note">Facebook 紀實 · 11 張相片</div>
-          </div>
-        </article>
-
-        <article class="activity-card activity-card-featured" data-category="international">
-          <div class="activity-visual activity-visual-international" aria-hidden="true">
-            <span class="activity-visual-label">國際志工</span>
-            <span class="activity-media-count">系列紀實 · 24 張相片 · 4 段影片</span>
-          </div>
-          <div class="activity-card-body">
-            <div class="activity-meta">
-              <time datetime="2026-07-06">2026.07.06–07.17</time>
-              <span>國際志工</span>
-              <span class="activity-series-badge">系列活動</span>
-            </div>
-            <h3>在陪伴中，一起成長——2026 PASSION 國際偏鄉教育志工服務計畫</h3>
-            <p>來自越南丁善理紀念中學的高中生志工接受培訓後，前往花蓮富北國中進行兩週英語教學服務。網站將同一活動期間的多則 Facebook 紀實整合為一個系列，保留培訓、出團與教學服務的完整脈絡。</p>
-            <div class="activity-source-note">整合 2 則主要 Facebook 紀實</div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-category="summer international">
-          <div class="activity-visual activity-visual-departure" aria-hidden="true">
-            <span class="activity-visual-label">暑期實習</span>
-            <span class="activity-media-count">8 張相片</span>
-          </div>
-          <div class="activity-card-body">
-            <div class="activity-meta">
-              <time datetime="2026-07-06">2026.07.06</time>
-              <span>暑期實習</span>
-            </div>
-            <h3>PASSION 扎根教學團隊十年深耕｜第八年暑期實習正式出團</h3>
-            <p>第八屆 PASSION 暑期實習正式展開，七所合作學校同步啟動，並與丁善理國際志工共同出團，展開暑期教學與陪伴。</p>
-            <div class="activity-source-note">Facebook 紀實 · 8 張相片</div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-category="training exchange">
-          <div class="activity-visual activity-visual-partner" aria-hidden="true">
-            <span class="activity-visual-label">合作共培</span>
-            <span class="activity-media-count">合作紀實</span>
-          </div>
-          <div class="activity-card-body">
-            <div class="activity-meta">
-              <time datetime="2026-07-15">2026.07.15</time>
-              <span>交流合作</span>
-            </div>
-            <h3>PASSION 與博幼共培人才，深耕偏鄉英語教育</h3>
-            <p>PASSION 英語教學模組持續應用於博幼各分校，由種子教師與在地課師接力傳承與實踐，讓師培成果真正進入日常教學現場。</p>
-            <div class="activity-source-note">Facebook 分享紀實</div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-category="remote training">
-          <div class="activity-visual activity-visual-remote" aria-hidden="true">
-            <span class="activity-visual-label">遠距教學</span>
-            <span class="activity-media-count">6 張相片</span>
-          </div>
-          <div class="activity-card-body">
-            <div class="activity-meta">
-              <time datetime="2026-04-21">2026.04.21</time>
-              <span>遠距教學</span>
-            </div>
-            <h3>教學路上不孤單｜PASSION 遠距教學諮詢會交流精華</h3>
-            <p>針對學生程度落差、專注力、班級經營等線上教學日常挑戰，修業生與專業輔導團隊共同討論實際案例，把教學問題帶回支持系統中一起解決。</p>
-            <div class="activity-source-note">Facebook 紀實 · 6 張相片</div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-category="training summer">
-          <div class="activity-visual activity-visual-sharing" aria-hidden="true">
-            <span class="activity-visual-label">經驗傳承</span>
-            <span class="activity-media-count">8 張相片</span>
-          </div>
-          <div class="activity-card-body">
-            <div class="activity-meta">
-              <time datetime="2026-04-10">2026.04.10</time>
-              <span>師資培育</span>
-            </div>
-            <h3>PASSION 暑期實習經驗分享座談</h3>
-            <p>五位 PASSION 學友從國文、英文、數學備課經驗，到班級經營與教師信念，分享走進偏鄉第一線後最真實的教學經驗與反思。</p>
-            <div class="activity-source-note">Facebook 紀實 · 8 張相片</div>
-          </div>
-        </article>
-
-        <article class="activity-card activity-card-wide" data-category="exchange remote">
-          <div class="activity-visual activity-visual-university" aria-hidden="true">
-            <span class="activity-visual-label">入大學堂</span>
-            <span class="activity-media-count">系列紀實 · 3 則</span>
-          </div>
-          <div class="activity-card-body">
-            <div class="activity-meta">
-              <time datetime="2026-01-21">2026.01.21–01.23</time>
-              <span>交流合作</span>
-              <span class="activity-series-badge">系列活動</span>
-            </div>
-            <h3>走進大學、用英語學習未來——花蓮中小學生入大學堂</h3>
-            <p>從走進臺師大校園、與長期陪伴的 PASSION 教師面對面交流，到前往國立臺灣科學教育館以英語探索生物多樣性與人體奧妙，三則連續紀實在網站中整合成完整活動故事。</p>
-            <div class="activity-source-note">整合 2026.01.21–01.23 系列 Facebook 紀實</div>
-          </div>
-        </article>
-      </div>
-
-      <div class="activity-archive-note">
-        <strong>2018–2025 歷年活動</strong>
-        <p>歷史 Facebook 備份已完成解析；確認 2026 年版型後，再依相同規則批次整理，不把招生公告、獎項與媒體報導混入活動紀實。</p>
-      </div>
+      <div id="activity-list" class="activity-grid" aria-live="polite"></div>
+      <p id="activity-empty" class="activity-empty" hidden>目前沒有符合條件的活動紀實。</p>
     </section>
   </main>
-
   <script src="site.js"></script>
-  <script>
-    (() => {
-      const filters = document.querySelectorAll('.activity-filter');
-      const cards = document.querySelectorAll('.activity-card');
-
-      filters.forEach((button) => {
-        button.addEventListener('click', () => {
-          const filter = button.dataset.filter;
-
-          filters.forEach((item) => item.classList.toggle('is-active', item === button));
-
-          cards.forEach((card) => {
-            const categories = (card.dataset.category || '').split(' ');
-            card.hidden = filter !== 'all' && !categories.includes(filter);
-          });
-        });
-      });
-    })();
-  </script>
+  <script src="activity.js"></script>
 </body>
 </html>
