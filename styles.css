@@ -1120,3 +1120,39 @@ main section a:not(.button):not(.button-link) {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Awards */
+.award-stack {
+  gap: 20px;
+}
+
+.award-card {
+  display: grid;
+  gap: 12px;
+}
+
+.award-year {
+  color: var(--brand);
+  font-size: 0.82rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.award-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 750;
+  line-height: 1.65;
+}
+
+.award-list {
+  display: grid;
+  gap: 18px;
+}
+
+.award-list .award-title + .award-title {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
