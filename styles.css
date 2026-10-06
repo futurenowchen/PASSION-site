@@ -1469,3 +1469,170 @@ main section a:not(.button):not(.button-link) {
     grid-template-columns: 1fr;
   }
 }
+
+/* PASSION native acronym diagram */
+.passion-native-diagram {
+  max-width: 1040px;
+  margin: 34px auto 42px;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(55, 107, 177, 0.10), transparent 28%),
+    radial-gradient(circle at 10% 92%, rgba(89, 166, 84, 0.10), transparent 28%),
+    #fff;
+  box-shadow: var(--shadow-sm);
+}
+.passion-diagram-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+  padding: 0 4px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.passion-diagram-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0.55rem 0.9rem;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #355f9e, #4a79bd);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+.passion-diagram-head p {
+  margin: 0;
+  color: #355f9e;
+  font-size: clamp(1rem, 2.2vw, 1.32rem);
+  font-weight: 800;
+  line-height: 1.4;
+}
+.passion-flow {
+  display: grid;
+  gap: 18px;
+}
+.passion-flow-row {
+  --stage: #3f70b7;
+  --stage-soft: rgba(63, 112, 183, 0.10);
+  position: relative;
+  display: grid;
+  grid-template-columns: 84px minmax(180px, 0.78fr) minmax(0, 1.22fr);
+  align-items: stretch;
+  gap: 12px;
+}
+.passion-flow-row:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  bottom: -17px;
+  left: 41px;
+  width: 2px;
+  height: 16px;
+  background: linear-gradient(var(--stage), rgba(139, 0, 16, 0.18));
+}
+.passion-flow-row:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  bottom: -18px;
+  left: 37px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--stage);
+  border-bottom: 2px solid var(--stage);
+  transform: rotate(45deg);
+}
+.passion-stage-project {
+  --stage: #4777bf;
+  --stage-soft: rgba(71, 119, 191, 0.10);
+}
+.passion-stage-adaptive {
+  --stage: #42aaa8;
+  --stage-soft: rgba(66, 170, 168, 0.10);
+}
+.passion-stage-screening {
+  --stage: #45ae68;
+  --stage-soft: rgba(69, 174, 104, 0.10);
+}
+.passion-stage-instruction {
+  --stage: #75aa45;
+  --stage-soft: rgba(117, 170, 69, 0.11);
+}
+.passion-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 104px;
+  border-radius: 18px;
+  color: #fff;
+  background: var(--stage);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--stage) 18%, transparent);
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+.passion-flow-zh,
+.passion-flow-en {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--stage) 26%, var(--line));
+  border-radius: 18px;
+  background: var(--stage-soft);
+}
+.passion-flow-caption {
+  margin-bottom: 4px;
+  color: var(--stage);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.passion-flow-zh strong {
+  color: var(--ink);
+  font-size: 1.08rem;
+  line-height: 1.45;
+}
+.passion-flow-en {
+  display: block;
+  align-content: center;
+  color: #40383a;
+  background: #fff;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 750;
+  line-height: 1.5;
+}
+.passion-flow-en span {
+  color: var(--stage);
+  font-size: 1.18em;
+  font-weight: 900;
+}
+@media (max-width: 760px) {
+  .passion-diagram-head {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .passion-diagram-mark {
+    width: fit-content;
+  }
+  .passion-flow-row {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+  .passion-code {
+    min-height: 82px;
+  }
+  .passion-flow-en {
+    grid-column: 2;
+  }
+  .passion-flow-row:not(:last-child)::after {
+    left: 31px;
+  }
+  .passion-flow-row:not(:last-child)::before {
+    left: 27px;
+  }
+}
