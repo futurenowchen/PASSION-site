@@ -957,15 +957,11 @@ main section a:not(.button):not(.button-link) {
   padding-top: 0;
 }
 
-
-
-
 .team-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
-
 
 .team-card {
   min-width: 0;
