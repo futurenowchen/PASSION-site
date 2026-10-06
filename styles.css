@@ -2765,40 +2765,29 @@ main section a:not(.button):not(.button-link) {
   display: flex;
   align-items: center;
   padding: clamp(72px, 8vw, 120px) clamp(42px, 5vw, 84px);
-  background:
-    radial-gradient(circle at 16% 84%, rgba(255, 255, 255, 0.06), transparent 34%),
-    linear-gradient(145deg, #5e0b16 0%, #76111f 62%, #861827 100%);
+  background: #A97173;
 }
 
 .home-hero-split .hero-copy {
   width: 100%;
-  max-width: 720px;
-  margin: 0 0 0 auto;
+  max-width: none;
+  margin: 0;
   text-shadow: none;
 }
 
 .home-hero-split .hero-copy .eyebrow {
   margin-bottom: 20px;
-  color: #f4d992;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .home-hero-split h1 {
-  max-width: 720px;
+  max-width: none;
   margin: 0;
   color: #fff;
-  font-size: clamp(2.65rem, 4vw, 4.7rem);
-  line-height: 1;
-  letter-spacing: -0.05em;
-}
-
-.home-hero-split h1 span {
-  display: block;
-  max-width: 640px;
-  margin-top: 18px;
-  color: #f5d27e;
-  font-size: 0.46em;
-  line-height: 1.28;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.5rem, 1.6vw, 1.95rem);
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
 }
 
 .home-hero-split .hero-actions {
@@ -2846,7 +2835,8 @@ main section a:not(.button):not(.button-link) {
   }
 
   .home-hero-split h1 {
-    font-size: clamp(2.7rem, 8vw, 4.6rem);
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    white-space: normal;
   }
 
   .home-hero-media {
@@ -2870,14 +2860,9 @@ main section a:not(.button):not(.button-link) {
   }
 
   .home-hero-split h1 {
-    font-size: clamp(2.35rem, 11vw, 3.6rem);
-    line-height: 1.02;
-  }
-
-  .home-hero-split h1 span {
-    margin-top: 15px;
-    font-size: 0.5em;
-    line-height: 1.32;
+    font-size: clamp(2rem, 9vw, 3rem);
+    line-height: 1.12;
+    white-space: normal;
   }
 
   .home-hero-split .hero-actions {
