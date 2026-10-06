@@ -45,8 +45,7 @@
           (media.length ? '<p class="activity-source-note">' + escapeHtml(media.join(' · ')) + '</p>' : '') +
         '</header>' +
         (item.cover ? '<figure class="activity-detail-cover"><img src="' + escapeHtml(item.cover) + '" alt="" /></figure>' : '') +
-        '<div class="activity-detail-body">' + escapeHtml(item.body).replace(/\n/g, '<br />') + '</div>' +
-        '<footer class="activity-provenance"><strong>資料來源</strong><span>PASSION Facebook 歷史備份</span></footer>';
+        '<div class="activity-detail-body">' + escapeHtml(item.body).replace(/\n/g, '<br />') + '</div>';
     })
     .catch((error) => {
       console.error(error);

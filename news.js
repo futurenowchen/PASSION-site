@@ -16,8 +16,7 @@
     list.innerHTML=visible.map((item)=>
       '<article class="news-row">'+
         '<time>'+esc(item.date.replace(/-/g,'.'))+'</time>'+
-        '<div><h2>'+esc(item.title)+'</h2><p>'+esc(item.summary)+'</p>'+
-        '<div class="activity-source-note">資料來源｜'+esc(item.source)+'</div></div>'+
+        '<div><h2>'+esc(item.title)+'</h2><p>'+esc(item.summary)+'</p></div>'+
       '</article>'
     ).join('');
   }
