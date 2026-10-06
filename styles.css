@@ -2744,6 +2744,8 @@ main section a:not(.button):not(.button-link) {
 
 /* Homepage full-bleed hero */
 .home-v2 > .home-hero-full {
+  width: 100%;
+  max-width: none;
   margin: 0;
   padding: 0;
   border: 0;
@@ -2813,6 +2815,19 @@ main section a:not(.button):not(.button-link) {
 
   .home-method-label:not(:has(> p)) {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Keep Join PASSION headline on one line on desktop */
+.home-join h2 {
+  max-width: none;
+  white-space: nowrap;
+  font-size: clamp(2.15rem, 3.5vw, 3.1rem);
+}
+
+@media (max-width: 760px) {
+  .home-join h2 {
+    white-space: normal;
   }
 }
 
