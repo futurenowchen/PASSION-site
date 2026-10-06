@@ -7,7 +7,6 @@
   const esc=(value='')=>value.replace(/[&<>"']/g,(c)=>({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
   }[c]));
-  const withBreaks=(value='')=>esc(value).replace(/\n/g,'<br />');
   const newsType=(item)=>{
     const text=(item.title+' '+item.summary).replace(/\s+/g,' ');
     if(/說明會/.test(text))return '說明會';
@@ -22,12 +21,10 @@
       button.classList.toggle('is-active',button.dataset.year===year);
     });
     list.innerHTML=visible.map((item)=>{
-      const full=item.body||item.summary||'';
+      const href='news-detail.html?id='+encodeURIComponent(item.id);
       return '<article class="news-row">'+
         '<div class="news-row-meta"><time datetime="'+esc(item.date)+'">'+esc(item.date.replace(/-/g,'.'))+'</time><span class="news-type">'+esc(newsType(item))+'</span></div>'+
-        '<div class="news-row-copy"><h2>'+esc(item.title)+'</h2><p class="news-summary">'+esc(item.summary)+'</p>'+
-          (full?'<details class="news-details"><summary>閱讀全文</summary><div class="news-fulltext">'+withBreaks(full)+'</div></details>':'')+
-        '</div>'+
+        '<div class="news-row-copy"><h2><a href="'+href+'">'+esc(item.title)+'</a></h2><p class="news-summary">'+esc(item.summary)+'</p><a class="news-read-more" href="'+href+'">閱讀全文 →</a></div>'+
       '</article>';
     }).join('');
   }
