@@ -2765,12 +2765,14 @@ main section a:not(.button):not(.button-link) {
   grid-template-columns: 1fr;
   gap: 0;
   align-items: end;
+  justify-items: start;
   padding: 112px 0 72px;
 }
 
 .home-hero-full .hero-copy {
   max-width: 560px;
-  margin-left: auto;
+  margin-left: 0;
+  margin-right: auto;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
 }
 
@@ -2822,6 +2824,7 @@ main section a:not(.button):not(.button-link) {
   .home-hero-full .hero-copy {
     max-width: 100%;
     margin-left: 0;
+    margin-right: auto;
   }
 
   .home-hero-full h1 {
