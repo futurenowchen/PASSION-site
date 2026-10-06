@@ -2752,7 +2752,7 @@ main section a:not(.button):not(.button-link) {
   border-radius: 0;
   background:
     linear-gradient(90deg, rgba(43, 8, 14, 0.14) 0%, rgba(43, 8, 14, 0.07) 34%, rgba(43, 8, 14, 0.12) 100%),
-    url("images/activity/2026/2026-07-27-01.jpg") center 38% / cover no-repeat;
+    url("images/activity/2026/2026-07-06-01.png") center 38% / cover no-repeat;
   box-shadow: none;
 }
 
