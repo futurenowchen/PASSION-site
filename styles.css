@@ -957,18 +957,8 @@ main section a:not(.button):not(.button-link) {
   padding-top: 0;
 }
 
-.team-section + .team-section {
-  margin-top: 58px;
-}
 
-.team-section-heading {
-  margin-bottom: 24px;
-}
 
-.team-section-heading h2 {
-  margin: 0;
-  font-size: clamp(1.8rem, 3vw, 2.65rem);
-}
 
 .team-grid {
   display: grid;
@@ -976,9 +966,6 @@ main section a:not(.button):not(.button-link) {
   gap: 22px;
 }
 
-.team-grid-leadership {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 
 .team-card {
   min-width: 0;
@@ -1054,19 +1041,13 @@ main section a:not(.button):not(.button-link) {
 }
 
 @media (max-width: 1080px) {
-  .team-grid,
-  .team-grid-leadership {
+  .team-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 620px) {
-  .team-section + .team-section {
-    margin-top: 42px;
-  }
-
-  .team-grid,
-  .team-grid-leadership {
+  .team-grid {
     grid-template-columns: 1fr;
   }
 
