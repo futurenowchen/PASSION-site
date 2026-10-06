@@ -9,30 +9,22 @@
 </head>
 <body>
   <div id="site-nav" aria-label="網站導覽"></div>
-
   <main id="main-content">
     <header class="page-hero">
       <div class="eyebrow">News</div>
       <h1>最新消息</h1>
-      <p>先保留初模原有的三則主題，移除缺失圖片依賴，讓內容在桌機與手機上都能穩定閱讀。</p>
+      <p>招生、報名、說明會與活動預告等即時訊息，依 PASSION 歷年 Facebook 公開紀錄整理。</p>
     </header>
-
-    <section class="news-gallery" aria-label="最新消息列表">
-      <article>
-        <h2>PASSION 中文閱讀教學診斷平台上線</h2>
-        <p>透過 DACC 平台，協助教師了解學生閱讀能力層次，提供即時學習回饋。</p>
-      </article>
-      <article>
-        <h2>PASSION 英語學習計畫啟動</h2>
-        <p>以 DCEC 平台搭配創新教學模組，協助學生提升英語文理解力。</p>
-      </article>
-      <article>
-        <h2>PASSION 數學診斷教學平台更新</h2>
-        <p>DTMC 平台全面升級，新增學生學習歷程報告功能，讓教學更精準。</p>
-      </article>
+    <section class="news-archive">
+      <div class="activity-browser-head">
+        <h2>歷年消息</h2>
+        <p class="activity-count" id="news-count">載入中…</p>
+      </div>
+      <div class="activity-filters" id="news-year-filters"></div>
+      <div class="news-list" id="news-list"></div>
     </section>
   </main>
-
   <script src="site.js"></script>
+  <script src="news.js"></script>
 </body>
 </html>
