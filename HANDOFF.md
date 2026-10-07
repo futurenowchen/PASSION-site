@@ -214,3 +214,31 @@ After that:
 
 ---
 When resuming development in a new conversation, read this file first, then inspect the current `main` HEAD and working tree before making changes.
+
+
+## 14. Media-report link integrity (2026-10-07)
+
+The media archive in `outcomes-public.html` must link directly to the actual media outlet page when a verifiable original URL exists.
+
+Do **not** use Professor Hu's aggregation page (`elearning.ice.ntnu.edu.tw/passionseedspassionfruits`) as a fallback URL for individual media reports. A prior bulk import created 212 such misleading fallback links; they have been removed and the recoverable original media URLs have been restored.
+
+Fail-closed rule:
+
+1. Prefer a verified direct outlet URL.
+2. Historical URLs may be restored from preserved PDFs / source spreadsheets when the article identity is unambiguous, even if the old outlet page is now offline.
+3. If the original outlet URL cannot be verified, keep the report title as plain text rather than inventing, inferring, or substituting an unrelated URL.
+4. Never relabel one outlet as another just to make an item clickable.
+5. When a syndicated mirror is unavailable but the original-source article is already separately listed, preserve the mirror record as plain text unless an exact mirror URL is recovered.
+
+Current unresolved plain-text records after the restoration pass:
+
+- 聯合報：台師大團隊攜博幼基金會 2年內再助逾600種子教師增能
+- Yahoo新聞／愛傳媒：陪敘利亞難民學習華語文 臺師大慈大及慈濟發表成效
+- Yahoo新聞／鏡新聞：慈濟師大攜手共助敘國難民學華語 志工結訓淚崩背後藏洋蔥
+- HiNet／中央社：台師大推暑期課輔 3週助偏鄉生進步10分
+- 經濟日報／中央社：台師大推暑期課輔 3週助偏鄉生進步10分
+- PChome／中央社：台師大推暑期課輔 3週助偏鄉生進步10分
+- HiNet／教育廣播電台：臺師大USR計畫深入偏鄉 弭平城鄉學習落差
+- 原民台：台師大首創偏鄉教育學程 國中生成績有起色
+
+These are intentionally unlinked until an exact historical outlet URL can be recovered. The site must not regress to professor-page fallback links.
