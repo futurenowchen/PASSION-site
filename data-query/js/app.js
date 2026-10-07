@@ -412,7 +412,7 @@ async function boot() {
     await waitForGoogle();
     initAuth();
     $("authorizeBtn").disabled = false;
-    setStatus("請使用有 Mirror 檢視權限的 Google 帳號授權。");
+    setStatus("請使用臺師大心測中心PASSION扎根教學團隊帳號授權。");
   } catch (error) {
     setStatus(error.message, "error");
   }
