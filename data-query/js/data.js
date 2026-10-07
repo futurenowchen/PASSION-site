@@ -45,7 +45,6 @@ const SCHOOL_SUFFIXES = ["國中","國小","高中","高職","中學","國民中
 
 export const FILTER_FIELDS = [
   "academic_year",
-  "project_family",
   "project",
   "category",
   "subject",
@@ -55,8 +54,7 @@ export const FILTER_FIELDS = [
 
 export const FILTER_LABELS = Object.freeze({
   academic_year: "學年度",
-  project_family: "計畫族",
-  project: "正式計畫名稱",
+  project: "計畫項目",
   category: "活動類別",
   subject: "科目／主題",
   service_region: "服務地區",
@@ -64,8 +62,7 @@ export const FILTER_LABELS = Object.freeze({
 });
 
 export const GROUP_LABELS = Object.freeze({
-  project_family: "計畫族",
-  project: "正式計畫名稱",
+  project: "計畫項目",
   academic_year: "學年度",
   category: "活動類別",
   subject: "科目／主題",

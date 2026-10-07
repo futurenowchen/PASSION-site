@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  FILTER_FIELDS,
+  FILTER_LABELS,
+  GROUP_LABELS,
   aggregate,
   applyFilters,
   canonicalizeSources,
@@ -76,4 +79,12 @@ test("dimension tokens and aggregation work without double-counting source rows"
   const grouped = aggregate(records, "教師參與人次", "project_family");
   assert.equal(grouped.length, 2);
   assert.equal(grouped.reduce((sum, row) => sum + row.value, 0), 55);
+});
+
+
+test("UI exposes raw project values as 計畫項目 instead of project family", () => {
+  assert.equal(FILTER_FIELDS.includes("project_family"), false);
+  assert.equal(FILTER_FIELDS.includes("project"), true);
+  assert.equal(FILTER_LABELS.project, "計畫項目");
+  assert.equal(GROUP_LABELS.project, "計畫項目");
 });

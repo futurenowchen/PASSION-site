@@ -267,8 +267,7 @@ function renderBars(rows) {
 const DETAIL_COLUMNS = [
   ["activity_date","日期"],
   ["academic_year","學年度"],
-  ["project_family","計畫族"],
-  ["project","正式計畫名稱"],
+  ["project","計畫項目"],
   ["category","活動類別"],
   ["subject","科目／主題"],
   ["service_region","服務地區"],
@@ -380,7 +379,7 @@ async function boot() {
     option.textContent = label;
     $("groupSelect").append(option);
   }
-  $("groupSelect").value = "project_family";
+  $("groupSelect").value = "project";
 
   if (!config.GOOGLE_CLIENT_ID) {
     setStatus("尚未設定 Google OAuth Client ID；程式已就緒，完成 OAuth 設定後即可上線。", "warning");
