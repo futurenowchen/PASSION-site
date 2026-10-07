@@ -1,9 +1,11 @@
 (() => {
   const newsHost = document.getElementById('home-news-list');
   const activityHost = document.getElementById('home-activity-list');
-  const heroImage = document.getElementById('home-hero-image');
-  const heroCaption = document.getElementById('home-hero-caption');
-  const heroStory = document.getElementById('home-hero-story');
+  const heroCarousel = document.getElementById('home-hero-carousel');
+  const heroSlides = heroCarousel ? [...heroCarousel.querySelectorAll('[data-hero-slide]')] : [];
+  const heroDots = heroCarousel ? [...heroCarousel.querySelectorAll('[data-hero-dot]')] : [];
+  const heroPrev = heroCarousel ? heroCarousel.querySelector('[data-hero-prev]') : null;
+  const heroNext = heroCarousel ? heroCarousel.querySelector('[data-hero-next]') : null;
 
   const activityLabels = {
     summer: '暑期實習',
@@ -24,6 +26,99 @@
   }[char]));
 
   const formatDate = (value = '') => value.replace(/-/g, '.');
+
+  function initHeroCarousel() {
+    if (!heroCarousel || heroSlides.length < 2) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const intervalMs = 5000;
+    let current = 0;
+    let timer = null;
+    let touchStartX = null;
+
+    const show = (nextIndex) => {
+      current = (nextIndex + heroSlides.length) % heroSlides.length;
+
+      heroSlides.forEach((slide, index) => {
+        const active = index === current;
+        slide.classList.toggle('is-active', active);
+        slide.setAttribute('aria-hidden', String(!active));
+      });
+
+      heroDots.forEach((dot, index) => {
+        const active = index === current;
+        dot.classList.toggle('is-active', active);
+        if (active) {
+          dot.setAttribute('aria-current', 'true');
+        } else {
+          dot.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const stop = () => {
+      if (!timer) return;
+      window.clearInterval(timer);
+      timer = null;
+    };
+
+    const start = () => {
+      if (reduceMotion || timer || document.hidden) return;
+      timer = window.setInterval(() => show(current + 1), intervalMs);
+    };
+
+    heroPrev?.addEventListener('click', () => {
+      show(current - 1);
+      stop();
+      start();
+    });
+
+    heroNext?.addEventListener('click', () => {
+      show(current + 1);
+      stop();
+      start();
+    });
+
+    heroDots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        show(index);
+        stop();
+        start();
+      });
+    });
+
+    heroCarousel.addEventListener('mouseenter', stop);
+    heroCarousel.addEventListener('mouseleave', start);
+    heroCarousel.addEventListener('focusin', stop);
+    heroCarousel.addEventListener('focusout', (event) => {
+      if (!heroCarousel.contains(event.relatedTarget)) start();
+    });
+
+    heroCarousel.addEventListener('touchstart', (event) => {
+      touchStartX = event.changedTouches[0]?.clientX ?? null;
+      stop();
+    }, { passive: true });
+
+    heroCarousel.addEventListener('touchend', (event) => {
+      if (touchStartX === null) return;
+      const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
+      const delta = touchEndX - touchStartX;
+      touchStartX = null;
+
+      if (Math.abs(delta) >= 45) {
+        show(current + (delta < 0 ? 1 : -1));
+      }
+      start();
+    }, { passive: true });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else start();
+    });
+
+    show(0);
+    start();
+  }
 
   const newsType = (item) => {
     const text = ((item.title || '') + ' ' + (item.summary || '')).replace(/\s+/g, ' ');
@@ -88,18 +183,9 @@
       '</article>';
     }).join('');
 
-    const feature = latest.find((item) => item.cover) || latest[0];
-    if (feature && heroStory) {
-      heroStory.href = 'activity-detail.html?id=' + encodeURIComponent(feature.id);
-      heroStory.setAttribute('aria-label', '閱讀最新活動紀實：' + feature.title);
-    }
-    if (feature && feature.cover && heroImage) {
-      heroImage.src = feature.cover;
-    }
-    if (feature && heroCaption) {
-      heroCaption.textContent = feature.title;
-    }
   }
+
+  initHeroCarousel();
 
   Promise.all([
     fetch('data/news.json', { cache: 'no-cache' }).then((response) => {
