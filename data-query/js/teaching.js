@@ -154,8 +154,8 @@ function setDateBounds() {
     $(id).min = min;
     $(id).max = max;
   }
-  $("teachingStartDate").value = min;
-  $("teachingEndDate").value = max;
+  $("teachingStartDate").value = "";
+  $("teachingEndDate").value = "";
 }
 
 function buildFilterControls() {
@@ -228,8 +228,8 @@ function currentFilterState() {
 
 function clearTeachingFilters() {
   $("teachingKeyword").value = "";
-  $("teachingStartDate").value = state.dateBounds.min || "";
-  $("teachingEndDate").value = state.dateBounds.max || "";
+  $("teachingStartDate").value = "";
+  $("teachingEndDate").value = "";
 
   for (const list of document.querySelectorAll("#teachingFilters .check-list")) {
     for (const input of list.querySelectorAll("input:checked")) input.checked = false;
