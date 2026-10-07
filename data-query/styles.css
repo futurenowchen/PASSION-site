@@ -191,8 +191,22 @@ input:focus, select:focus {
 }
 .filter-panel[open] summary { color: var(--brand); }
 .check-list { max-height: 220px; overflow: auto; padding: 2px 0 9px; }
-.check-row { display: flex; align-items: flex-start; gap: 8px; padding: 5px 2px; font-size: 14px; }
-.check-row input { width: auto; margin-top: 3px; accent-color: var(--brand); }
+.sidebar .check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 2px 2px;
+  font-size: 14px;
+  line-height: 1.28;
+  cursor: pointer;
+}
+.check-row input {
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--brand);
+}
 
 .active-filters { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
 .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 15px; }
