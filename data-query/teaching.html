@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PASSION 教學資料查詢框架">
+  <title>PASSION 教學資料查詢</title>
+  <link rel="stylesheet" href="./styles.css?v=20261008-1">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">PASSION DATA</div>
+      <h1>資料查詢</h1>
+    </div>
+  </header>
+
+  <main>
+    <nav class="data-tabs" aria-label="資料查詢分類">
+      <a class="data-tab" href="./index.html">活動資料</a>
+      <a class="data-tab active" href="./teaching.html" aria-current="page">教學資料</a>
+      <span class="data-tab disabled" aria-disabled="true">問卷資料</span>
+      <span class="data-tab disabled" aria-disabled="true">PASSION學程資料</span>
+    </nav>
+
+    <section class="status" data-kind="warning">
+      教學資料查詢框架預覽｜目前尚未接入正式資料來源。
+    </section>
+
+    <section id="teachingWorkspace">
+      <div class="search-row">
+        <label class="search-box">
+          <span>自由搜尋</span>
+          <input id="teachingKeyword" type="search" placeholder="例如：富北國中／英文／USR">
+        </label>
+        <label>
+          <span>起始日期</span>
+          <input id="teachingStartDate" type="date">
+        </label>
+        <label>
+          <span>結束日期</span>
+          <input id="teachingEndDate" type="date">
+        </label>
+      </div>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="filter-heading">
+            <h2>篩選條件</h2>
+            <button id="clearTeachingFiltersBtn" class="clear-filter-button" type="button">清除篩選</button>
+          </div>
+          <p class="muted">同一欄位多選＝OR；不同欄位＝AND。</p>
+
+          <div class="teaching-rule">
+            <strong>學期規則</strong>
+            <span>08/01–01/15 上學期</span>
+            <span>02/01–07/31 下學期</span>
+            <span>01/16–01/31 暫不歸學期</span>
+          </div>
+
+          <details class="filter-panel">
+            <summary>學年度</summary>
+            <p class="filter-placeholder">接入資料後自動產生</p>
+          </details>
+          <details class="filter-panel">
+            <summary>學期</summary>
+            <p class="filter-placeholder">上學期／下學期</p>
+          </details>
+          <details class="filter-panel">
+            <summary>計畫項目</summary>
+            <p class="filter-placeholder">接入資料後自動產生</p>
+          </details>
+          <details class="filter-panel">
+            <summary>地區</summary>
+            <p class="filter-placeholder">接入資料後自動產生</p>
+          </details>
+          <details class="filter-panel">
+            <summary>學校</summary>
+            <p class="filter-placeholder">接入資料後自動產生</p>
+          </details>
+          <details class="filter-panel">
+            <summary>學制</summary>
+            <p class="filter-placeholder">國小／國中</p>
+          </details>
+          <details class="filter-panel">
+            <summary>科目</summary>
+            <p class="filter-placeholder">國文／英文／數學</p>
+          </details>
+          <details class="filter-panel">
+            <summary>診斷項目</summary>
+            <p class="filter-placeholder">例如：文法／詞彙／聽力／閱讀</p>
+          </details>
+          <details class="filter-panel">
+            <summary>年級</summary>
+            <p class="filter-placeholder">接入資料後自動產生</p>
+          </details>
+
+          <hr>
+          <label>
+            <span>群組方式</span>
+            <select id="teachingGroupSelect">
+              <option value="school">依學校</option>
+              <option value="time">依時間</option>
+              <option value="project">依計畫</option>
+              <option value="subject">依科目</option>
+              <option value="region">依地區</option>
+            </select>
+          </label>
+        </aside>
+
+        <section class="content">
+          <p class="active-filters">目前顯示全部資料｜正式資料接入後依條件即時計算</p>
+
+          <div class="metric-grid three">
+            <article class="metric-card">
+              <span>診斷人次</span>
+              <strong>—</strong>
+            </article>
+            <article class="metric-card">
+              <span>扎根班</span>
+              <strong>—</strong>
+            </article>
+            <article class="metric-card">
+              <span>扎根人次</span>
+              <strong>—</strong>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2 id="teachingSummaryTitle">教學成果｜依學校</h2>
+                <p class="muted">三項核心指標會依目前篩選條件同步重算。</p>
+              </div>
+            </div>
+            <div class="table-wrap compact">
+              <table>
+                <thead>
+                  <tr>
+                    <th>群組</th>
+                    <th>診斷人次</th>
+                    <th>扎根班</th>
+                    <th>扎根人次</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-row">
+                    <td colspan="4">尚未接入正式教學資料</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>教學資料明細</h2>
+                <p class="muted">未來每筆統計均保留來源與批次，可追溯到原始資料。</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>學年度</th>
+                    <th>學期</th>
+                    <th>計畫項目</th>
+                    <th>地區</th>
+                    <th>學校</th>
+                    <th>學制</th>
+                    <th>科目</th>
+                    <th>診斷項目</th>
+                    <th>診斷人次</th>
+                    <th>扎根班</th>
+                    <th>扎根人次</th>
+                    <th>資料來源</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="empty-row">
+                    <td colspan="13">尚未接入正式教學資料</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/teaching.js?v=20261008-1"></script>
+</body>
+</html>
