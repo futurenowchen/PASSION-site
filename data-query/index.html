@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PASSION 活動資料自由查詢系統">
+  <title>PASSION 活動資料查詢</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="./config.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">PASSION DATA</div>
+      <h1>活動資料查詢</h1>
+      <p>Google 帳號授權後，直接讀取私人 Mirror；資料不儲存在 GitHub Pages。</p>
+    </div>
+    <div class="auth-actions">
+      <button id="authorizeBtn" class="primary">使用 Google 帳號讀取資料</button>
+      <button id="reloadBtn" class="secondary" disabled>重新讀取</button>
+      <button id="signoutBtn" class="ghost" hidden>解除授權</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="statusBox" class="status" data-kind="neutral">正在初始化…</section>
+
+    <section id="workspace" hidden>
+      <div class="search-row">
+        <label class="search-box">
+          <span>自由搜尋</span>
+          <input id="keyword" type="search" placeholder="例如：博幼 英文 花蓮／富北國中／生成式AI">
+        </label>
+        <label>
+          <span>起始日期</span>
+          <input id="startDate" type="date">
+        </label>
+        <label>
+          <span>結束日期</span>
+          <input id="endDate" type="date">
+        </label>
+      </div>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <h2>篩選條件</h2>
+          <p class="muted">同一欄位多選＝OR；不同欄位＝AND。</p>
+          <div id="filters"></div>
+          <hr>
+          <label>
+            <span>統計指標</span>
+            <select id="metricSelect"></select>
+          </label>
+          <label>
+            <span>群組方式</span>
+            <select id="groupSelect"></select>
+          </label>
+        </aside>
+
+        <section class="content">
+          <p id="activeFilters" class="active-filters"></p>
+
+          <div class="metric-grid">
+            <article class="metric-card"><span>活動場次</span><strong id="metricActivities">0</strong></article>
+            <article class="metric-card"><span>教師參與人次</span><strong id="metricTeachers">0</strong></article>
+            <article class="metric-card"><span>總參與人次</span><strong id="metricTotal">0</strong></article>
+            <article class="metric-card"><span>目前指標</span><strong id="metricSelected">0</strong></article>
+          </div>
+
+          <div class="split">
+            <article class="panel">
+              <h2 id="summaryTitle">分組統計</h2>
+              <div class="table-wrap compact">
+                <table id="summaryTable">
+                  <thead><tr><th>群組</th><th>數值</th><th>活動筆數</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>視覺比較</h2>
+              <div id="barChart" class="bar-chart"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>活動明細</h2>
+                <p id="detailCount" class="muted"></p>
+              </div>
+              <button id="downloadBtn" class="secondary">下載篩選結果 CSV</button>
+            </div>
+            <div class="table-wrap">
+              <table id="detailTable">
+                <thead>
+                  <tr>
+                    <th>日期</th><th>學年度</th><th>計畫族</th><th>正式計畫名稱</th>
+                    <th>活動類別</th><th>科目／主題</th><th>服務地區</th><th>服務對象／學校</th>
+                    <th>活動名稱</th><th>教師人次</th><th>總參與人次</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="pager">
+              <button id="prevPage" class="ghost">上一頁</button>
+              <span id="pageInfo"></span>
+              <button id="nextPage" class="ghost">下一頁</button>
+            </div>
+          </article>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    教師參與人次：舊表外部參與人數；2023+ 合作學校人員＋NPO人員＋校外教師；顧問老師固定排除。
+  </footer>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
