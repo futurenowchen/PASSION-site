@@ -83,3 +83,25 @@ test("date precision warnings respect the other active filters", () => {
   assert.equal(result.records.length, 0);
   assert.equal(result.partialRecords.length, 0);
 });
+
+
+test("undated academic-year facts remain visible when no date range is selected", () => {
+  const undated = [{
+    fact_id: "summer-1",
+    date_start: null,
+    date_end: null,
+    time_granularity: "academic_year",
+    academic_year: 114,
+    semester: "暑期",
+    project_name: "暑期實習",
+    metric_type: "root_person_time",
+    metric_value: 228,
+  }];
+  const all = filterTeachingRecords(undated, {});
+  assert.equal(all.records.length, 1);
+  const dated = filterTeachingRecords(undated, {
+    startDate: "2025-08-01",
+    endDate: "2026-07-31",
+  });
+  assert.equal(dated.records.length, 0);
+});
