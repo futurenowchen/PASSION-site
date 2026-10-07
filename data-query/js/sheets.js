@@ -42,12 +42,20 @@ export async function fetchPassionSheets({
     } catch {
       details = await response.text();
     }
+    const detailsLower = details.toLowerCase();
+    const apiDisabled =
+      detailsLower.includes("has not been used in project") ||
+      detailsLower.includes("it is disabled") ||
+      detailsLower.includes("api has not been used");
+
     const message =
-      response.status === 403
-        ? "這個 Google 帳號沒有 Mirror 試算表的讀取權限，請確認該帳號已被分享為檢視者。"
-        : response.status === 401
-          ? "Google 授權已失效，請重新登入。"
-          : `Google Sheets API 讀取失敗（HTTP ${response.status}）。`;
+      response.status === 403 && apiDisabled
+        ? "Google Sheets API 尚未在這個 Google Cloud 專案啟用，請先啟用後再重試。"
+        : response.status === 403
+          ? "這個 Google 帳號沒有 Mirror 試算表的讀取權限，請確認該帳號已被分享為檢視者。"
+          : response.status === 401
+            ? "Google 授權已失效，請重新登入。"
+            : `Google Sheets API 讀取失敗（HTTP ${response.status}）。`;
     throw new GoogleSheetsError(message, response.status, details);
   }
 

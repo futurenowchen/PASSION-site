@@ -41,7 +41,14 @@ const SCHOOL_PREFIXES = [
   "南投縣","雲林縣","嘉義市","嘉義縣","臺南市","高雄市","屏東縣","宜蘭縣","花蓮縣",
   "臺東縣","澎湖縣","金門縣","連江縣",
 ];
-const SCHOOL_SUFFIXES = ["國中","國小","高中","高職","中學","國民中學","國民小學","高中國中部","國中部"];
+const SCHOOL_SUFFIXES = ["國中","國小","高中","高職","高工","中學","國中小","國民中學","國民小學","高中國中部","國中部","學校"];
+const NO_SERVICE_VALUES = new Set(["無","無服務對象","不限","-","—"]);
+const VALID_TAIWAN_REGIONS = new Set([
+  "基隆市","臺北市","新北市","桃園市","新竹市","新竹縣","苗栗縣","臺中市","彰化縣",
+  "南投縣","雲林縣","嘉義市","嘉義縣","臺南市","高雄市","屏東縣","宜蘭縣","花蓮縣",
+  "臺東縣","澎湖縣","金門縣","連江縣","全臺",
+]);
+const INTERNATIONAL_REGION_PREFIXES = ["土耳其","敘利亞","越南","泰國","緬甸"];
 
 export const FILTER_FIELDS = [
   "academic_year",
@@ -50,6 +57,8 @@ export const FILTER_FIELDS = [
   "subject",
   "service_region",
   "service_target",
+  "venue_region",
+  "venue",
 ];
 
 export const FILTER_LABELS = Object.freeze({
@@ -57,8 +66,10 @@ export const FILTER_LABELS = Object.freeze({
   project: "計畫項目",
   category: "活動類別",
   subject: "科目／主題",
-  service_region: "服務地區",
+  service_region: "服務對象所在地區",
   service_target: "服務對象／學校",
+  venue_region: "舉辦地區",
+  venue: "舉辦地點",
 });
 
 export const GROUP_LABELS = Object.freeze({
@@ -70,6 +81,7 @@ export const GROUP_LABELS = Object.freeze({
   service_target: "服務對象／學校",
   activity_mode: "活動形式",
   venue_region: "舉辦地區",
+  venue: "舉辦地點",
   source_type: "資料來源",
 });
 
@@ -94,7 +106,7 @@ export const METRICS = Object.freeze({
   "舊表外部參與人數": "legacy_external_participant_count",
 });
 
-const TOKEN_FIELDS = new Set(["subject", "service_region", "service_target"]);
+const TOKEN_FIELDS = new Set(["subject", "service_region", "service_target", "venue_region"]);
 const SEARCH_FIELDS = [
   "project","project_family","project_raw","category","subject","service_region","service_region_raw",
   "service_target","service_target_raw","venue_region","venue","activity_name","notes",
@@ -168,6 +180,33 @@ export function normalizeRegion(value) {
   return [...new Set(parts)].join(", ") || null;
 }
 
+export function normalizeServiceRegion(value) {
+  const text = cleanText(value);
+  if (!text || NO_SERVICE_VALUES.has(text)) return null;
+
+  const parts = text
+    .replaceAll("台", "臺")
+    .replace(/[、，]/g, ",")
+    .split(",")
+    .map((item) => cleanText(item))
+    .filter(Boolean)
+    .map((item) => {
+      if (item.startsWith("臺灣/")) {
+        const region = REGION_ALIASES[item.slice(3)] || item.slice(3);
+        return VALID_TAIWAN_REGIONS.has(region) ? region : null;
+      }
+      const normalized = REGION_ALIASES[item] || item;
+      if (VALID_TAIWAN_REGIONS.has(normalized)) return normalized;
+      if (INTERNATIONAL_REGION_PREFIXES.some((prefix) => normalized === prefix || normalized.startsWith(prefix + "/"))) {
+        return normalized;
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  return [...new Set(parts)].join(", ") || null;
+}
+
 export function normalizeSubject(value) {
   const text = cleanText(value);
   if (!text || ["無","無,","-"].includes(text)) return null;
@@ -189,7 +228,7 @@ export function normalizeSubject(value) {
 
 export function normalizeServiceTarget(value) {
   const text = cleanText(value);
-  if (!text) return null;
+  if (!text || NO_SERVICE_VALUES.has(text)) return null;
   const parts = text
     .replaceAll("台", "臺")
     .replace(/[、，]/g, ",")
@@ -209,6 +248,13 @@ export function normalizeServiceTarget(value) {
       return part;
     });
   return [...new Set(parts)].join(", ") || null;
+}
+
+function looksLikeLegacySchool(value) {
+  const text = cleanText(value)?.replaceAll("台", "臺");
+  if (!text) return false;
+  if (SCHOOL_SUFFIXES.some((suffix) => text.includes(suffix))) return true;
+  return /[一二三四五六七八九十]中$/.test(text);
 }
 
 function normalizeCategory(value) {
@@ -249,8 +295,14 @@ export function canonicalizeLegacy(values = []) {
     const projectRaw = cleanText(pick(row, headers, "計畫名稱 (要全名)", "計畫名稱"));
     const project = projectRaw;
     const categoryRaw = cleanText(pick(row, headers, "類別"));
-    const serviceRegionRaw = cleanText(pick(row, headers, "地區"));
-    const serviceTargetRaw = cleanText(pick(row, headers, "地點"));
+    const legacyRegionRaw = cleanText(pick(row, headers, "地區"));
+    const legacyVenueRaw = cleanText(pick(row, headers, "地點"));
+    const inferredLegacyServiceTarget = looksLikeLegacySchool(legacyVenueRaw)
+      ? normalizeServiceTarget(legacyVenueRaw)
+      : null;
+    const inferredLegacyServiceRegion = inferredLegacyServiceTarget
+      ? normalizeRegion(legacyRegionRaw)
+      : null;
     const subjectRaw = cleanText(pick(row, headers, "科目"));
 
     const ntnuProfessor = toInt(pick(row, headers, "師大教授 人數"));
@@ -277,12 +329,12 @@ export function canonicalizeLegacy(values = []) {
       project_family: projectFamily(project),
       project_raw: projectRaw,
       activity_mode: cleanText(pick(row, headers, "遠距請打V")) ? "遠距" : "現場",
-      service_region: normalizeRegion(serviceRegionRaw),
-      service_region_raw: serviceRegionRaw,
-      service_target: normalizeServiceTarget(serviceTargetRaw),
-      service_target_raw: serviceTargetRaw,
-      venue_region: normalizeRegion(serviceRegionRaw),
-      venue: serviceTargetRaw,
+      service_region: inferredLegacyServiceRegion,
+      service_region_raw: inferredLegacyServiceRegion ? legacyRegionRaw : null,
+      service_target: inferredLegacyServiceTarget,
+      service_target_raw: inferredLegacyServiceTarget ? legacyVenueRaw : null,
+      venue_region: normalizeRegion(legacyRegionRaw),
+      venue: legacyVenueRaw,
       subject: normalizeSubject(subjectRaw),
       subject_raw: subjectRaw,
       category: normalizeCategory(categoryRaw),
@@ -362,7 +414,7 @@ export function canonicalizeCurrent(values = []) {
       project_family: projectFamily(project),
       project_raw: projectRaw,
       activity_mode: cleanText(pick(row, headers, "活動形式")),
-      service_region: normalizeRegion(serviceRegionRaw),
+      service_region: normalizeServiceRegion(serviceRegionRaw),
       service_region_raw: serviceRegionRaw,
       service_target: normalizeServiceTarget(serviceTargetRaw),
       service_target_raw: serviceTargetRaw,

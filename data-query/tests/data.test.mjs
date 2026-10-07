@@ -64,7 +64,7 @@ test("filter semantics are OR within dimension and AND across dimensions", () =>
   const filtered = applyFilters(records, {
     keyword: "博幼 英文",
     filters: {
-      project_family: ["PASSION與博幼偏鄉優質教師培育計畫", "偏鄉學力增能計畫"],
+      project: ["PASSION與博幼偏鄉優質教師培育計畫"],
       service_region: ["花蓮縣"],
     },
   });
@@ -87,4 +87,36 @@ test("UI exposes raw project values as 計畫項目 instead of project family", 
   assert.equal(FILTER_FIELDS.includes("project"), true);
   assert.equal(FILTER_LABELS.project, "計畫項目");
   assert.equal(GROUP_LABELS.project, "計畫項目");
+});
+
+
+test("legacy non-school venue stays in venue fields and is excluded from service filters", () => {
+  const venueOnlyLegacy = [
+    legacy[0],
+    ["2021/12/29","「心心向榮」偏鄉國民小學學力增能計畫","臺北市","臺師大、Xpark","記者會及校外參訪","","其他",0,0,0,0,0,0,0,"",""],
+  ];
+  const [record] = canonicalizeSources({legacy: venueOnlyLegacy, current: []});
+  assert.equal(record.service_region, null);
+  assert.equal(record.service_target, null);
+  assert.equal(record.venue_region, "臺北市");
+  assert.equal(record.venue, "臺師大、Xpark");
+  assert.equal(dimensionValues([record], "service_target").includes("臺師大、Xpark"), false);
+  assert.equal(dimensionValues([record], "venue").includes("臺師大、Xpark"), true);
+});
+
+test("current service-region normalization drops obvious non-region spillover", () => {
+  const dirtyCurrent = [
+    currentHeader,
+    ["2023/09/08","深耕偏鄉教育計畫：深化、廣化、國際化、永續化","現場","臺灣/臺北市, USR科技化教學產業學分學程","大學生","臺灣/臺北市","臺師大","無","會議","","","","",0,0,0,0,0,0,0,0,0,0,0,0,0,0,""],
+  ];
+  const [record] = canonicalizeSources({legacy: [], current: dirtyCurrent});
+  assert.equal(record.service_region, "臺北市");
+});
+
+test("filter UI includes separate venue dimensions", () => {
+  assert.equal(FILTER_LABELS.service_region, "服務對象所在地區");
+  assert.equal(FILTER_LABELS.venue_region, "舉辦地區");
+  assert.equal(FILTER_LABELS.venue, "舉辦地點");
+  assert.equal(FILTER_FIELDS.includes("venue_region"), true);
+  assert.equal(FILTER_FIELDS.includes("venue"), true);
 });

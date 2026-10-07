@@ -185,6 +185,26 @@ function updateFilterSummary(details, summary, field) {
   summary.textContent = count ? `${FILTER_LABELS[field]}（${count}）` : FILTER_LABELS[field];
 }
 
+function clearFilters() {
+  $("keyword").value = "";
+
+  const dates = state.records.map(r => r.activity_date).filter(Boolean).sort();
+  if (dates.length) {
+    $("startDate").value = dates[0];
+    $("endDate").value = dates.at(-1);
+  }
+
+  for (const panel of document.querySelectorAll(".check-list")) {
+    for (const input of panel.querySelectorAll("input:checked")) input.checked = false;
+    const details = panel.closest(".filter-panel");
+    const summary = details?.querySelector("summary");
+    if (details && summary) updateFilterSummary(details, summary, panel.dataset.field);
+  }
+
+  state.page = 1;
+  renderAll();
+}
+
 function currentFilterState() {
   return {
     keyword: $("keyword").value,
@@ -360,6 +380,7 @@ function bindUi() {
     renderDetails();
   });
   $("downloadBtn").addEventListener("click", downloadCsv);
+  $("clearFiltersBtn").addEventListener("click", clearFilters);
 }
 
 async function boot() {

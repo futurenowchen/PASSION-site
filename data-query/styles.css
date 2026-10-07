@@ -165,6 +165,19 @@ input:focus, select:focus {
   overflow: auto;
 }
 .sidebar h2, .panel h2 { margin: 0 0 6px; font-size: 18px; color: var(--ink); }
+.filter-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.filter-heading h2 { margin: 0; }
+.clear-filter-button {
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  padding: 4px 2px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: .18em;
+}
+.clear-filter-button:hover { color: var(--brand-strong); }
 .sidebar label { display: block; margin: 12px 0; }
 .sidebar hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
 .muted { color: var(--muted); font-size: 13px; margin: 3px 0 10px; }

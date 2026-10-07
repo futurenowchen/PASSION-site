@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="PASSION 活動資料自由查詢系統">
   <title>PASSION 活動資料查詢</title>
-  <link rel="stylesheet" href="./styles.css?v=20261007-2">
+  <link rel="stylesheet" href="./styles.css?v=20261007-3">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="./config.js?v=20261007-2"></script>
+  <script src="./config.js?v=20261007-3"></script>
 </head>
 <body>
   <header class="topbar">
@@ -44,7 +44,10 @@
 
       <div class="layout">
         <aside class="sidebar">
-          <h2>篩選條件</h2>
+          <div class="filter-heading">
+            <h2>篩選條件</h2>
+            <button id="clearFiltersBtn" class="clear-filter-button" type="button">清除篩選</button>
+          </div>
           <p class="muted">同一欄位多選＝OR；不同欄位＝AND。</p>
           <div id="filters"></div>
           <hr>
@@ -115,6 +118,6 @@
     </section>
   </main>
 
-  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/app.js?v=20261007-3"></script>
 </body>
 </html>
