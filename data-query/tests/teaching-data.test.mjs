@@ -71,3 +71,15 @@ test("teaching aggregation keeps the three core metrics side by side", () => {
   assert.equal(fubei.root_class, 0);
   assert.deepEqual(teachingDimensionValues(records, "county_city"), ["花蓮縣","臺東縣"]);
 });
+
+
+test("date precision warnings respect the other active filters", () => {
+  const records = canonicalizeTeaching({facts, schools});
+  const result = filterTeachingRecords(records, {
+    startDate: "2026-01-01",
+    endDate: "2026-01-15",
+    filters: {project_name: ["USR"]},
+  });
+  assert.equal(result.records.length, 0);
+  assert.equal(result.partialRecords.length, 0);
+});
