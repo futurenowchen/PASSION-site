@@ -3,15 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="PASSION 教學資料查詢框架">
+  <meta name="description" content="PASSION 教學資料查詢系統">
   <title>PASSION 教學資料查詢</title>
-  <link rel="stylesheet" href="./styles.css?v=20261008-1">
+  <link rel="stylesheet" href="./styles.css?v=20261008-2">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="./config.js?v=20261008-2"></script>
 </head>
 <body>
   <header class="topbar">
     <div>
       <div class="eyebrow">PASSION DATA</div>
       <h1>資料查詢</h1>
+    </div>
+    <div class="auth-actions">
+      <button id="authorizeBtn" class="primary">使用 Google 帳號讀取資料</button>
+      <button id="reloadBtn" class="secondary" disabled>重新讀取</button>
+      <button id="signoutBtn" class="ghost" hidden>解除授權</button>
     </div>
   </header>
 
@@ -23,11 +30,9 @@
       <span class="data-tab disabled" aria-disabled="true">PASSION學程資料</span>
     </nav>
 
-    <section class="status" data-kind="warning">
-      教學資料查詢框架預覽｜目前尚未接入正式資料來源。
-    </section>
+    <section id="statusBox" class="status" data-kind="neutral">正在初始化…</section>
 
-    <section id="teachingWorkspace">
+    <section id="teachingWorkspace" hidden>
       <div class="search-row">
         <label class="search-box">
           <span>自由搜尋</span>
@@ -58,42 +63,7 @@
             <span>01/16–01/31 暫不歸學期</span>
           </div>
 
-          <details class="filter-panel">
-            <summary>學年度</summary>
-            <p class="filter-placeholder">接入資料後自動產生</p>
-          </details>
-          <details class="filter-panel">
-            <summary>學期</summary>
-            <p class="filter-placeholder">上學期／下學期</p>
-          </details>
-          <details class="filter-panel">
-            <summary>計畫項目</summary>
-            <p class="filter-placeholder">接入資料後自動產生</p>
-          </details>
-          <details class="filter-panel">
-            <summary>地區</summary>
-            <p class="filter-placeholder">接入資料後自動產生</p>
-          </details>
-          <details class="filter-panel">
-            <summary>學校</summary>
-            <p class="filter-placeholder">接入資料後自動產生</p>
-          </details>
-          <details class="filter-panel">
-            <summary>學制</summary>
-            <p class="filter-placeholder">國小／國中</p>
-          </details>
-          <details class="filter-panel">
-            <summary>科目</summary>
-            <p class="filter-placeholder">國文／英文／數學</p>
-          </details>
-          <details class="filter-panel">
-            <summary>診斷項目</summary>
-            <p class="filter-placeholder">例如：文法／詞彙／聽力／閱讀</p>
-          </details>
-          <details class="filter-panel">
-            <summary>年級</summary>
-            <p class="filter-placeholder">接入資料後自動產生</p>
-          </details>
+          <div id="teachingFilters"></div>
 
           <hr>
           <label>
@@ -109,20 +79,21 @@
         </aside>
 
         <section class="content">
-          <p class="active-filters">目前顯示全部資料｜正式資料接入後依條件即時計算</p>
+          <p id="teachingActiveFilters" class="active-filters"></p>
+          <div id="teachingDateWarning" class="inline-warning" hidden></div>
 
           <div class="metric-grid three">
             <article class="metric-card">
               <span>診斷人次</span>
-              <strong>—</strong>
+              <strong id="metricDiagnostic">0</strong>
             </article>
             <article class="metric-card">
               <span>扎根班</span>
-              <strong>—</strong>
+              <strong id="metricRootClasses">0</strong>
             </article>
             <article class="metric-card">
               <span>扎根人次</span>
-              <strong>—</strong>
+              <strong id="metricRootPeople">0</strong>
             </article>
           </div>
 
@@ -130,11 +101,11 @@
             <div class="panel-head">
               <div>
                 <h2 id="teachingSummaryTitle">教學成果｜依學校</h2>
-                <p class="muted">三項核心指標會依目前篩選條件同步重算。</p>
+                <p class="muted">三項核心指標依目前條件同步重算。</p>
               </div>
             </div>
             <div class="table-wrap compact">
-              <table>
+              <table id="teachingSummaryTable">
                 <thead>
                   <tr>
                     <th>群組</th>
@@ -143,11 +114,7 @@
                     <th>扎根人次</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr class="empty-row">
-                    <td colspan="4">尚未接入正式教學資料</td>
-                  </tr>
-                </tbody>
+                <tbody></tbody>
               </table>
             </div>
           </article>
@@ -156,14 +123,15 @@
             <div class="panel-head">
               <div>
                 <h2>教學資料明細</h2>
-                <p class="muted">未來每筆統計均保留來源與批次，可追溯到原始資料。</p>
+                <p id="teachingDetailCount" class="muted"></p>
               </div>
+              <button id="downloadTeachingBtn" class="secondary">下載篩選結果 CSV</button>
             </div>
             <div class="table-wrap">
-              <table>
+              <table id="teachingDetailTable">
                 <thead>
                   <tr>
-                    <th>日期</th>
+                    <th>日期／期間</th>
                     <th>學年度</th>
                     <th>學期</th>
                     <th>計畫項目</th>
@@ -172,18 +140,20 @@
                     <th>學制</th>
                     <th>科目</th>
                     <th>診斷項目</th>
+                    <th>年級</th>
                     <th>診斷人次</th>
                     <th>扎根班</th>
                     <th>扎根人次</th>
                     <th>資料來源</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr class="empty-row">
-                    <td colspan="13">尚未接入正式教學資料</td>
-                  </tr>
-                </tbody>
+                <tbody></tbody>
               </table>
+            </div>
+            <div class="pager">
+              <button id="teachingPrevPage" class="ghost">上一頁</button>
+              <span id="teachingPageInfo"></span>
+              <button id="teachingNextPage" class="ghost">下一頁</button>
             </div>
           </article>
         </section>
@@ -191,6 +161,6 @@
     </section>
   </main>
 
-  <script type="module" src="./js/teaching.js?v=20261008-1"></script>
+  <script type="module" src="./js/teaching.js?v=20261008-2"></script>
 </body>
 </html>

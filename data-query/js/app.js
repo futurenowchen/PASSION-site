@@ -10,6 +10,7 @@ import {
   metricTotal,
 } from "./data.js";
 import {fetchPassionSheets, GoogleSheetsError} from "./sheets.js";
+import {clearSheetsSession, restoreSheetsSession, storeSheetsSession} from "./auth-session.js";
 
 const config = window.PASSION_CONFIG || {};
 const state = {
@@ -68,6 +69,7 @@ function initAuth() {
         return;
       }
       state.accessToken = response.access_token;
+      storeSheetsSession(response);
       $("signoutBtn").hidden = false;
       $("authorizeBtn").textContent = "重新授權";
       await loadData();
@@ -105,6 +107,14 @@ async function loadData() {
     $("workspace").hidden = false;
     $("reloadBtn").disabled = false;
   } catch (error) {
+    if (error instanceof GoogleSheetsError && error.status === 401) {
+      clearSheetsSession();
+      state.accessToken = null;
+      $("workspace").hidden = true;
+      $("signoutBtn").hidden = true;
+      $("reloadBtn").disabled = true;
+      $("authorizeBtn").textContent = "使用 Google 帳號讀取資料";
+    }
     const detail = error instanceof GoogleSheetsError && error.details ? `（${error.details}）` : "";
     setStatus(`${error.message || "資料載入失敗。"} ${detail}`, "error");
   } finally {
@@ -115,6 +125,7 @@ async function loadData() {
 function signOut() {
   if (!state.accessToken) return;
   google.accounts.oauth2.revoke(state.accessToken, () => {});
+  clearSheetsSession();
   state.accessToken = null;
   state.records = [];
   state.filtered = [];
@@ -411,8 +422,16 @@ async function boot() {
   try {
     await waitForGoogle();
     initAuth();
-    $("authorizeBtn").disabled = false;
-    setStatus("請使用臺師大心測中心PASSION扎根教學團隊帳號授權。");
+    const restored = restoreSheetsSession();
+    if (restored) {
+      state.accessToken = restored;
+      $("signoutBtn").hidden = false;
+      $("authorizeBtn").textContent = "重新授權";
+      await loadData();
+    } else {
+      $("authorizeBtn").disabled = false;
+      setStatus("請使用臺師大心測中心PASSION扎根教學團隊帳號授權。");
+    }
   } catch (error) {
     setStatus(error.message, "error");
   }

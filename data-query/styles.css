@@ -379,3 +379,21 @@ body.busy { cursor: progress; }
   }
   .metric-grid.three { grid-template-columns: 1fr; }
 }
+
+
+.inline-warning {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #ead29a;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: #72530e;
+  font-size: 13px;
+}
+.empty-cell {
+  height: 72px;
+  color: var(--muted);
+  text-align: center;
+  vertical-align: middle;
+  background: var(--surface-warm);
+}
