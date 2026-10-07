@@ -185,13 +185,6 @@ export function filterTeachingRecords(records, state = {}) {
   const partialRecords = [];
 
   for (const record of records) {
-    const date = dateDecision(record, state.startDate || null, state.endDate || null);
-    if (date.partial) {
-      partialRecords.push(record);
-      continue;
-    }
-    if (!date.include) continue;
-
     let selectedMatch = true;
     for (const [field, selected] of Object.entries(filters)) {
       if (!selected?.length) continue;
@@ -206,6 +199,14 @@ export function filterTeachingRecords(records, state = {}) {
       const haystack = searchableText(record);
       if (!terms.every((term) => haystack.includes(term))) continue;
     }
+
+    const date = dateDecision(record, state.startDate || null, state.endDate || null);
+    if (date.partial) {
+      partialRecords.push(record);
+      continue;
+    }
+    if (!date.include) continue;
+
     result.push(record);
   }
 
