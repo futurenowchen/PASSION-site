@@ -11,6 +11,7 @@ import {
   applyApprovedHistoricalSupplements,
   applyOriginalPriorityHistoricalReplacement,
   replaceApproved1136OverviewWithRaw,
+  applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
 } from "../js/teaching-data.js";
@@ -302,4 +303,58 @@ test("113.6 USR is a verified full-group replacement, not an addition", () => {
     [baseline,unrelated],raw.map((r,i)=>i===0?{...r,grade:"8"}:r)),/數字不符/);
   assert.throws(()=>replaceApproved1136OverviewWithRaw(
     [baseline,unrelated],[raw[0],...raw.slice(1).map((r,i)=>i===0?{...r,school_name:"吉貝國中",diagnostic_item:"數學"}:r)]),/重複/);
+});
+
+test("8 approved historical cohorts replace overview instead of stacking totals", () => {
+  const contracts = [
+    ["root_class","花蓮教育處","113-1",22,21,7,"2024-08-01","2025-01-15",113],
+    ["root_class","花蓮教育處","113-2",19,25,7,"2025-02-01","2025-07-31",113],
+    ["root_class","花蓮教育處","114-1",23,28,6,"2025-08-01","2026-01-15",114],
+    ["root_person_time","花蓮教育處","113-1",77,85,7,"2024-08-01","2025-01-15",113],
+    ["root_person_time","花蓮教育處","113-2",84,105,7,"2025-02-01","2025-07-31",113],
+    ["root_person_time","花蓮教育處","114-1",91,115,6,"2025-08-01","2026-01-15",114],
+    ["diagnostic_person_time","光華高工","112.6",0,1272,18,"2023-06-01","2023-06-30",111],
+    ["diagnostic_person_time","芳和中學","111.1",0,49,6,"2022-01-01","2022-01-31",110],
+  ];
+  const base = [{fact_id:"unrelated",metric_type:"diagnostic_person_time",metric_value:5}];
+  const details = [];
+  for (const [metric,project,period,baseline,target,amount,from,to,academic_year] of contracts) {
+    const key = [metric,project,period].join("|");
+    if (baseline !== 0) {
+      base.push({batch_id:"hist-big-overview-20261008-v1",metric_type:metric,
+        project_name:project,time_granularity:"semester",academic_year,
+        semester:period.endsWith("-1")?"上學期":"下學期",metric_value:baseline});
+    }
+    for (let n=0;n<amount;n++) {
+      const metric_value = project==="芳和中學"?(n===5?49:0):
+        Math.floor(target/amount)+(n<target%amount?1:0);
+      const item=["國文","文法","詞彙","聽力","閱讀","數學"][n%6];
+      details.push({verified_group_key:key,metric_type:metric,project_name:project,
+        group_target:target,group_baseline:baseline,
+        date_start:from,date_end:to,academic_year,
+        school_name:metric==="diagnostic_person_time"?project:"學校"+n,
+        school_level:metric==="diagnostic_person_time"?(project==="光華高工"?"高職":"國中"):"國小",
+        diagnostic_item:metric==="diagnostic_person_time"?item:null,
+        grade:metric==="diagnostic_person_time"?"高一":null,
+        metric_value,source_reference:key+"!A"+n});
+    }
+  }
+  const updated=applyApprovedHistoricalDetailDecisions(base,details);
+  assert.equal(updated.length,65);
+  assert.equal(teachingMetricTotals(updated).diagnostic_person_time,1326);
+  assert.equal(teachingMetricTotals(updated).root_class,74);
+  assert.equal(teachingMetricTotals(updated).root_person_time,305);
+  assert.equal(applyApprovedHistoricalDetailDecisions(base,details).length,65);
+  assert.throws(()=>applyApprovedHistoricalDetailDecisions(base,details.slice(1)),/64列/);
+  assert.throws(()=>applyApprovedHistoricalDetailDecisions(base,details.map((r,i)=>
+    i===0?{...r,metric_value:r.metric_value+1}:r)),/未對平/);
+  assert.throws(()=>applyApprovedHistoricalDetailDecisions(base,details.map((r,i)=>
+    i===0?{...r,group_baseline:99}:r)),/不合法/);
+  assert.throws(()=>applyApprovedHistoricalDetailDecisions(base,details.map((r,i)=>
+    i===0?{...r,source_reference:details[1].source_reference}:r)),/未對平/);
+  assert.throws(()=>applyApprovedHistoricalDetailDecisions(
+    base.map(x=>x.project_name==="花蓮教育處"&&x.metric_type==="root_class"?{...x,metric_value:x.metric_value+1}:x),details),/未對平/);
+  assert.throws(()=>applyApprovedHistoricalDetailDecisions([
+    ...base,{verified_group_key:"diagnostic_person_time|光華高工|112.6",metric_value:1272},
+  ],details),/未對平/);
 });
