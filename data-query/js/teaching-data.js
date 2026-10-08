@@ -130,6 +130,97 @@ export function canonicalizeTeaching({facts = [], schools = []} = {}) {
   return records;
 }
 
+
+export function canonicalizeVerifiedTeachingDetail(values = []) {
+  if (values.length < 2) return [];
+  const headers = headerMap(values[0]);
+  const records = [];
+
+  values.slice(1).forEach((row, offset) => {
+    const groupKey = cleanText(pick(row, headers, "group_key"));
+    const metricType = cleanText(pick(row, headers, "metric_type"));
+    if (!groupKey || !metricType) return;
+
+    const academicYearText = cleanText(pick(row, headers, "academic_year"));
+    const academicYear = academicYearText === null ? null : Number(academicYearText);
+    const projectName = cleanText(pick(row, headers, "project_name"));
+    const schoolName = cleanText(pick(row, headers, "school_name"));
+    const dateStart = cleanText(pick(row, headers, "date_start"));
+    const dateEnd = cleanText(pick(row, headers, "date_end")) || dateStart;
+
+    records.push({
+      fact_id: `verified-detail:${offset + 2}`,
+      batch_id: "hist-detail-verified-20261008-v1",
+      status: "active",
+      verified_group_key: groupKey,
+      date_start: dateStart,
+      date_end: dateEnd,
+      time_granularity: cleanText(pick(row, headers, "time_granularity")) || "custom",
+      academic_year: Number.isFinite(academicYear) ? academicYear : academicYearText,
+      semester: cleanText(pick(row, headers, "semester")),
+      project_id: projectName ? `project:${projectName}` : null,
+      project_name: projectName,
+      school_id: schoolName ? `school:${schoolName}` : null,
+      school_name: schoolName,
+      county_city: cleanText(pick(row, headers, "county_city")),
+      school_level: cleanText(pick(row, headers, "school_level")),
+      subject: cleanText(pick(row, headers, "subject")),
+      diagnostic_item: cleanText(pick(row, headers, "diagnostic_item")),
+      grade: cleanText(pick(row, headers, "grade")),
+      metric_type: metricType,
+      metric_value: toNumber(pick(row, headers, "metric_value")),
+      unit: metricType === "root_class" ? "班" : "人次",
+      source_type: "historical_detail_verified",
+      source_reference: cleanText(pick(row, headers, "source_reference")),
+      notes: cleanText(pick(row, headers, "notes")),
+    });
+  });
+
+  return records;
+}
+
+function rocMonthFromIso(isoDate) {
+  if (!isoDate) return null;
+  const match = String(isoDate).match(/^(\d{4})-(\d{2})-/);
+  if (!match) return null;
+  return `${Number(match[1]) - 1911}.${Number(match[2])}`;
+}
+
+export function historicalOverviewGroupKey(record) {
+  if (record.batch_id !== "hist-big-overview-20261008-v1") return null;
+  let period = null;
+
+  if (record.time_granularity === "month") {
+    period = rocMonthFromIso(record.date_start);
+  } else if (
+    record.time_granularity === "semester" ||
+    record.time_granularity === "academic_year"
+  ) {
+    const suffix =
+      record.semester === "上學期" ? "1" :
+      record.semester === "下學期" ? "2" :
+      record.semester === "暑期" ? "3" : null;
+    if (suffix && record.academic_year !== null && record.academic_year !== undefined) {
+      period = `${record.academic_year}-${suffix}`;
+    }
+  }
+
+  return period && record.metric_type && record.project_name
+    ? `${record.metric_type}|${record.project_name}|${period}`
+    : null;
+}
+
+export function mergeVerifiedTeachingDetail(baseRecords = [], detailRecords = []) {
+  const verifiedKeys = new Set(
+    detailRecords.map(record => record.verified_group_key).filter(Boolean),
+  );
+  const retained = baseRecords.filter(record => {
+    const key = historicalOverviewGroupKey(record);
+    return !key || !verifiedKeys.has(key);
+  });
+  return [...retained, ...detailRecords];
+}
+
 export function teachingDimensionValues(records, field) {
   const values = new Set();
   for (const record of records) {
