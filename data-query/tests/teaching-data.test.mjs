@@ -151,7 +151,7 @@ test("verified historical detail replaces only its matching overview group", () 
   assert.equal(teachingMetricTotals(merged).diagnostic_person_time, 15);
   assert.deepEqual(
     teachingDimensionValues(merged, "school_name"),
-    ["富北國中","東里國中"],
+    ["東里國中","富北國中"],
   );
 });
 
