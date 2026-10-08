@@ -8,6 +8,7 @@ import {
   historicalOverviewGroupKey,
   mergeVerifiedTeachingDetail,
   overlayHistoricalDiagnosticEnrichment,
+  applyApprovedHistoricalSupplements,
   teachingDimensionValues,
   teachingMetricTotals,
 } from "../js/teaching-data.js";
@@ -194,4 +195,36 @@ test("enrichment fails closed on item mismatch, missing group, or missing school
   assert.throws(()=>overlayHistoricalDiagnosticEnrichment(old,make("diagnostic_person_time|國教署|106.1")) ,/分項不一致/);
   assert.throws(()=>overlayHistoricalDiagnosticEnrichment(old,make(undefined,"閱讀",5,"")),/格式不完整/);
   assert.equal(overlayHistoricalDiagnosticEnrichment(old,[]),old);
+});
+
+test("approved Meilun grade-eight supplement is added exactly once after group reconciliation", () => {
+  const group = "diagnostic_person_time|國教署|110.9";
+  const old = [
+    {verified_group_key:group,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"美崙國中",grade:"7",diagnostic_item:"國文",metric_value:119},
+    {verified_group_key:group,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"其他國中",grade:"7",diagnostic_item:"國文",metric_value:1192},
+    {verified_group_key:"root_class|國教署|110-1",metric_type:"root_class",metric_value:5},
+  ];
+  const amounts = [["國文",113],["文法",106],["詞彙",106],["聽力",106],["閱讀",106],["數學",124]];
+  const supplement = amounts.map(([item,metric_value])=>({
+    verified_group_key:group, group_target:1972, project_name:"國教署", school_name:"美崙國中",
+    grade:"8", diagnostic_item:item, metric_type:"diagnostic_person_time",metric_value,
+  }));
+  const merged=applyApprovedHistoricalSupplements(old,supplement);
+  assert.equal(merged.length,9);
+  assert.equal(teachingMetricTotals(merged).diagnostic_person_time,1972);
+  assert.equal(teachingMetricTotals(merged).root_class,5);
+  assert.equal(supplement.reduce((sum,r)=>sum+r.metric_value,0),661);
+});
+
+test("approved supplements fail closed on different baseline, target, duplicate or missing grade", () => {
+  const key="diagnostic_person_time|國教署|110.9";
+  const base=[{verified_group_key:key,metric_value:1311}];
+  const row={verified_group_key:key,group_target:1972,project_name:"國教署",
+    metric_type:"diagnostic_person_time",school_name:"美崙國中",grade:"8",
+    diagnostic_item:"國文",metric_value:661};
+  assert.equal(applyApprovedHistoricalSupplements(base,[row]).length,2);
+  assert.throws(()=>applyApprovedHistoricalSupplements(base,[{...row,group_target:1973}]),/未能對平/);
+  assert.throws(()=>applyApprovedHistoricalSupplements(base,[row,row]),/重複項目/);
+  assert.throws(()=>applyApprovedHistoricalSupplements(base,[{...row,grade:null}]),/格式不完整/);
+  assert.throws(()=>applyApprovedHistoricalSupplements([], [row]),/未能對平/);
 });
