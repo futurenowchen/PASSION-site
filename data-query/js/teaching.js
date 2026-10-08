@@ -20,6 +20,7 @@ import {
   teachingMetricTotals,
   teachingPeriodLabel,
 } from "./teaching-data.js";
+import {evaluateTeachingAcceptance} from "./teaching-acceptance.js";
 import {clearSheetsSession, restoreSheetsSession, storeSheetsSession} from "./auth-session.js";
 
 const config = window.PASSION_CONFIG || {};
@@ -221,6 +222,28 @@ async function loadData() {
         ), newerUSRRaw,
       ), yunlin1106Source,
     );
+    if (new URLSearchParams(window.location.search).get("acceptance") === "1") {
+      const acceptance = evaluateTeachingAcceptance(state.records);
+      const existing = document.getElementById("teachingAcceptanceResults");
+      existing?.remove();
+      const panel = document.createElement("section");
+      panel.id = "teachingAcceptanceResults";
+      panel.className = "status";
+      panel.dataset.kind = acceptance.allPassed ? "success" : "error";
+      const title = document.createElement("strong");
+      title.textContent = "資料驗收：" + acceptance.passed + "/" + acceptance.total +
+        (acceptance.allPassed ? " PASS" : " FAIL");
+      panel.append(title);
+      const details = document.createElement("ul");
+      for (const entry of acceptance.checks) {
+        const item = document.createElement("li");
+        item.textContent = (entry.pass ? "PASS " : "FAIL ") + entry.label +
+          "：" + entry.actual + "（預期 " + entry.expected + "）";
+        details.append(item);
+      }
+      panel.append(details);
+      document.getElementById("teachingWorkspace").before(panel);
+    }
     state.page = 1;
     state.dateBounds = teachingDateBounds(state.records);
     buildFilterControls();
