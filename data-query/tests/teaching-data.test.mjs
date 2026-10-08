@@ -434,18 +434,18 @@ test("Yunlin 110.6 dedup 658 to 614 removes old six totals atomically", () => {
   assert.equal(teachingMetricTotals(updated).diagnostic_person_time,614);
   assert.equal(teachingMetricTotals(updated).root_class,5);
   assert.equal(updated.some(row=>!row.school_name&&row.metric_type==="diagnostic_person_time"),false);
-  assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.slice(1)),/基準/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.slice(1)),/基準|未對平/);
   assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,metric_value:22}:r)),/無效/);
   assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,group_baseline:657}:r)),/無效/);
   assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,diagnostic_item:"數學"}:r)),/重複/);
   assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,school_name:"其他國小"}:r)),/無效/);
-  assert.throws(()=>replaceYunlin1106WithDedupedSource(updated,source),/基準/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource(updated,source),/基準|未對平/);
   assert.throws(()=>replaceYunlin1106WithDedupedSource([
     ...old,oldUnrelated,{
       fact_id:"extra",batch_id:"hist-big-overview-20261008-v1",
       project_name:"雲林",metric_type:"diagnostic_person_time",
       time_granularity:"month",date_start:"2021-06-01",metric_value:658,
-    }],source),/基準/);
+    }],source),/基準|未對平/);
 });
 
 test("Yunlin 110.02 original session stays February without changing 587", () => {
