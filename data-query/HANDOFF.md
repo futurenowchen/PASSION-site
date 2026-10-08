@@ -303,3 +303,10 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - `PASSION Teaching Data Hub!VERIFIED_DETAIL_INDEX!A8:J9` 新補111.1/114.9 USR 36列以及雲林110.6 24列索引，均 active；`HIST_DIAG_DECISIONS!A19:H21` 已記錄110.6=-44、110.2只移期、110.12=620不動，寫入後讀回一致。另修正 `PENDING_REVIEW!H3/H5` 111.1與114.9USR過時的「尚未原始查驗」敘述，改為已核對與已接入前端。
 - 依先前核准的原總量 123001／2315／15844，採納110.6 **-44**、110.02 **0**、110.12 **0** 後，正式查詢**預期**總量為 **診斷122957、扎根班2315、扎根人次15844**。CI／Pages 已成功，但 OAuth 授權的實際查詢頁尚未在本回合親自看到顯示值，因此仍為 `UI_ACCEPTANCE_PENDING`；不得將預期當作實測。
 - 下一項精確行動：授權帳號登入 `https://futurenowchen.github.io/PASSION-site/data-query/teaching.html`，查診斷122957、扎根2315／15844、雲林110.02=587、110.06=614（分校且無「未填」）、原110.12=620，確定未重複或顯示錯期。其餘 114.9 國教署富北/竹圍、110.9平和等未決資料不動。
+
+## 22. Aggregate-only acceptance gate deployment checkpoint（2026-10-08）
+
+- 兩 repo 新增 `js/teaching-acceptance.js`、`tests/teaching-acceptance.test.mjs`，七項基準測試：診斷122957、扎根班2315、扎根人次15844、雲林110.2=587、110.6=614、110.12=620、110.6四校六項24筆不缺不重。含合計漂移、缺校、錯月、空資料反向測試；僅用匿名聚合，無學生姓名／學號。
+- `teaching.js` 完成使用真實已合併且未篩選的 records 的驗收入口；網址 `teaching.html?acceptance=1` 經正常 Google OAuth 後顯示七項 PASS/FAIL、實際和預期值。一般 `teaching.html` 不顯示驗收；cache token 20261008-14。公開與私有對應 teaching.js、teaching.html、驗收模組及測試已雙向同步。
+- 兩 repo 寫入已由 GitHub connector 回覆 commit SHA。**尚未驗收**：此最新 HEAD 的完整 GitHub Actions 流程及 Pages/OAuth UI；commit status/workflow_runs 搜尋回空集合，不能據此宣稱 CI PASS。公開 Pages 在目前網頁讀取環境仍無法實際訪問。下一動作是授權帳號開啟 `https://futurenowchen.github.io/PASSION-site/data-query/teaching.html?acceptance=1`，核對七項全部 PASS，再核對 Actions；若 FAIL 先停下查差異，不要改資料以湊數。
+- 本輪未更動 Google Sheet 內容或原始學生資料，原附件安全刪除仍由對話擁有人處理。其餘 114.9 國教署及 110.9 平和未決統計不可自行批准。
