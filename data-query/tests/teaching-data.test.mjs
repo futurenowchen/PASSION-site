@@ -17,6 +17,7 @@ import {
   replaceNational1149Official,
   replaceUsrRoot1121,
   applyNmoe1109RawPriority,
+  replaceUsr1086WithThreeSchools,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -595,4 +596,41 @@ test("approved NMOE 110.9 raw values replace only 3 cells and preserve Meilun 66
  assert.throws(()=>applyNmoe1109RawPriority(original,correction.map((x,i)=>i===0?{...x,metric_value:9}:x)),/不一致/);
  assert.throws(()=>applyNmoe1109RawPriority(original.map(x=>
   x.school_name==="美崙國中"?{...x,metric_value:x.metric_value+1}:x),correction),/基準/);
+});
+
+
+test("USR 108.6 3 schools x 3 items replace existing 40/item with exact school totals",()=>{
+ const group="diagnostic_person_time|USR|108.6";
+ const items=["文法","詞彙","聽力"];
+ const counts=[["三民國中",18],["玉東國中",10],["美崙國中",12]];
+ const originals=items.map((item,i)=>({
+   verified_group_key:group,project_name:"USR",metric_type:"diagnostic_person_time",
+   diagnostic_item:item,metric_value:40,school_name:null,
+   source_reference:"USR!E"+(3+i),source_type:"historical_detail_verified"
+ }));
+ const official=counts.flatMap(([school_name,n])=>items.map((diagnostic_item,i)=>({
+   verified_group_key:group,project_name:"USR",metric_type:"diagnostic_person_time",
+   school_name,metric_value:n,diagnostic_item,subject:"英文",
+   group_target:120,group_baseline:120,
+   time_granularity:"month",date_start:"2019-06-01",date_end:"2019-06-30",
+   academic_year:107,semester:"下學期",county_city:"花蓮縣",
+   school_level:"國中",grade:null,
+   source_reference:school_name+"_20190723.xlsx::"+
+     school_name.slice(0,2)+"_131!"+["K","Q","W"][i]+"2:"+
+     ["K","Q","W"][i]+(n+1)
+ })));
+ const untouched={metric_type:"root_person_time",project_name:"USR",metric_value:300};
+ const result=replaceUsr1086WithThreeSchools([...originals,untouched],official);
+ assert.equal(result.length,10);
+ assert.equal(result.filter(x=>x.verified_group_key===group)
+   .reduce((s,x)=>s+x.metric_value,0),120);
+ assert.deepEqual(items.map(item=>result.filter(x=>x.diagnostic_item===item)
+   .reduce((s,x)=>s+x.metric_value,0)),[40,40,40]);
+ assert.equal(result.find(x=>x.metric_type==="root_person_time"),untouched);
+ assert.throws(()=>replaceUsr1086WithThreeSchools(result,official),/底帳/);
+ assert.throws(()=>replaceUsr1086WithThreeSchools([...originals,untouched],official.slice(1)),/底帳/);
+ assert.throws(()=>replaceUsr1086WithThreeSchools([...originals,untouched],official.map((r,i)=>
+   i===0?{...r,metric_value:19}:r)),/無效/);
+ assert.throws(()=>replaceUsr1086WithThreeSchools([...originals,untouched],official.map((r,i)=>
+   i===0?{...r,source_reference:"unverified"}:r)),/無效/);
 });
