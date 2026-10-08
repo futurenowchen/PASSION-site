@@ -1,11 +1,13 @@
-import {fetchTeachingSheets, GoogleSheetsError} from "./sheets.js";
+import {fetchTeachingDetailSheet, fetchTeachingSheets, GoogleSheetsError} from "./sheets.js";
 import {
   TEACHING_FILTER_FIELDS,
   TEACHING_FILTER_LABELS,
   TEACHING_GROUP_LABELS,
   aggregateTeaching,
   canonicalizeTeaching,
+  canonicalizeVerifiedTeachingDetail,
   filterTeachingRecords,
+  mergeVerifiedTeachingDetail,
   teachingDateBounds,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -102,13 +104,22 @@ async function loadData() {
   setBusy(true);
   setStatus("正在從 Teaching Data Hub 讀取資料…");
   try {
-    const sheets = await fetchTeachingSheets({
-      accessToken: state.accessToken,
-      spreadsheetId: config.TEACHING_SPREADSHEET_ID,
-      factsSheet: config.TEACHING_FACTS_SHEET,
-      schoolsSheet: config.TEACHING_SCHOOLS_SHEET,
-    });
-    state.records = canonicalizeTeaching(sheets);
+    const [sheets, verifiedDetailValues] = await Promise.all([
+      fetchTeachingSheets({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_SPREADSHEET_ID,
+        factsSheet: config.TEACHING_FACTS_SHEET,
+        schoolsSheet: config.TEACHING_SCHOOLS_SHEET,
+      }),
+      fetchTeachingDetailSheet({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
+        sheetName: config.TEACHING_DETAIL_SHEET,
+      }),
+    ]);
+    const baseRecords = canonicalizeTeaching(sheets);
+    const verifiedDetail = canonicalizeVerifiedTeachingDetail(verifiedDetailValues);
+    state.records = mergeVerifiedTeachingDetail(baseRecords, verifiedDetail);
     state.page = 1;
     state.dateBounds = teachingDateBounds(state.records);
     buildFilterControls();
@@ -118,7 +129,8 @@ async function loadData() {
     setStatus(
       "教學資料載入完成：" + state.records.length.toLocaleString() +
       " 筆統計事實；目前診斷人次 " +
-      totals.diagnostic_person_time.toLocaleString() + "。",
+      totals.diagnostic_person_time.toLocaleString() +
+      "；已套用核對通過的歷史明細。",
       "success",
     );
     $("teachingWorkspace").hidden = false;
@@ -457,7 +469,11 @@ function bindUi() {
 async function boot() {
   bindUi();
 
-  if (!config.GOOGLE_CLIENT_ID || !config.TEACHING_SPREADSHEET_ID) {
+  if (
+    !config.GOOGLE_CLIENT_ID ||
+    !config.TEACHING_SPREADSHEET_ID ||
+    !config.TEACHING_DETAIL_SPREADSHEET_ID
+  ) {
     setStatus("尚未設定教學資料 Google Sheet 或 OAuth Client ID。", "warning");
     $("authorizeBtn").disabled = true;
     return;
