@@ -682,3 +682,64 @@ export function replaceApprovedUSR1111And1149Overviews(records = [], sourceRows 
   }
   return [...records.filter(row=>!removed.has(historicalOverviewGroupKey(row))), ...sourceRows];
 }
+
+/**
+ * Original-source authoritative, full-cohort Yunlin 110.6 replacement.
+ * The legacy six anonymous item totals (658) are removed atomically and
+ * replaced with 24 school-item records (614). Never append the difference.
+ */
+export function replaceYunlin1106WithDedupedSource(records = [], sourceRows = []) {
+  const key = "diagnostic_person_time|雲林|110.6";
+  const items = ["國文","文法","詞彙","聽力","閱讀","數學"];
+  const schools = {
+    "水碓國小": [21,21,21,21,21,21],
+    "永光國小": [12,48,48,48,48,49],
+    "華南國小": [6,25,25,25,25,29],
+    "樟湖國中小": [4,18,18,18,18,24],
+  };
+  const old = records.filter(row => row.verified_group_key === key);
+  const oldPerItem = new Map();
+  for (const row of old) {
+    if (row.school_name || !items.includes(row.diagnostic_item) ||
+        row.project_name !== "雲林" || row.metric_type !== "diagnostic_person_time" ||
+        !Number.isSafeInteger(row.metric_value)) {
+      throw new Error("110.6 雲林舊來源基準結構不符，停止載入。");
+    }
+    oldPerItem.set(row.diagnostic_item,
+      (oldPerItem.get(row.diagnostic_item) || 0) + row.metric_value);
+  }
+  if (old.length !== 6 || oldPerItem.size !== 6 ||
+      oldPerItem.get("國文") !== 43 ||
+      items.slice(1).some(item => oldPerItem.get(item) !== 123) ||
+      sourceRows.length !== 24 ||
+      records.some(row => historicalOverviewGroupKey(row) === key)) {
+    throw new Error("110.6 雲林舊總覽與來源群組未對平，停止載入。");
+  }
+  const seen = new Set();
+  let sum = 0;
+  for (const row of sourceRows) {
+    const expected = schools[row.school_name];
+    const itemIndex = items.indexOf(row.diagnostic_item);
+    const unique = row.school_name + "|" + row.diagnostic_item;
+    const expectedSubject = row.diagnostic_item === "國文" ? "國文"
+      : row.diagnostic_item === "數學" ? "數學" : "英文";
+    if (row.verified_group_key !== key || row.project_name !== "雲林" ||
+        row.metric_type !== "diagnostic_person_time" || !expected ||
+        itemIndex < 0 || seen.has(unique) ||
+        row.metric_value !== expected[itemIndex] ||
+        row.group_baseline !== 658 || row.group_target !== 614 ||
+        row.date_start !== "2021-06-01" || row.date_end !== "2021-06-30" ||
+        row.academic_year !== 109 || row.semester !== "下學期" ||
+        row.school_level !== "國小" || row.subject !== expectedSubject ||
+        row.grade !== null ||
+        !row.source_reference?.startsWith("11006雲林.zip::")) {
+      throw new Error("110.6 雲林原始明細無效或含重複學校項目，停止載入。");
+    }
+    seen.add(unique);
+    sum += row.metric_value;
+  }
+  if (seen.size !== 24 || sum !== 614) {
+    throw new Error("110.6 雲林完整群組加總失敗，停止載入。");
+  }
+  return [...records.filter(row => row.verified_group_key !== key), ...sourceRows];
+}
