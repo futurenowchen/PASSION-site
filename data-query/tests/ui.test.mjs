@@ -5,8 +5,8 @@ import fs from "node:fs";
 const activity = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const teaching = fs.readFileSync(new URL("../teaching.html", import.meta.url), "utf8");
 
-test("data query exposes the four top-level categories", () => {
-  for (const label of ["活動資料", "教學資料", "問卷資料", "PASSION學程資料"]) {
+test("data query exposes the five top-level categories", () => {
+  for (const label of ["活動資料", "教學資料", "問卷資料", "PASSION學程資料", "觀課資料"]) {
     assert.match(activity, new RegExp(label));
     assert.match(teaching, new RegExp(label));
   }
