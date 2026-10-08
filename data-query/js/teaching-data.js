@@ -743,3 +743,52 @@ export function replaceYunlin1106WithDedupedSource(records = [], sourceRows = []
   }
   return [...records.filter(row => row.verified_group_key !== key), ...sourceRows];
 }
+
+
+/**
+ * User-approved metering authority: replace all seven legacy Hualien month
+ * groups with six metering reporting periods. SRE stays a distinct item.
+ * This runs only after other approved historical transforms.
+ */
+export function replaceHualienMeteringPeriods(records = [], meteringRows = []) {
+  const specs = [
+    {period:"113.1-2(含112.11-12)",old:["112.12","113.1"],baseline:528,values:[183,168,171]},
+    {period:"113.5-6",old:["113.6"],baseline:474,values:[147,145,157]},
+    {period:"113.9-114.2",old:["113.9"],baseline:470,values:[180,180,179]},
+    {period:"114.5-6",old:["114.6"],baseline:1048,values:[186,185,172]},
+    {period:"114.9-115.4",old:["114.9"],baseline:414,values:[113,113,113]},
+    {period:"115.5-6",old:["115.6"],baseline:486,values:[168,168,150]},
+  ];
+  const items=["詞彙","聽力","SRE閱讀平台"];
+  if (meteringRows.length !== 18) throw new Error("計量核定花蓮資料必須完整18列。");
+  const retiredKeys=new Set(specs.flatMap(s=>s.old.map(p=>"diagnostic_person_time|花蓮教育處|"+p)));
+  const oldRecords=records.filter(r=>r.metric_type==="diagnostic_person_time" &&
+    r.project_name==="花蓮教育處" &&
+    (retiredKeys.has(r.verified_group_key) || retiredKeys.has(historicalOverviewGroupKey(r))));
+  if(oldRecords.length===0) throw new Error("未找到花蓮教育處原始群組，不可套用。");
+  for(const spec of specs){
+    const prior=oldRecords.filter(r=>spec.old.some(p=>
+      r.verified_group_key==="diagnostic_person_time|花蓮教育處|"+p ||
+      historicalOverviewGroupKey(r)==="diagnostic_person_time|花蓮教育處|"+p));
+    const original=prior.reduce((sum,r)=>sum+Number(r.metric_value||0),0);
+    if(original!==spec.baseline) throw new Error("計量舊值基準不吻合："+spec.period);
+    const next=meteringRows.filter(r=>r.verified_group_key===
+      "diagnostic_person_time|花蓮教育處|計量|"+spec.period);
+    if(next.length!==3 || new Set(next.map(r=>r.diagnostic_item)).size!==3)
+      throw new Error("計量期別缺項或重複："+spec.period);
+    for(let i=0;i<items.length;i++){
+      const row=next.find(r=>r.diagnostic_item===items[i]);
+      if(!row || row.project_name!=="花蓮教育處" ||
+        row.metric_type!=="diagnostic_person_time" ||
+        row.metric_value!==spec.values[i] ||
+        row.group_baseline!==spec.baseline ||
+        row.group_target!==spec.values.reduce((a,b)=>a+b,0) ||
+        row.school_name || !row.source_reference?.startsWith("計量2026-10-08核定"))
+        throw new Error("計量核定明細不吻合："+spec.period+"/"+items[i]);
+    }
+  }
+  if(oldRecords.length!==records.filter(r=>r.metric_type==="diagnostic_person_time" &&
+      r.project_name==="花蓮教育處").length)
+    throw new Error("花蓮教育處另有未涵蓋的診斷期別，禁止靜默合併。");
+  return [...records.filter(r=>!oldRecords.includes(r)),...meteringRows];
+}
