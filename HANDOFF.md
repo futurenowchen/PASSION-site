@@ -240,3 +240,13 @@ Current unresolved plain-text records after the restoration pass:
 - 原民台：台師大首創偏鄉教育學程 國中生成績有起色
 
 These are intentionally unlinked until an exact historical outlet URL can be recovered. The site must not regress to professor-page fallback links.
+
+
+## 15. Data Query Handoff（2026-10-08）
+
+PASSION 資料檢視平臺／資料查詢系統有**獨立 handoff**：
+
+- [data-query/HANDOFF.md](data-query/HANDOFF.md)：活動／教學資料查詢、OAuth、Google Sheets、歷史診斷數據對校、已確認的人工決議、待解差異與下一步。
+- 私有 canonical 原始碼 repo：futurenowchen/passion-activity-data 的根目錄 HANDOFF.md，同步維護。
+
+本文件仍管主網站、活動／新聞／媒體與頁面設計。要接續資料檢視平臺，請優先讀資料查詢的專屬 handoff，避免以本文件中較早的網站 checkpoint 誤判資料庫狀態。
