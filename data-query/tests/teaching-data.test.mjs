@@ -10,6 +10,7 @@ import {
   overlayHistoricalDiagnosticEnrichment,
   applyApprovedHistoricalSupplements,
   applyOriginalPriorityHistoricalReplacement,
+  replaceApproved1136OverviewWithRaw,
   teachingDimensionValues,
   teachingMetricTotals,
 } from "../js/teaching-data.js";
@@ -260,4 +261,45 @@ test("original-source replacement fails closed on incomplete, changed, duplicate
   assert.throws(()=>applyOriginalPriorityHistoricalReplacement(old,[{...value,grade:""}]),/不合法或重複/);
   assert.throws(()=>applyOriginalPriorityHistoricalReplacement([], [value]),/群組不存在/);
   assert.equal(applyOriginalPriorityHistoricalReplacement(old,[]),old);
+});
+
+test("113.6 USR is a verified full-group replacement, not an addition", () => {
+  const key = "diagnostic_person_time|USR|113.6";
+  const baseline = {
+    fact_id:"overview", batch_id:"hist-big-overview-20261008-v1",
+    metric_type:"diagnostic_person_time",project_name:"USR",
+    time_granularity:"month",date_start:"2024-06-01",metric_value:109,
+  };
+  const unrelated = {fact_id:"unrelated",metric_type:"root_class",metric_value:5};
+  const amounts = [
+    ["吉貝國中",[5,5,5,5,5]],
+    ["富里國中",[8,8,8,8,8]],
+    ["海端國中",[8,8,8,8,7]],
+    ["望安國中",[1,1,1,1,1]],
+    ["萬榮國中",[9,9,9,9,9]],
+  ];
+  const items=["數學","文法","詞彙","聽力","閱讀"];
+  const raw = amounts.flatMap(([school,vals]) => items.map((item,i) => ({
+    verified_group_key:key,project_name:"USR",metric_type:"diagnostic_person_time",
+    school_name:school,school_level:"國中",grade:"7",
+    diagnostic_item:item,metric_value:vals[i],group_baseline:109,group_target:154,
+    date_start:"2024-06-01",date_end:"2024-06-30",
+  })));
+  const result = replaceApproved1136OverviewWithRaw([baseline,unrelated],raw);
+  assert.equal(result.length,26);
+  assert.equal(result.some(x=>x.fact_id==="overview"),false);
+  assert.equal(teachingMetricTotals(result).diagnostic_person_time,154);
+  assert.equal(teachingMetricTotals(result).root_class,5);
+  assert.throws(()=>replaceApproved1136OverviewWithRaw([baseline,unrelated],[]),/基準或完整/);
+  assert.throws(()=>replaceApproved1136OverviewWithRaw([baseline,unrelated],raw.slice(1)),/基準或完整/);
+  assert.throws(()=>replaceApproved1136OverviewWithRaw(
+    [{...baseline,metric_value:110},unrelated],raw),/基準或完整/);
+  assert.throws(()=>replaceApproved1136OverviewWithRaw(
+    [baseline,{verified_group_key:key,metric_value:109}],raw),/基準或完整/);
+  assert.throws(()=>replaceApproved1136OverviewWithRaw(
+    [baseline,unrelated],raw.map((r,i)=>i===0?{...r,metric_value:6}:r)),/數字不符/);
+  assert.throws(()=>replaceApproved1136OverviewWithRaw(
+    [baseline,unrelated],raw.map((r,i)=>i===0?{...r,grade:"8"}:r)),/數字不符/);
+  assert.throws(()=>replaceApproved1136OverviewWithRaw(
+    [baseline,unrelated],[raw[0],...raw.slice(1).map((r,i)=>i===0?{...r,school_name:"吉貝國中",diagnostic_item:"數學"}:r)]),/重複/);
 });
