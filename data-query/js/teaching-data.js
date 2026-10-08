@@ -942,3 +942,51 @@ export function applyNmoe1109RawPriority(records = [], corrections = []) {
     throw new Error("國教署110.9整期替換未對平1968。");
   return revised;
 }
+
+
+/**
+ * 108.6 USR official 40 people per English item (= 120 item-times).
+ * Break out the three original aggregate rows into exact school×item rows,
+ * only after independent original files establish a complete 40-student group.
+ * Some test dates are in May: they belong to the historical 108.6 batch.
+ */
+export function replaceUsr1086WithThreeSchools(records = [], rawRows = []) {
+  const key = "diagnostic_person_time|USR|108.6";
+  const items = ["文法","詞彙","聽力"];
+  const counts = new Map([["三民國中",18],["玉東國中",10],["美崙國中",12]]);
+  const old = records.filter(r => r.metric_type==="diagnostic_person_time" &&
+    r.project_name==="USR" &&
+    (r.verified_group_key===key || historicalOverviewGroupKey(r)===key));
+  if (old.length!==3 || rawRows.length!==9 ||
+      new Set(old.map(r=>r.diagnostic_item)).size!==3 ||
+      old.some(r=>!items.includes(r.diagnostic_item) || r.metric_value!==40 ||
+        r.school_name || r.verified_group_key!==key ||
+        !r.source_reference?.startsWith("USR!E")) ||
+      old.reduce((n,r)=>n+r.metric_value,0)!==120)
+    throw new Error("USR 108.6 原始三科各40與歷史底帳不吻合。");
+  const seen = new Set();
+  const sums = new Map(items.map(i=>[i,0]));
+  for (const r of rawRows) {
+    const key2=r.school_name+"|"+r.diagnostic_item;
+    const n=counts.get(r.school_name);
+    const file=r.school_name+"_20190723.xlsx";
+    const col={"文法":"K","詞彙":"Q","聽力":"W"}[r.diagnostic_item];
+    const expectedEnd=n+1;
+    if (!n || !col || seen.has(key2) ||
+       r.verified_group_key!==key || r.metric_type!=="diagnostic_person_time" ||
+       r.project_name!=="USR" || r.metric_value!==n ||
+       r.group_target!==120 || r.group_baseline!==120 ||
+       r.time_granularity!=="month" || r.date_start!=="2019-06-01" ||
+       r.date_end!=="2019-06-30" || r.academic_year!==107 ||
+       r.semester!=="下學期" || r.county_city!=="花蓮縣" ||
+       r.school_level!=="國中" || r.subject!=="英文" || r.grade ||
+       !r.source_reference?.startsWith(file+"::") ||
+       !r.source_reference?.includes("!"+col+"2:"+col+expectedEnd))
+      throw new Error("USR 108.6 三校明細無效：" + key2);
+    seen.add(key2);
+    sums.set(r.diagnostic_item,sums.get(r.diagnostic_item)+n);
+  }
+  if(seen.size!==9 || items.some(i=>sums.get(i)!==40))
+    throw new Error("USR 108.6 三校三科來源未完整對齊官方各40。");
+  return [...records.filter(r=>!old.includes(r)),...rawRows];
+}
