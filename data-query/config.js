@@ -1,5 +1,6 @@
 window.PASSION_CONFIG = Object.freeze({
   GOOGLE_CLIENT_ID: "390817772097-ctj3ck53006cpmsriktv7f4jaeth92ip.apps.googleusercontent.com",
+  GOOGLE_HOSTED_DOMAIN: "rcpet.edu.tw",
   SPREADSHEET_ID: "1bu5qvqOIV9c3VA10Af3UPizXEzJTGmVlsZFTVvUSV0c",
   LEGACY_SHEET: "LEGACY_RAW",
   CURRENT_SHEET: "RAW_CURRENT",
