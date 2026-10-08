@@ -845,3 +845,35 @@ export function replaceNational1149Official(records = [], officialRows = []) {
   }
   return [...records.filter(row => !prior.includes(row)), ...officialRows];
 }
+
+
+/**
+ * USR 112-1: official subject ledger records English 51 and mathematics 51.
+ * Replace the stale 104 people-time overview; preserve source, do not add -2.
+ */
+export function replaceUsrRoot1121(records = [], officialRows = []) {
+  const group = "root_person_time|USR|112-1";
+  const old = records.filter(r => r.metric_type === "root_person_time" &&
+    r.project_name === "USR" &&
+    (r.verified_group_key === group || historicalOverviewGroupKey(r) === group));
+  if(old.length !== 1 || old[0].metric_value !== 104 ||
+     old[0].batch_id !== "hist-big-overview-20261008-v1" ||
+     officialRows.length !== 2)
+    throw new Error("USR 112-1 舊總覽或分科明細不吻合，停止載入。");
+  const expected = new Map([["英文",51],["數學",51]]);
+  const seen = new Set();
+  for(const row of officialRows) {
+    const sub = row.subject;
+    if(!expected.has(sub) || seen.has(sub) ||
+      row.verified_group_key !== group || row.metric_type !== "root_person_time" ||
+      row.project_name !== "USR" || row.metric_value !== expected.get(sub) ||
+      row.group_baseline !== 104 || row.group_target !== 102 ||
+      row.date_start !== "2023-08-01" || row.date_end !== "2024-01-15" ||
+      row.academic_year !== 112 || row.semester !== "上學期" ||
+      row.school_name || !row.source_reference?.endsWith("USR!" + (sub === "英文"?"K":"L") + "22")) {
+      throw new Error("USR 112-1 官方分科明細無效，停止載入。");
+    }
+    seen.add(sub);
+  }
+  return [...records.filter(r=>!old.includes(r)),...officialRows];
+}
