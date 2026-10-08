@@ -8,6 +8,7 @@ import {
   canonicalizeVerifiedTeachingDetail,
   filterTeachingRecords,
   mergeVerifiedTeachingDetail,
+  overlayHistoricalDiagnosticEnrichment,
   teachingDateBounds,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -105,7 +106,7 @@ async function loadData() {
   setBusy(true);
   setStatus("正在從 Teaching Data Hub 讀取資料…");
   try {
-    const [sheets, verifiedDetailValues] = await Promise.all([
+    const [sheets, verifiedDetailValues, enrichmentValues] = await Promise.all([
       fetchTeachingSheets({
         accessToken: state.accessToken,
         spreadsheetId: config.TEACHING_SPREADSHEET_ID,
@@ -117,10 +118,22 @@ async function loadData() {
         spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
         sheetName: config.TEACHING_DETAIL_SHEET,
       }),
+      fetchTeachingDetailSheet({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
+        sheetName: config.TEACHING_ENRICHMENT_SHEET,
+      }),
     ]);
     const baseRecords = canonicalizeTeaching(sheets);
     const verifiedDetail = canonicalizeVerifiedTeachingDetail(verifiedDetailValues);
-    state.records = mergeVerifiedTeachingDetail(baseRecords, verifiedDetail);
+    const enrichment = canonicalizeVerifiedTeachingDetail(enrichmentValues).map((record, index) => ({
+      ...record,
+      fact_id: `hist-diag-enrichment:${index + 1}`,
+      batch_id: "hist-diagnostic-enrichment-20261008-v1",
+      source_type: "historical_diagnostic_raw_verified",
+    }));
+    const reconciledDetail = overlayHistoricalDiagnosticEnrichment(verifiedDetail, enrichment);
+    state.records = mergeVerifiedTeachingDetail(baseRecords, reconciledDetail);
     state.page = 1;
     state.dateBounds = teachingDateBounds(state.records);
     buildFilterControls();
@@ -473,7 +486,8 @@ async function boot() {
   if (
     !config.GOOGLE_CLIENT_ID ||
     !config.TEACHING_SPREADSHEET_ID ||
-    !config.TEACHING_DETAIL_SPREADSHEET_ID
+    !config.TEACHING_DETAIL_SPREADSHEET_ID ||
+    !config.TEACHING_ENRICHMENT_SHEET
   ) {
     setStatus("尚未設定教學資料 Google Sheet 或 OAuth Client ID。", "warning");
     $("authorizeBtn").disabled = true;
