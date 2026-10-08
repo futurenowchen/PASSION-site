@@ -201,7 +201,7 @@ async function loadData() {
       "教學資料載入完成：" + state.records.length.toLocaleString() +
       " 筆統計事實；目前診斷人次 " +
       totals.diagnostic_person_time.toLocaleString() +
-      "；已套用核對通過的歷史明細。",
+      "；已套用核對通過的歷史明細及新核准補正。",
       "success",
     );
     $("teachingWorkspace").hidden = false;
@@ -546,7 +546,9 @@ async function boot() {
     !config.TEACHING_DETAIL_SPREADSHEET_ID ||
     !config.TEACHING_ENRICHMENT_SHEET ||
     !config.TEACHING_SUPPLEMENT_SHEET ||
-    !config.TEACHING_RAW_AUTHORITY_SHEET
+    !config.TEACHING_RAW_AUTHORITY_SHEET ||
+    !config.TEACHING_RAW1136_SHEET ||
+    !config.TEACHING_APPROVED_DETAIL_SHEET
   ) {
     setStatus("尚未設定教學資料 Google Sheet 或 OAuth Client ID。", "warning");
     $("authorizeBtn").disabled = true;
