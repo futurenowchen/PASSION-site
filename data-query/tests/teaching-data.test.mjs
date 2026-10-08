@@ -13,6 +13,7 @@ import {
   replaceApproved1136OverviewWithRaw,
   replaceApprovedUSR1111And1149Overviews,
   replaceYunlin1106WithDedupedSource,
+  replaceHualienMeteringPeriods,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -459,4 +460,35 @@ test("Yunlin 110.02 original session stays February without changing 587", () =>
   assert.equal(mergeVerifiedTeachingDetail([corrected],[
     {verified_group_key:"diagnostic_person_time|雲林|110.2",metric_value:587}
   ]).length,1);
+});
+
+test("Hualien metering replaces seven old month groups with six official periods",()=>{
+ const specs=[
+  ["113.1-2(含112.11-12)",["112.12","113.1"],[255,273],[183,168,171]],
+  ["113.5-6",["113.6"],[474],[147,145,157]],
+  ["113.9-114.2",["113.9"],[470],[180,180,179]],
+  ["114.5-6",["114.6"],[1048],[186,185,172]],
+  ["114.9-115.4",["114.9"],[414],[113,113,113]],
+  ["115.5-6",["115.6"],[486],[168,168,150]],
+ ];
+ const original=specs.flatMap(([period,old,values])=>old.map((p,i)=>({
+  metric_type:"diagnostic_person_time",project_name:"花蓮教育處",
+  verified_group_key:"diagnostic_person_time|花蓮教育處|"+p,metric_value:values[i]
+ })));
+ const metering=specs.flatMap(([period,old,values,items])=>items.map((value,i)=>({
+  metric_type:"diagnostic_person_time",project_name:"花蓮教育處",
+  verified_group_key:"diagnostic_person_time|花蓮教育處|計量|"+period,
+  diagnostic_item:["詞彙","聽力","SRE閱讀平台"][i],metric_value:value,
+  group_baseline:values.reduce((a,b)=>a+b,0),
+  group_target:items.reduce((a,b)=>a+b,0),school_name:null,
+  source_reference:"計量2026-10-08核定"
+ })));
+ const unaffected={metric_type:"root_person_time",project_name:"花蓮教育處",metric_value:115};
+ const updated=replaceHualienMeteringPeriods([...original,unaffected],metering);
+ assert.equal(updated.length,19);
+ assert.equal(updated.reduce((s,r)=>s+(r.metric_type==="diagnostic_person_time"?r.metric_value:0),0),2878);
+ assert.equal(updated.find(r=>r.metric_type==="root_person_time").metric_value,115);
+ assert.throws(()=>replaceHualienMeteringPeriods([...original,unaffected],metering.slice(1)),/18列/);
+ assert.throws(()=>replaceHualienMeteringPeriods([...original,unaffected],metering.map((x,i)=>i===0?{...x,metric_value:999}:x)),/不吻合/);
+ assert.throws(()=>replaceHualienMeteringPeriods([...original.slice(1),unaffected],metering),/基準/);
 });
