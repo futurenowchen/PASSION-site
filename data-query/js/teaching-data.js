@@ -792,3 +792,56 @@ export function replaceHualienMeteringPeriods(records = [], meteringRows = []) {
     throw new Error("花蓮教育處另有未涵蓋的診斷期別，禁止靜默合併。");
   return [...records.filter(r=>!oldRecords.includes(r)),...meteringRows];
 }
+
+
+/**
+ * 114.9 NMOE official performance table: six subject item totals and
+ * nine school rows per item all reconcile to 2,869, while the separate
+ * historical overview cell S37 has a stale 2,866. Replace exactly once.
+ */
+export function replaceNational1149Official(records = [], officialRows = []) {
+  const group = "diagnostic_person_time|國教署|114.9";
+  const spec = new Map([
+    ["國文",331],["文法",535],["詞彙",535],
+    ["聽力",533],["閱讀",534],["數學",401],
+  ]);
+  const prior = records.filter(row =>
+    row.metric_type === "diagnostic_person_time" &&
+    row.project_name === "國教署" &&
+    (row.verified_group_key === group || historicalOverviewGroupKey(row) === group));
+  if (prior.length !== 1 || prior[0].metric_value !== 2866 ||
+      prior[0].batch_id !== "hist-big-overview-20261008-v1" ||
+      officialRows.length !== 54) {
+    throw new Error("國教署114.9舊總覽或官方完整來源不吻合，停止載入。");
+  }
+  const schools = new Set();
+  const totals = new Map();
+  const counts = new Map();
+  for (const row of officialRows) {
+    const item = row.diagnostic_item;
+    const school = row.school_name;
+    const schoolExpected = school?.endsWith("國小") ? "國小" : "國中";
+    const unique = item + "|" + school;
+    const subject = item === "國文" || item === "數學" ? item : "英文";
+    if (!spec.has(item) || !school || schools.has(unique) ||
+        row.verified_group_key !== group ||
+        row.metric_type !== "diagnostic_person_time" ||
+        row.project_name !== "國教署" ||
+        row.metric_value <= 0 || !Number.isInteger(row.metric_value) ||
+        row.group_baseline !== 2866 || row.group_target !== 2869 ||
+        row.date_start !== "2025-09-01" || row.date_end !== "2025-09-30" ||
+        row.time_granularity !== "month" || row.academic_year !== 114 ||
+        row.school_level !== schoolExpected || row.subject !== subject ||
+        !row.source_reference?.includes("108-114國教署!V")) {
+      throw new Error("國教署114.9官方明細不合法、重複或來源不符，停止載入。");
+    }
+    schools.add(unique);
+    counts.set(item, (counts.get(item) || 0) + 1);
+    totals.set(item, (totals.get(item) || 0) + row.metric_value);
+  }
+  for (const [item, expected] of spec) {
+    if (counts.get(item) !== 9 || totals.get(item) !== expected)
+      throw new Error("國教署114.9學校或科目合計不吻合："+item);
+  }
+  return [...records.filter(row => !prior.includes(row)), ...officialRows];
+}
