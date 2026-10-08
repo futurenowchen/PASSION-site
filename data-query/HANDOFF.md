@@ -310,3 +310,12 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - `teaching.js` 完成使用真實已合併且未篩選的 records 的驗收入口；網址 `teaching.html?acceptance=1` 經正常 Google OAuth 後顯示七項 PASS/FAIL、實際和預期值。一般 `teaching.html` 不顯示驗收；cache token 20261008-14。公開與私有對應 teaching.js、teaching.html、驗收模組及測試已雙向同步。
 - 兩 repo 寫入已由 GitHub connector 回覆 commit SHA。**尚未驗收**：此最新 HEAD 的完整 GitHub Actions 流程及 Pages/OAuth UI；commit status/workflow_runs 搜尋回空集合，不能據此宣稱 CI PASS。公開 Pages 在目前網頁讀取環境仍無法實際訪問。下一動作是授權帳號開啟 `https://futurenowchen.github.io/PASSION-site/data-query/teaching.html?acceptance=1`，核對七項全部 PASS，再核對 Actions；若 FAIL 先停下查差異，不要改資料以湊數。
 - 本輪未更動 Google Sheet 內容或原始學生資料，原附件安全刪除仍由對話擁有人處理。其餘 114.9 國教署及 110.9 平和未決統計不可自行批准。
+
+## 23. 全期歷史資料清理總帳與來源稽核（2026-10-08）
+
+- 依正式 Teaching Data Hub 現有 `PENDING_REVIEW!A1:H15` 共14個總表差異，以及 `HIST_DIAG_DECISIONS` 另外三項 110.9 國教署分項與108.6美崙USR英語36，建立 `HIST_CLEANUP_CONTROL!A1:L19`（header +18項；11項已核准而OAuth待驗收，7項仍缺完整證據：USR110.9平和76、國教署114.9差3、USR112-1扎根-2、國教署110.9東里國文-1/數學-2與卓楓數學-1，以及108.6美崙英語36）。這些項目彼此有群組關係，不能將差額直接相加。
+- 新增 `HIST_PERIOD_SOURCE_AUDIT!A1:I29`（28期 + header），取來源 `PASSION_historical_diagnostic_stage2_reconciliation.xlsx` 的歷史快照：原始候選57724、當時已歸屬46840、待歸屬10848、排除36。這是**舊版第二階段快照**，其中許多已由後續檢查解決，不能將10848當成現在未入庫人次，也不得按期直接補計。
+- 兩張表已由 Google Sheets 實際寫入、讀回核實首尾及待確認群組；一律匿名聚合。舊 `PENDING_REVIEW`、`HIST_DIAG_DECISIONS`、`TEACHING_FACTS`、Verified Detail Store 完全保留，**本輪沒有調整任何正式人次、班數或前端程式**。
+- 已確認既有有效決議保持不動：雲林110.02=587、110.06=614、原110.12=620，110.9美崙已核准淨增661，111.6原始優先2738，113.6 USR154，111.1 USR280，114.9 USR154，花蓮教育處扎根與光華/芳和補列不重複計數。
+- **未完成全期原始逐筆清理**：當前能取得舊聚合檢查點與正式Sheet，但沒有完整28份可在受控本地逐筆查核的原始來源；不能將本次「全期盤點已建帳」誤宣稱為「歷史資料全部清理結案」。須優先取得110.9平和英語施測來源及國教署110.9完整群組、114.9國教署完整來源、USR112-1扎根原始明細、108.6美崙跨期證據。原始識別資料只在授權地端處理。
+- 網站預期KPI維持診斷122957／扎根班2315／扎根人次15844；OAuth UI/最新Actions仍待獨立核驗。下一步是逐列稽核 `HIST_CLEANUP_CONTROL` 中七個 pending，不得為了結案隨意把差額歸零。
