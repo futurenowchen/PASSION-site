@@ -9,6 +9,7 @@ import {
   mergeVerifiedTeachingDetail,
   overlayHistoricalDiagnosticEnrichment,
   applyApprovedHistoricalSupplements,
+  applyOriginalPriorityHistoricalReplacement,
   teachingDimensionValues,
   teachingMetricTotals,
 } from "../js/teaching-data.js";
@@ -227,4 +228,36 @@ test("approved supplements fail closed on different baseline, target, duplicate 
   assert.throws(()=>applyApprovedHistoricalSupplements(base,[row,row]),/重複項目/);
   assert.throws(()=>applyApprovedHistoricalSupplements(base,[{...row,grade:null}]),/格式不完整/);
   assert.throws(()=>applyApprovedHistoricalSupplements([], [row]),/未能對平/);
+});
+
+test("original-source priority completely replaces 111.6 verified school-item group and preserves other groups", () => {
+  const key="diagnostic_person_time|國教署|111.6";
+  const old=[
+    {verified_group_key:key,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"美崙國中",school_level:"國中",diagnostic_item:"文法",metric_value:231},
+    {verified_group_key:key,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"富北國中",school_level:"國中",diagnostic_item:"數學",metric_value:51},
+    {verified_group_key:"root_class|國教署|110-2",project_name:"國教署",metric_type:"root_class",metric_value:5},
+  ];
+  const raw=[
+    {verified_group_key:key,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"美崙國中",school_level:"國中",diagnostic_item:"文法",grade:"7",metric_value:112,group_baseline:282,group_target:281},
+    {verified_group_key:key,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"美崙國中",school_level:"國中",diagnostic_item:"文法",grade:"8",metric_value:119,group_baseline:282,group_target:281},
+    {verified_group_key:key,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"富北國中",school_level:"國中",diagnostic_item:"數學",grade:"7",metric_value:50,group_baseline:282,group_target:281},
+  ];
+  const updated=applyOriginalPriorityHistoricalReplacement(old,raw);
+  assert.equal(updated.length,4);
+  assert.equal(teachingMetricTotals(updated).diagnostic_person_time,281);
+  assert.equal(teachingMetricTotals(updated).root_class,5);
+  assert.equal(updated.some(r=>r.school_name==="美崙國中" && !r.grade),false);
+});
+
+test("original-source replacement fails closed on incomplete, changed, duplicate or mismatched groups", () => {
+  const key="diagnostic_person_time|國教署|111.6";
+  const old=[{verified_group_key:key,metric_type:"diagnostic_person_time",school_name:"美崙國中",school_level:"國中",diagnostic_item:"文法",metric_value:3}];
+  const value={verified_group_key:key,project_name:"國教署",metric_type:"diagnostic_person_time",school_name:"美崙國中",school_level:"國中",diagnostic_item:"文法",grade:"7",metric_value:2,group_baseline:3,group_target:2};
+  assert.equal(applyOriginalPriorityHistoricalReplacement(old,[value]).length,1);
+  assert.throws(()=>applyOriginalPriorityHistoricalReplacement(old,[{...value,group_baseline:4}]),/未能與官方基準/);
+  assert.throws(()=>applyOriginalPriorityHistoricalReplacement(old,[{...value,group_target:3}]),/未能與官方基準/);
+  assert.throws(()=>applyOriginalPriorityHistoricalReplacement(old,[value,value]),/不合法或重複/);
+  assert.throws(()=>applyOriginalPriorityHistoricalReplacement(old,[{...value,grade:""}]),/不合法或重複/);
+  assert.throws(()=>applyOriginalPriorityHistoricalReplacement([], [value]),/群組不存在/);
+  assert.equal(applyOriginalPriorityHistoricalReplacement(old,[]),old);
 });
