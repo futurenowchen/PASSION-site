@@ -367,3 +367,47 @@ export function teachingPeriodLabel(record) {
     ? record.date_start
     : record.date_start + "～" + record.date_end;
 }
+
+// Replace whole verified historical groups only when both the total and each
+// diagnostic item match. Never append source rows on top of an existing total.
+export function overlayHistoricalDiagnosticEnrichment(verifiedDetail = [], enrichment = []) {
+  if (!enrichment.length) return verifiedDetail;
+  const previous = new Map();
+  const incoming = new Map();
+  for (const record of verifiedDetail) {
+    const key = record.verified_group_key;
+    if (!key) continue;
+    if (!previous.has(key)) previous.set(key, []);
+    previous.get(key).push(record);
+  }
+  for (const record of enrichment) {
+    const key = record.verified_group_key;
+    if (!key || record.metric_type !== "diagnostic_person_time" ||
+        !record.school_name || !Number.isFinite(record.metric_value) ||
+        record.metric_value <= 0) {
+      throw new Error("歷史施測補齊明細格式不完整，已停止套用。");
+    }
+    if (!incoming.has(key)) incoming.set(key, []);
+    incoming.get(key).push(record);
+  }
+  const perItem = (items) => {
+    const counts = new Map();
+    for (const record of items) {
+      const item = record.diagnostic_item;
+      if (!item) throw new Error("歷史施測補齊缺少診斷項目。");
+      counts.set(item, (counts.get(item) || 0) + record.metric_value);
+    }
+    return [...counts.entries()].sort(([a], [b]) => a.localeCompare(b, "zh-Hant"));
+  };
+  for (const [key, replacements] of incoming) {
+    const existing = previous.get(key);
+    if (!existing?.length ||
+        JSON.stringify(perItem(existing)) !== JSON.stringify(perItem(replacements))) {
+      throw new Error("歷史施測補齊與既有大表分項不一致：" + key);
+    }
+  }
+  return [
+    ...verifiedDetail.filter(r => !incoming.has(r.verified_group_key)),
+    ...enrichment,
+  ];
+}
