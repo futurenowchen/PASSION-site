@@ -191,3 +191,13 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - 已在正式 Sheet 更新 `PENDING_REVIEW!H4`，並新增 `HIST_DIAG_DECISIONS!A18:H18`，狀態 `GAP_LOCALIZED_PENDING_CROSS_PERIOD`；寫入後讀回 PASS。原 109、154、45 與既有公開指標維持不變。
 - **下一個精確步驟**：在受控地端環境取得 11301 與 11306 原始 Excel，針對萬榮五項各9做跨期日期／記錄唯一性比對；原始個資僅在地端，僅將不可識別的聚合差異、可重跑判定及候選替換表帶回。證據不足就繼續 pending。
 - 不改動既有 111.6 國教署 2,738、110.9 核准補計 661、全站**預期**診斷 121,492（仍待授權帳號實際 UI 驗收）。
+
+## 13. 113.6 原始檔跨期查重完成，25筆安全候選已入 staging（2026-10-08）
+
+- 本輪取得使用者上傳的 `11301資料.xlsx`（SHA-256 `ee02b57420d7020a54d49fd5d7584559551d58fcb8cac7e96c1edf0d0e827851`）與 `11306資料.xlsx`（SHA-256 `82210225b5a96ea473fd7ac43a47151ec812d6eca5ef0546098c6df2ed2bcbf6`），於當前受控計算環境內讀取，未向 repo 傳遞識別資料。
+- 113.6 USR/FB 五校原始有效分項計數：吉貝25、富里40、海端39、望安5、萬榮45，合計 **154**；每校數學、英文四項共 25 個 school×item，全數核對；大表官方 **109**。
+- 萬榮兩期數學均9筆，9個同校班級學號組合相同，但實際日期完全不同（11301: 2023/12–2024/01；11306: 2024/06），九筆25題作答向量也全部不同；屬不同期有效測驗。英語兩期各9筆、四項各9，完整共同欄位成績組合無相同列、期內無完全重複列；但英語匯出**沒有學號與施測日期**，不得虛稱身分級一對一查重。
+- 在正式 Verified Detail Store 新增 `HIST_DIAG_1136_STAGING`（sheetId=1425261136），20欄結構與原始優先資料相同，25筆分年級彙總合計154，所有 baseline=109、target=154；**已讀回驗證 PASS**，無個資。
+- 在 Teaching Data Hub 已回寫 `PENDING_REVIEW!H4` 與 `HIST_DIAG_DECISIONS!A18:H18`，狀態 `SOURCE_RECONCILED_STAGED_NOT_LIVE`；已讀回確認。
+- **尚未啟用正式前端替換，也未將109改為154。** 目前全系統預期仍是121,492；完成程式的 fail-closed 原始群組替換（驗109基準、154目標、5校×5項全覆蓋、不重複）與雙 repo 測試及部署後，預期才會成為 **121,537**，仍須 OAuth UI 驗收。切勿直接把45附加到109或在程式未驗證前將 staging 視為 active。
+- 下一個精確步驟：讀私有 canonical repo `web/js/teaching-data.js`／`web/js/teaching.js` 與目前 Google Sheets staging，實作專用「overview-only 109 → 25-row detail 154」完整替換檢查、測試 fail-closed、同步到公開 `data-query/`、驗證 CI／Pages，最後才啟用 staging；110.9 平和76與國教署4仍待查。
