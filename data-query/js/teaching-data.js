@@ -153,6 +153,7 @@ export function canonicalizeVerifiedTeachingDetail(values = []) {
       batch_id: "hist-detail-verified-20261008-v1",
       status: "active",
       verified_group_key: groupKey,
+      group_target: toNumber(pick(row, headers, "group_target")),
       date_start: dateStart,
       date_end: dateEnd,
       time_granularity: cleanText(pick(row, headers, "time_granularity")) || "custom",
@@ -219,6 +220,51 @@ export function mergeVerifiedTeachingDetail(baseRecords = [], detailRecords = []
     return !key || !verifiedKeys.has(key);
   });
   return [...retained, ...detailRecords];
+}
+
+// Supplement only approved, independently reconciled diagnostic records.
+// The old historical overview remains intact; a verified group is augmented
+// only when the resulting whole-group sum agrees with its approved target.
+export function applyApprovedHistoricalSupplements(records = [], supplements = []) {
+  if (!supplements.length) return records;
+  const originals = new Map();
+  for (const record of records) {
+    const key = record.verified_group_key;
+    if (!key) continue;
+    originals.set(key, (originals.get(key) || 0) + Number(record.metric_value || 0));
+  }
+
+  const grouped = new Map();
+  const seen = new Set();
+  for (const record of supplements) {
+    const key = record.verified_group_key;
+    const fields = key?.split("|");
+    if (!key || fields?.length !== 3 ||
+        fields[0] !== "diagnostic_person_time" ||
+        record.metric_type !== "diagnostic_person_time" ||
+        fields[1] !== record.project_name ||
+        !record.school_name || !record.diagnostic_item ||
+        !record.grade || !Number.isSafeInteger(record.metric_value) ||
+        record.metric_value <= 0 ||
+        !Number.isSafeInteger(record.group_target) ||
+        record.group_target <= 0) {
+      throw new Error("核准補計資料格式不完整，已停止載入。");
+    }
+    const identity = [key, record.school_name, record.grade, record.diagnostic_item].join("|");
+    if (seen.has(identity)) throw new Error("核准補計資料有重複項目：" + identity);
+    seen.add(identity);
+    if (!grouped.has(key)) grouped.set(key, {amount: 0, targets: new Set()});
+    const group = grouped.get(key);
+    group.amount += record.metric_value;
+    group.targets.add(record.group_target);
+  }
+  for (const [key, group] of grouped) {
+    if (!originals.has(key) || group.targets.size !== 1 ||
+        originals.get(key) + group.amount !== [...group.targets][0]) {
+      throw new Error("核准補計未能對平既有歷史群組：" + key);
+    }
+  }
+  return [...records, ...supplements];
 }
 
 export function teachingDimensionValues(records, field) {
