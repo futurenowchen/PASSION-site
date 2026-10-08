@@ -129,13 +129,17 @@ export async function fetchTeachingDetailSheet({
   accessToken,
   spreadsheetId,
   sheetName,
+  endColumn = "S",
 }) {
   const params = new URLSearchParams();
   params.set("majorDimension", "ROWS");
   params.set("valueRenderOption", "FORMATTED_VALUE");
   params.set("fields", "values");
 
-  const range = `${quotedSheet(sheetName)}!A:S`;
+  if (endColumn !== "S" && endColumn !== "T") {
+    throw new GoogleSheetsError("Invalid historical data range.");
+  }
+  const range = `${quotedSheet(sheetName)}!A:${endColumn}`;
   const url =
     `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}?${params}`;
 
