@@ -9,6 +9,7 @@ import {
   filterTeachingRecords,
   mergeVerifiedTeachingDetail,
   overlayHistoricalDiagnosticEnrichment,
+  applyApprovedHistoricalSupplements,
   teachingDateBounds,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -106,7 +107,7 @@ async function loadData() {
   setBusy(true);
   setStatus("正在從 Teaching Data Hub 讀取資料…");
   try {
-    const [sheets, verifiedDetailValues, enrichmentValues] = await Promise.all([
+    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues] = await Promise.all([
       fetchTeachingSheets({
         accessToken: state.accessToken,
         spreadsheetId: config.TEACHING_SPREADSHEET_ID,
@@ -123,6 +124,11 @@ async function loadData() {
         spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
         sheetName: config.TEACHING_ENRICHMENT_SHEET,
       }),
+      fetchTeachingDetailSheet({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
+        sheetName: config.TEACHING_SUPPLEMENT_SHEET,
+      }),
     ]);
     const baseRecords = canonicalizeTeaching(sheets);
     const verifiedDetail = canonicalizeVerifiedTeachingDetail(verifiedDetailValues);
@@ -133,7 +139,14 @@ async function loadData() {
       source_type: "historical_diagnostic_raw_verified",
     }));
     const reconciledDetail = overlayHistoricalDiagnosticEnrichment(verifiedDetail, enrichment);
-    state.records = mergeVerifiedTeachingDetail(baseRecords, reconciledDetail);
+    const supplements = canonicalizeVerifiedTeachingDetail(supplementValues).map((record, index) => ({
+      ...record,
+      fact_id: `hist-diag-supplement:${index + 1}`,
+      batch_id: "hist-meilun-1109-dedup-20261008-v1",
+      source_type: "historical_diagnostic_approved_supplement",
+    }));
+    const finalDetail = applyApprovedHistoricalSupplements(reconciledDetail, supplements);
+    state.records = mergeVerifiedTeachingDetail(baseRecords, finalDetail);
     state.page = 1;
     state.dateBounds = teachingDateBounds(state.records);
     buildFilterControls();
@@ -487,7 +500,8 @@ async function boot() {
     !config.GOOGLE_CLIENT_ID ||
     !config.TEACHING_SPREADSHEET_ID ||
     !config.TEACHING_DETAIL_SPREADSHEET_ID ||
-    !config.TEACHING_ENRICHMENT_SHEET
+    !config.TEACHING_ENRICHMENT_SHEET ||
+    !config.TEACHING_SUPPLEMENT_SHEET
   ) {
     setStatus("尚未設定教學資料 Google Sheet 或 OAuth Client ID。", "warning");
     $("authorizeBtn").disabled = true;
