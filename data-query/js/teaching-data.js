@@ -154,6 +154,7 @@ export function canonicalizeVerifiedTeachingDetail(values = []) {
       status: "active",
       verified_group_key: groupKey,
       group_target: toNumber(pick(row, headers, "group_target")),
+      group_baseline: toNumber(pick(row, headers, "group_baseline")),
       date_start: dateStart,
       date_end: dateEnd,
       time_granularity: cleanText(pick(row, headers, "time_granularity")) || "custom",
@@ -265,6 +266,58 @@ export function applyApprovedHistoricalSupplements(records = [], supplements = [
     }
   }
   return [...records, ...supplements];
+}
+
+// Use newly reconciled original source data in preference to legacy big-table
+// numbers, but only after validating the complete school-by-item group.
+// Group replacement is atomic: no partial append or accidental double count.
+export function applyOriginalPriorityHistoricalReplacement(verifiedDetail = [], replacements = []) {
+  if (!replacements.length) return verifiedDetail;
+  const byGroup = (records) => {
+    const groups = new Map();
+    for (const record of records) {
+      const key = record.verified_group_key;
+      if (!key) continue;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(record);
+    }
+    return groups;
+  };
+  const original = byGroup(verifiedDetail);
+  const updated = byGroup(replacements);
+  const itemKey = (r) => [r.school_name, r.school_level, r.diagnostic_item].join("|");
+  for (const [key, rows] of updated) {
+    const before = original.get(key);
+    const fields = key.split("|");
+    if (!before?.length || fields.length !== 3 || fields[0] !== "diagnostic_person_time") {
+      throw new Error("原始資料優先替換群組不存在或指標不符：" + key);
+    }
+    const baseline = before.reduce((sum, row) => sum + Number(row.metric_value || 0), 0);
+    const keys = new Set(before.map(itemKey));
+    const replacementItems = new Set(rows.map(itemKey));
+    const grades = new Set();
+    const totals = new Set(rows.map(row => row.group_target));
+    const baselines = new Set(rows.map(row => row.group_baseline));
+    let current = 0;
+    for (const row of rows) {
+      const pk = [key, row.school_name, row.school_level, row.diagnostic_item, row.grade].join("|");
+      if (grades.has(pk) || !keys.has(itemKey(row)) ||
+          !row.grade || !row.school_name || !row.diagnostic_item ||
+          row.project_name !== fields[1] || row.metric_type !== fields[0] ||
+          !Number.isSafeInteger(row.metric_value) || row.metric_value <= 0) {
+        throw new Error("原始資料替換內容不合法或重複：" + pk);
+      }
+      grades.add(pk);
+      current += row.metric_value;
+    }
+    if (replacementItems.size !== keys.size ||
+        totals.size !== 1 || baselines.size !== 1 ||
+        !Number.isSafeInteger([...totals][0]) ||
+        [...baselines][0] !== baseline || [...totals][0] !== current) {
+      throw new Error("原始資料替換未能與官方基準及去重結果對平：" + key);
+    }
+  }
+  return [...verifiedDetail.filter(row => !updated.has(row.verified_group_key)), ...replacements];
 }
 
 export function teachingDimensionValues(records, field) {
