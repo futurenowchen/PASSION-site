@@ -877,3 +877,68 @@ export function replaceUsrRoot1121(records = [], officialRows = []) {
   }
   return [...records.filter(r=>!old.includes(r)),...officialRows];
 }
+
+
+/**
+ * Three user-approved 110.9 NMOE original-source corrections.
+ * The six-row, +661 Meilun supplement remains intact. The corrected cohort
+ * has 66 historical school/item rows plus six independently verified rows.
+ */
+export function applyNmoe1109RawPriority(records = [], corrections = []) {
+  const group = "diagnostic_person_time|國教署|110.9";
+  const spec = new Map([
+    ["東里國中|國文", {old:9, next:8, school:"東里國中", item:"國文", source:"國文"}],
+    ["東里國中|數學", {old:10, next:8, school:"東里國中", item:"數學", source:"數學"}],
+    ["卓楓國小|數學", {old:8, next:7, school:"卓楓國小", item:"數學", source:"數學"}],
+  ]);
+  const cohort = records.filter(r=>r.metric_type==="diagnostic_person_time" &&
+    r.project_name==="國教署" &&
+    (r.verified_group_key===group || historicalOverviewGroupKey(r)===group));
+  const amount = cohort.reduce((a,r)=>a+Number(r.metric_value||0),0);
+  const supplements = cohort.filter(r=>r.source_type==="historical_diagnostic_approved_supplement");
+  const supplementTotal = supplements.reduce((a,r)=>a+r.metric_value,0);
+  if(cohort.length!==72 || amount!==1972 ||
+    supplements.length!==6 || supplementTotal!==661 ||
+    cohort.some(r=>r.verified_group_key!==group) || corrections.length!==3)
+    throw new Error("國教署110.9完整期別1972或美崙661基準不符，停止載入。");
+  const source = new Map();
+  for(const row of corrections) {
+    const identity = row.school_name+"|"+row.diagnostic_item;
+    const required = spec.get(identity);
+    const subject = row.diagnostic_item==="國文"?"國文":"數學";
+    if(!required || source.has(identity) || row.verified_group_key!==group ||
+      row.metric_type!=="diagnostic_person_time" || row.project_name!=="國教署" ||
+      row.metric_value!==required.next || row.group_target!==1968 ||
+      row.group_baseline!==1972 || row.date_start!=="2021-09-01" ||
+      row.date_end!=="2021-09-30" || row.academic_year!==110 ||
+      row.subject!==subject || row.grade ||
+      !row.source_reference?.startsWith("11009資料.xlsx::"+required.source+"|"))
+      throw new Error("國教署110.9原始優先核准值或來源不一致："+identity);
+    source.set(identity,row);
+  }
+  if(source.size!==3) throw new Error("國教署110.9原始核准未完整。");
+  const seen = new Map();
+  const revised = records.map(row=>{
+    if(!cohort.includes(row)) return row;
+    const identity = row.school_name+"|"+row.diagnostic_item;
+    const required = spec.get(identity);
+    if(required) {
+      if(seen.has(identity) || row.metric_value!==required.old ||
+        row.source_type==="historical_diagnostic_approved_supplement")
+        throw new Error("國教署110.9原始舊明細不符："+identity);
+      seen.set(identity,true);
+      const replacement=source.get(identity);
+      return {...row,metric_value:replacement.metric_value,
+        group_target:1968,
+        source_type:"historical_diagnostic_original_priority_user_approved",
+        source_reference:replacement.source_reference,
+        notes:[row.notes, replacement.notes,
+          "舊明細來源："+(row.source_reference||"")].filter(Boolean).join("；")};
+    }
+    return {...row,group_target:1968};
+  });
+  if(seen.size!==3 || revised.filter(r=>r.verified_group_key===group)
+      .reduce((a,r)=>a+Number(r.metric_value||0),0)!==1968)
+    throw new Error("國教署110.9整期替換未對平1968。");
+  return revised;
+}
