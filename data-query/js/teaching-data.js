@@ -557,3 +557,73 @@ export function replaceApproved1136OverviewWithRaw(records = [], raw = []) {
     ...raw,
   ];
 }
+
+
+/**
+ * Adopt eight specifically approved detailed cohorts without stacking an old
+ * overview total. Only canonical source-ref rows in a complete cohort may load.
+ * An absent overview (光華、芳和) is an explicit baseline of zero.
+ */
+export function applyApprovedHistoricalDetailDecisions(records = [], details = []) {
+  const spec = new Map([
+    ["root_class|花蓮教育處|113-1", {baseline:22,target:21,rows:7,from:"2024-08-01",to:"2025-01-15",academicYear:113}],
+    ["root_class|花蓮教育處|113-2", {baseline:19,target:25,rows:7,from:"2025-02-01",to:"2025-07-31",academicYear:113}],
+    ["root_class|花蓮教育處|114-1", {baseline:23,target:28,rows:6,from:"2025-08-01",to:"2026-01-15",academicYear:114}],
+    ["root_person_time|花蓮教育處|113-1", {baseline:77,target:85,rows:7,from:"2024-08-01",to:"2025-01-15",academicYear:113}],
+    ["root_person_time|花蓮教育處|113-2", {baseline:84,target:105,rows:7,from:"2025-02-01",to:"2025-07-31",academicYear:113}],
+    ["root_person_time|花蓮教育處|114-1", {baseline:91,target:115,rows:6,from:"2025-08-01",to:"2026-01-15",academicYear:114}],
+    ["diagnostic_person_time|光華高工|112.6", {baseline:0,target:1272,rows:18,from:"2023-06-01",to:"2023-06-30",academicYear:111}],
+    ["diagnostic_person_time|芳和中學|111.1", {baseline:0,target:49,rows:6,from:"2022-01-01",to:"2022-01-31",academicYear:110}],
+  ]);
+  if (!Array.isArray(details) || details.length !== 64) {
+    throw new Error("已核准明細不是完整64列，已停止載入。");
+  }
+  const grouped = new Map();
+  for (const row of details) {
+    const key = row.verified_group_key;
+    const contract = spec.get(key);
+    if (!contract || !row.source_reference ||
+        !Number.isSafeInteger(row.metric_value) || row.metric_value < 0 ||
+        row.group_target !== contract.target ||
+        row.group_baseline !== contract.baseline ||
+        row.date_start !== contract.from || row.date_end !== contract.to ||
+        row.academic_year !== contract.academicYear ||
+        !row.school_name || !row.school_level ||
+        !["國小","國中","高職"].includes(row.school_level)) {
+      throw new Error("已核准明細欄位不合法或缺少來源：" + key);
+    }
+    const [metric, project, period] = key.split("|");
+    if (row.metric_type !== metric || row.project_name !== project ||
+        !["root_class","root_person_time","diagnostic_person_time"].includes(metric) ||
+        (metric === "diagnostic_person_time" &&
+          (!["國文","文法","詞彙","聽力","閱讀","數學"].includes(row.diagnostic_item) || !row.grade)) ||
+        (metric !== "diagnostic_person_time" && row.diagnostic_item)) {
+      throw new Error("已核准明細指標或科目不符：" + key);
+    }
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(row);
+  }
+  if (grouped.size !== spec.size) {
+    throw new Error("缺少已核准歷史群組，已停止載入。");
+  }
+  const replaced = new Set();
+  for (const [key, contract] of spec) {
+    const rows = grouped.get(key) || [];
+    const referenceSet = new Set(rows.map(row => row.source_reference));
+    const total = rows.reduce((n,row)=>n+row.metric_value,0);
+    const original = records.filter(row => historicalOverviewGroupKey(row) === key);
+    if (rows.length !== contract.rows ||
+        referenceSet.size !== rows.length ||
+        total !== contract.target ||
+        original.length !== (contract.baseline ? 1 : 0) ||
+        (original.length === 1 && original[0].metric_value !== contract.baseline) ||
+        records.some(row => row.verified_group_key === key)) {
+      throw new Error("已核准明細整期替換未對平，拒絕重複加計：" + key);
+    }
+    replaced.add(key);
+  }
+  return [
+    ...records.filter(row => !replaced.has(historicalOverviewGroupKey(row))),
+    ...details,
+  ];
+}
