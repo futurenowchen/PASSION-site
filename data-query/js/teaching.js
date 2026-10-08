@@ -18,6 +18,7 @@ import {
   replaceNational1149Official,
   replaceUsrRoot1121,
   applyNmoe1109RawPriority,
+  replaceUsr1086WithThreeSchools,
   applyApprovedHistoricalDetailDecisions,
   teachingDateBounds,
   teachingDimensionValues,
@@ -117,7 +118,7 @@ async function loadData() {
   setBusy(true);
   setStatus("正在從 Teaching Data Hub 讀取資料…");
   try {
-    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values, approvedDetailValues, rawUSR11111149Values, yunlin1106Values, hualienMeteringValues, officialNmoe1149Values, usr1121RootValues, nmoe1109RawValues] = await Promise.all([
+    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values, approvedDetailValues, rawUSR11111149Values, yunlin1106Values, hualienMeteringValues, officialNmoe1149Values, usr1121RootValues, nmoe1109RawValues, usr1086ThreeSchoolsValues] = await Promise.all([
       fetchTeachingSheets({
         accessToken: state.accessToken,
         spreadsheetId: config.TEACHING_SPREADSHEET_ID,
@@ -193,6 +194,12 @@ async function loadData() {
         sheetName: config.TEACHING_NMOE1109_RAW_SHEET,
         endColumn: "T",
       }),
+      fetchTeachingDetailSheet({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
+        sheetName: config.TEACHING_USR1086_THREE_SCHOOLS_SHEET,
+        endColumn: "T",
+      }),
     ]);
     const baseRecords = canonicalizeTeaching(sheets);
     const verifiedDetail = canonicalizeVerifiedTeachingDetail(verifiedDetailValues);
@@ -265,7 +272,13 @@ async function loadData() {
       batch_id:"hist-nmoe-1109-raw-priority-20261008-v1",
       source_type:"historical_diagnostic_original_priority_user_approved"
     }));
-    state.records = applyNmoe1109RawPriority(replaceUsrRoot1121(replaceNational1149Official(replaceHualienMeteringPeriods(replaceYunlin1106WithDedupedSource(
+    const usr1086ThreeSchools=canonicalizeVerifiedTeachingDetail(usr1086ThreeSchoolsValues).map((record,index)=>({
+      ...record,
+      fact_id:"usr1086-three-schools-original-20261008:"+(index+1),
+      batch_id:"hist-usr-1086-three-schools-original-20261008-v1",
+      source_type:"historical_english_original_cross_verified"
+    }));
+    state.records = replaceUsr1086WithThreeSchools(applyNmoe1109RawPriority(replaceUsrRoot1121(replaceNational1149Official(replaceHualienMeteringPeriods(replaceYunlin1106WithDedupedSource(
       replaceApprovedUSR1111And1149Overviews(
         applyApprovedHistoricalDetailDecisions(
           replaceApproved1136OverviewWithRaw(
@@ -273,7 +286,7 @@ async function loadData() {
           approvedDetail,
         ), newerUSRRaw,
       ), yunlin1106Source,
-    ), hualienMetering), officialNmoe1149), usr1121Root), nmoe1109Raw);
+    ), hualienMetering), officialNmoe1149), usr1121Root), nmoe1109Raw), usr1086ThreeSchools);
     if (new URLSearchParams(window.location.search).get("acceptance") === "1") {
       const acceptance = evaluateTeachingAcceptance(state.records);
       const existing = document.getElementById("teachingAcceptanceResults");
@@ -655,6 +668,7 @@ async function boot() {
     !config.TEACHING_RAW1136_SHEET ||
     !config.TEACHING_APPROVED_DETAIL_SHEET ||
     !config.TEACHING_USR1111_1149_SHEET ||
+    !config.TEACHING_USR1086_THREE_SCHOOLS_SHEET ||
     !config.TEACHING_NMOE1109_RAW_SHEET ||
     !config.TEACHING_USR1121_ROOT_SHEET ||
     !config.TEACHING_NMOE1149_OFFICIAL_SHEET ||
