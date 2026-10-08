@@ -2,7 +2,7 @@
 
 最後核對：2026-10-08（臺北時間）
 範圍：PASSION 資料查詢平臺（活動資料、教學資料及未來模組），**不是** PASSION 主網站的活動／新聞內容維護。
-目前狀態：活動資料與教學資料查詢已部署；歷史診斷資料正進行逐期對校；111.6 尚有差異，不得直接匯入。
+目前狀態：活動資料與教學資料查詢已部署；110.9 已核准補計；111.6 已按原始優先規則排重並整期替換；其餘期別持續核對。
 
 ## 0. 新對話的接續入口
 
@@ -10,7 +10,7 @@
 
 1. 讀這份 handoff、GitHub 最新 main，以及公開站根目錄的 HANDOFF.md（後者只管主網站，不代替本文件）。
 2. 確認兩個 repo 的對應前端檔案、Google Sheets 真實表頭／分頁與最近 GitHub Actions；不得僅依本文件的歷史 HEAD 操作。
-3. **優先續查 111.6 的國教署診斷人次差異**；先查來源，後決定要不要入庫。
+3. **優先續查 113.6 及 110.9 尚待確認的差異**；先查來源與跨期重複，後決定要不要入庫。
 4. 任何新增或替換都要「每期 × 計畫 × 子測驗 × 學校」對校、跨期排重、保持原始統計可追溯；不可直接把原始數據加在大表之上。
 5. 完成後同步更新本文件及雙 repo，保留可重跑的檢查點；不能把個人資料或原始學生名單放到 GitHub。
 
@@ -63,6 +63,7 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - PASSION Teaching Verified Detail Store：3,758 筆歷史核對明細、190 個核對完成群組。
 - HIST_DIAG_ENRICHMENT：5 期 162 筆、11,564 人次的學校／子測驗補齊，**覆蓋**既有同群組明細，不加計。
 - HIST_DIAG_SUPPLEMENT：110.9 美崙八年級去重淨增 661 人次，6 項子測驗／科目，**在驗證群組總量後補計**。
+- HIST_DIAG_RAW_AUTHORITY：111.6 國教署 162 筆原始優先明細，整群 2,739 → 2,738，20 欄含 group_baseline；**整期替換原先的 78 筆官方彙整，不能追加**。
 - 不要直接把這三頁的數字全部相加；合併順序由教學前端邏輯決定。
 
 權限：同仁各自登入 Google，使用 https://www.googleapis.com/auth/spreadsheets.readonly。群組 passion-data@rcpet.edu.tw 曾對三份 Sheet 授與 Viewer，另有個別分享；實際授權仍應以 Drive 權限為準。OAuth hosted_domain=rcpet.edu.tw 只是帳號提示，**不是安全驗證或資料授權規則**。OAuth Testing／測試者名單在未經使用者同意前勿擅改。
@@ -82,7 +83,8 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 1. 基底：TEACHING_FACTS（含歷史總覽與 115.01 的 raw aggregate），由 canonicalizeTeaching 解析。
 2. 已核對歷史明細：Verified Detail Store 替換完全一致的「metric_type|project|ROC period」總覽群組，未核對者保留原總覽。
 3. HIST_DIAG_ENRICHMENT：overlayHistoricalDiagnosticEnrichment 逐子測驗比較，只有舊明細與新明細每項和數都完全一致才能整群替換，**不增總人次**。
-4. HIST_DIAG_SUPPLEMENT：applyApprovedHistoricalSupplements 驗證來源項目、無重複、同群組 baseline + approved supplement == group_target，才附加核准的**真正新增**人次；驗證失敗應 fail closed（停止載入），絕不可默默部分套用。
+4. HIST_DIAG_RAW_AUTHORITY：applyOriginalPriorityHistoricalReplacement 讀 A:T，核對舊群組 baseline、新群組 target、每個 school × item 全部覆蓋、學校與年級無重複後**整期替換**。
+5. HIST_DIAG_SUPPLEMENT：applyApprovedHistoricalSupplements 驗證來源項目、無重複、同群組 baseline + approved supplement == group_target，才附加核准的**真正新增**人次；驗證失敗應 fail closed（停止載入），絕不可默默部分套用。
 
 注意：上述順序不得隨意顛倒。索引中的 active/verified_staging 是稽核狀態；目前網站載入仍以 config 的分頁及程式內檢查為主，**不能假設索引狀態本身就是前端載入開關**。
 
@@ -94,7 +96,7 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - 歷史核對明細：3,758 筆／190 個 metric × project × period 群組。
 - 115.01 原始檔重建 1,500 診斷人次：國教署 1,400＋USR 100（已存在，不要重複補）。
 - 在 110.9 補計前，網站診斷總人次為 120,832；扎根班 2,305；扎根人次 15,791。
-- 加上 110.9 核准的 661 後，**診斷總人次預期為 121,493**；這是計算驗收目標，若未實際以登入帳號進站核對，不得稱「瀏覽器端總數已驗收」。扎根相關指標不應被此批次改動。
+- 加上 110.9 核准的 661 後，診斷總人次為 121,493；進一步將 111.6 國教署以原始去重後 2,738 替換大表 2,739，**診斷總人次預期為 121,492**。這是計算驗收目標，未實際登入不可稱瀏覽器端總數已驗收。扎根相關指標不應被此批次改動。
 
 ### 28 期歷史 Excel
 
@@ -117,7 +119,7 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - **平和國中英語四項各 19，合 76**，已確認歸 USR／FB；但原官方 USR 總覽 164，逐校明細 240（差 76）。計畫歸屬已確定，不等於可以直接加總。待確認總覽漏計或其他來源／期別重複。
 - 國教署東里國中國文 -1、數學 -2；卓楓國小數學 -1（合 4 人次）；原始匯出與大表不一致，現無證據補造資料，沿用官方大表值。
 
-## 7. 當前下一步：111.6
+## 7. 111.6 前一輪差異分析（以下已由第 11 節新結果取代）
 
 最新已分析結果（**尚未修正式績效總數**）：
 - 國教署原始檔對應 2,750，官方大表 2,739，**差 +11 人次**。
@@ -163,6 +165,19 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 
 ## 10. 新對話第一句建議
 
-「請先讀取 futurenowchen/passion-activity-data 的 HANDOFF.md（PASSION 資料檢視平臺），再對照 futurenowchen/PASSION-site/data-query/HANDOFF.md、兩個 main 的最新狀態與 Google Sheets。接續 111.6 施測差異的查核；先查證再回寫，不要改動已驗證的 110.9 美崙國教署 661 人次補計。」
+「請先讀取 futurenowchen/passion-activity-data 的 HANDOFF.md（PASSION 資料檢視平臺），再對照公開 data-query/HANDOFF.md 與 Google Sheets。111.6 國教署已按原始檔排重 12 英語子測驗人次後整群替換為 2,738；請繼續 113.6 與 110.9 未解差異，維持 110.9 美崙 661 補計不動。」
 
 本 handoff 是工作交接而非不可變的統計真值；**以最新的原始資料、大表、正式資料庫讀回結果與明確人工確認為最高優先證據**。
+
+## 11. 111.6 已採用「原始材料優先，除非重複」新決議（2026-10-08）
+
+- 使用者確認：**若大表與原始資料不同，原則上採原始有效施測資料；只有有充分依據的重複才扣除**。英語文法／詞彙／聽力／閱讀仍各自算一次，不可乘四或用其他科目人數設上限。
+- 11106資料.xlsx：國教署原始 2,750 人次；美崙八年級英語資料有 3 組**同班、相鄰原始列且 18 個測驗欄完全一致**，每組僅「學生狀況」不同。原始英語檔**沒有學號**，因此是高度可信的「匯出重複」判斷，不可虛稱已身分級唯一配對。每組影響四項子測驗，所以 3×4＝12 人次。
+- 國教署去重後：**2,750－12＝2,738**；原大表 2,739，整期淨變化 -1。美崙英語每項 234→231、與大表相同。
+- 富北國中原始較大表六項各少1（共 -6），依原始 296；寧埔國小數學五年級5＋六年級8，採原始13（比大表多5）。
+- 111.6 的其他學校 78/78 school×item 群組已有來源對應，已產出 162 筆分年級彙總，並寫入 Verified Detail Store 的 **HIST_DIAG_RAW_AUTHORITY**（A:T），讀回總數2,738，僅保存彙總不含學號。
+- 前端依序「原 overview → 已核對 detail → 早期 enrichment → **111.6 原始優先完整群組替換** → 110.9 核准 supplement」。每群驗證 baseline=2,739、target=2,738、78個學校項目全覆蓋、school×grade×item不重複，未對平 fail closed。
+- 111.6 USR/FB 162、光華高工950、花蓮教育處1000均**維持原有值**，不重複入庫。
+- 需做登入介面核對（若尚無實測）：全系統診斷**121,492**、111.6 國教署**2,738**、110.9 國教署**1,972**、扎根班**2,305**、扎根人次**15,791**；前端與 Google Sheets CI/寫入驗證不等於實際 OAuth 帳號 UI 驗收。
+- 原始掃描／報告／可重跑檢查點：先前會話的 `historical_diagnostic_stage4_1116/original_priority_v2/`，包括 `PASSION_1116_原始優先_去重與整組替換核對.xlsx`、`PASSION_1116_原始優先_檢查點.zip`，不要把原始學生 Excel 加入 GitHub。
+- **下一步**：113.6 大差異期別；另 110.9 平和國中英語76及東里／卓楓差4尚未解決，新「原始優先」原則也需套用到這些遺留項，但必須先追蹤來源及跨期重複，切勿擅自補造缺少紀錄。
