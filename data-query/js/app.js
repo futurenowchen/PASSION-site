@@ -54,6 +54,7 @@ function initAuth() {
   state.tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: config.GOOGLE_CLIENT_ID,
     scope: "https://www.googleapis.com/auth/spreadsheets.readonly",
+    hosted_domain: config.GOOGLE_HOSTED_DOMAIN || undefined,
     callback: async (response) => {
       if (response?.error) {
         setStatus(`Google 授權失敗：${response.error}`, "error");
