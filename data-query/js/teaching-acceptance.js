@@ -2,7 +2,7 @@
 export const TEACHING_ACCEPTANCE_BASELINE = Object.freeze({
   diagnostic_person_time: 122418,
   root_class: 2315,
-  root_person_time: 15844,
+  root_person_time: 15842,
   yunlin_1102: 587,
   yunlin_1106: 614,
   yunlin_11012: 620,
