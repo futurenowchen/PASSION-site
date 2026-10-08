@@ -16,6 +16,7 @@ import {
   replaceHualienMeteringPeriods,
   replaceNational1149Official,
   replaceUsrRoot1121,
+  applyNmoe1109RawPriority,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -550,4 +551,48 @@ test("USR 112-1 subject-based people-time fixes isolated -2 discrepancy", () => 
   assert.throws(()=>replaceUsrRoot1121([{...old,metric_value:102}],official),/不吻合/);
   assert.throws(()=>replaceUsrRoot1121([old],official.slice(1)),/不吻合/);
   assert.throws(()=>replaceUsrRoot1121([old],official.map((r,i)=>i===1?{...r,metric_value:52}:r)),/無效/);
+});
+
+test("approved NMOE 110.9 raw values replace only 3 cells and preserve Meilun 661",()=>{
+ const key="diagnostic_person_time|國教署|110.9";
+ const targets=[["東里國中","國文",9,8],["東里國中","數學",10,8],["卓楓國小","數學",8,7]];
+ const named=targets.map(([school_name,diagnostic_item,metric_value])=>({
+   verified_group_key:key,metric_type:"diagnostic_person_time",project_name:"國教署",
+   school_name,diagnostic_item,metric_value,source_type:"historical_detail_verified",
+   source_reference:"108-114國教署!J28",group_target:1311
+ }));
+ const rest=Array.from({length:63},(_,i)=>({
+   verified_group_key:key,metric_type:"diagnostic_person_time",project_name:"國教署",
+   school_name:"測試學校"+i,diagnostic_item:"文法",metric_value:i===62?44:20,
+   source_type:"historical_detail_verified",group_target:1311
+ }));
+ const supplements=Array.from({length:6},(_,i)=>({
+   verified_group_key:key,metric_type:"diagnostic_person_time",project_name:"國教署",
+   school_name:"美崙國中",diagnostic_item:["國文","文法","詞彙","聽力","閱讀","數學"][i],
+   metric_value:i===5?111:110,source_type:"historical_diagnostic_approved_supplement",
+   group_target:1972
+ }));
+ const correction=targets.map(([school_name,diagnostic_item,old,n])=>({
+   verified_group_key:key,project_name:"國教署",metric_type:"diagnostic_person_time",
+   school_name,diagnostic_item,subject:diagnostic_item,metric_value:n,
+   group_target:1968,group_baseline:1972,date_start:"2021-09-01",
+   date_end:"2021-09-30",academic_year:110,grade:null,
+   source_reference:"11009資料.xlsx::"+diagnostic_item+"|"+school_name,
+   notes:"approved 2026-10-08",
+ }));
+ const unrelated={metric_type:"root_person_time",metric_value:777};
+ const original=[...named,...rest,...supplements,unrelated];
+ assert.equal(original.filter(x=>x.verified_group_key===key).reduce((s,x)=>s+x.metric_value,0),1972);
+ const modified=applyNmoe1109RawPriority(original,correction);
+ assert.equal(modified.filter(x=>x.verified_group_key===key).reduce((s,x)=>s+x.metric_value,0),1968);
+ assert.equal(modified.filter(x=>x.source_type==="historical_diagnostic_approved_supplement")
+  .reduce((s,x)=>s+x.metric_value,0),661);
+ assert.equal(modified.find(x=>x.metric_type==="root_person_time"),unrelated);
+ assert.equal(modified.filter(x=>x.verified_group_key===key&&
+  x.source_type==="historical_diagnostic_original_priority_user_approved").length,3);
+ assert.throws(()=>applyNmoe1109RawPriority(modified,correction),/基準/);
+ assert.throws(()=>applyNmoe1109RawPriority(original,correction.slice(1)),/基準/);
+ assert.throws(()=>applyNmoe1109RawPriority(original,correction.map((x,i)=>i===0?{...x,metric_value:9}:x)),/不一致/);
+ assert.throws(()=>applyNmoe1109RawPriority(original.map(x=>
+  x.school_name==="美崙國中"?{...x,metric_value:x.metric_value+1}:x),correction),/基準/);
 });
