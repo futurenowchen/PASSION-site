@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import {
   aggregateTeaching,
   canonicalizeTeaching,
+  canonicalizeVerifiedTeachingDetail,
   filterTeachingRecords,
+  historicalOverviewGroupKey,
+  mergeVerifiedTeachingDetail,
   teachingDimensionValues,
   teachingMetricTotals,
 } from "../js/teaching-data.js";
@@ -104,4 +107,62 @@ test("undated academic-year facts remain visible when no date range is selected"
     endDate: "2026-07-31",
   });
   assert.equal(dated.records.length, 0);
+});
+
+
+test("verified historical detail replaces only its matching overview group", () => {
+  const base = [
+    {
+      fact_id: "overview-1",
+      batch_id: "hist-big-overview-20261008-v1",
+      date_start: "2020-09-01",
+      date_end: "2020-09-30",
+      time_granularity: "month",
+      academic_year: 109,
+      semester: "上學期",
+      project_name: "國教署",
+      metric_type: "diagnostic_person_time",
+      metric_value: 10,
+    },
+    {
+      fact_id: "overview-pending",
+      batch_id: "hist-big-overview-20261008-v1",
+      date_start: "2021-09-01",
+      date_end: "2021-09-30",
+      time_granularity: "month",
+      academic_year: 110,
+      semester: "上學期",
+      project_name: "USR",
+      metric_type: "diagnostic_person_time",
+      metric_value: 5,
+    },
+  ];
+  const detailValues = [
+    ["group_key","group_target","metric_type","project_name","period","date_start","date_end","time_granularity","academic_year","semester","county_city","school_name","school_level","subject","diagnostic_item","grade","metric_value","source_reference","notes"],
+    ["diagnostic_person_time|國教署|109.9",10,"diagnostic_person_time","國教署","109.9","2020-09-01","2020-09-30","month",109,"上學期","花蓮縣","富北國中","國中","英文","閱讀","7",6,"detail!A1",""],
+    ["diagnostic_person_time|國教署|109.9",10,"diagnostic_person_time","國教署","109.9","2020-09-01","2020-09-30","month",109,"上學期","花蓮縣","東里國中","國中","英文","閱讀","7",4,"detail!A2",""],
+  ];
+  const detail = canonicalizeVerifiedTeachingDetail(detailValues);
+  const merged = mergeVerifiedTeachingDetail(base, detail);
+
+  assert.equal(historicalOverviewGroupKey(base[0]), "diagnostic_person_time|國教署|109.9");
+  assert.equal(merged.some(record => record.fact_id === "overview-1"), false);
+  assert.equal(merged.some(record => record.fact_id === "overview-pending"), true);
+  assert.equal(teachingMetricTotals(merged).diagnostic_person_time, 15);
+  assert.deepEqual(
+    teachingDimensionValues(merged, "school_name"),
+    ["富北國中","東里國中"],
+  );
+});
+
+test("verified detail also replaces semester-level root overview facts", () => {
+  const overview = {
+    batch_id: "hist-big-overview-20261008-v1",
+    time_granularity: "semester",
+    academic_year: 113,
+    semester: "下學期",
+    project_name: "國教署",
+    metric_type: "root_class",
+  };
+  assert.equal(historicalOverviewGroupKey(overview), "root_class|國教署|113-2");
 });
