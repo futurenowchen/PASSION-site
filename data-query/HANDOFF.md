@@ -201,3 +201,13 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - 在 Teaching Data Hub 已回寫 `PENDING_REVIEW!H4` 與 `HIST_DIAG_DECISIONS!A18:H18`，狀態 `SOURCE_RECONCILED_STAGED_NOT_LIVE`；已讀回確認。
 - **尚未啟用正式前端替換，也未將109改為154。** 目前全系統預期仍是121,492；完成程式的 fail-closed 原始群組替換（驗109基準、154目標、5校×5項全覆蓋、不重複）與雙 repo 測試及部署後，預期才會成為 **121,537**，仍須 OAuth UI 驗收。切勿直接把45附加到109或在程式未驗證前將 staging 視為 active。
 - 下一個精確步驟：讀私有 canonical repo `web/js/teaching-data.js`／`web/js/teaching.js` 與目前 Google Sheets staging，實作專用「overview-only 109 → 25-row detail 154」完整替換檢查、測試 fail-closed、同步到公開 `data-query/`、驗證 CI／Pages，最後才啟用 staging；110.9 平和76與國教署4仍待查。
+
+## 14. 113.6 USR 原始優先完整替換已接入正式程式碼（2026-10-08）
+
+- Stage 13 的原始查核與 `HIST_DIAG_1136_STAGING` 25列，已逐校逐項讀回：吉貝25、富里40、海端39、望安5、萬榮45；合計154。五校皆七年級；英文各項依有效紀錄分別計數。
+- 原官方大表 `TEACHING_FACTS` 的 113.6 USR 109 **不覆寫**，由前端 `replaceApproved1136OverviewWithRaw()` 原子性移除其概要群組，換上 `HIST_DIAG_1136_STAGING` 完整25列；拒絕缺列、重複、學校／子項不符、數值篡動、基準不符或已存在同群組明細。
+- 更新雙 repo `js/teaching-data.js`、`js/teaching.js`、`config.js`、`tests/teaching-data.test.mjs`、`teaching.html`。`web/` 與 `data-query/` 四個程式/測試檔案內容逐字相等；HTML 資產快取參數更新至 `20261008-10`。
+- 已用本地獨立 Node 安全檢查 7/7 PASS（包括109→154、缺列、錯誤基準、重複、數字變更、年級錯誤、雙重群組）；原 repo 全套 GitHub Actions 測試與 Pages 發布狀態**本回合無法從工具確認**，不得虛稱 CI PASS。
+- 正式 Teaching Data Hub 的 `VERIFIED_DETAIL_INDEX!A6:J6` 已登記新增批次 `hist-diag-original-priority-1136-20261008-v1`（active；25列、1群）；`PENDING_REVIEW!H4` 與 `HIST_DIAG_DECISIONS!F18:H18` 已更新、讀回 PASS。特別注意：索引是稽核狀態，真正啟用由前端明確讀取資料頁籤決定。
+- 全系統診斷人次 **121,492＋45＝預期121,537**；扎根班2305、扎根人次15791、111.6國教署2738、110.9國教署1972均不得變動。**OAuth授權帳號瀏覽器畫面總量121537仍需人工實測**；在 Google 登入頁按「重新讀取」驗證。
+- 下一期：110.9 平和國中英語76及東里／卓楓原始差4。不可在未重新取得原始表與去重證據時直接補計。
