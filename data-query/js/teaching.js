@@ -12,6 +12,7 @@ import {
   applyApprovedHistoricalSupplements,
   applyOriginalPriorityHistoricalReplacement,
   replaceApproved1136OverviewWithRaw,
+  replaceApprovedUSR1111And1149Overviews,
   applyApprovedHistoricalDetailDecisions,
   teachingDateBounds,
   teachingDimensionValues,
@@ -110,7 +111,7 @@ async function loadData() {
   setBusy(true);
   setStatus("正在從 Teaching Data Hub 讀取資料…");
   try {
-    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values, approvedDetailValues] = await Promise.all([
+    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values, approvedDetailValues, rawUSR11111149Values] = await Promise.all([
       fetchTeachingSheets({
         accessToken: state.accessToken,
         spreadsheetId: config.TEACHING_SPREADSHEET_ID,
@@ -150,6 +151,12 @@ async function loadData() {
         sheetName: config.TEACHING_APPROVED_DETAIL_SHEET,
         endColumn: "T",
       }),
+      fetchTeachingDetailSheet({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
+        sheetName: config.TEACHING_USR1111_1149_SHEET,
+        endColumn: "T",
+      }),
     ]);
     const baseRecords = canonicalizeTeaching(sheets);
     const verifiedDetail = canonicalizeVerifiedTeachingDetail(verifiedDetailValues);
@@ -186,10 +193,18 @@ async function loadData() {
       batch_id: "hist-approved-detail-20261008-v1",
       source_type: "historical_user_approved_detail",
     }));
-    state.records = applyApprovedHistoricalDetailDecisions(
-      replaceApproved1136OverviewWithRaw(
-        mergeVerifiedTeachingDetail(baseRecords, finalDetail), raw1136),
-      approvedDetail,
+    const newerUSRRaw = canonicalizeVerifiedTeachingDetail(rawUSR11111149Values).map((record, index) => ({
+      ...record,
+      fact_id: `original-priority-usr-1111-1149:${index + 1}`,
+      batch_id: "hist-usr-1111-1149-original-priority-20261008-v1",
+      source_type: "historical_diagnostic_original_priority",
+    }));
+    state.records = replaceApprovedUSR1111And1149Overviews(
+      applyApprovedHistoricalDetailDecisions(
+        replaceApproved1136OverviewWithRaw(
+          mergeVerifiedTeachingDetail(baseRecords, finalDetail), raw1136),
+        approvedDetail,
+      ), newerUSRRaw,
     );
     state.page = 1;
     state.dateBounds = teachingDateBounds(state.records);
@@ -548,7 +563,8 @@ async function boot() {
     !config.TEACHING_SUPPLEMENT_SHEET ||
     !config.TEACHING_RAW_AUTHORITY_SHEET ||
     !config.TEACHING_RAW1136_SHEET ||
-    !config.TEACHING_APPROVED_DETAIL_SHEET
+    !config.TEACHING_APPROVED_DETAIL_SHEET ||
+    !config.TEACHING_USR1111_1149_SHEET
   ) {
     setStatus("尚未設定教學資料 Google Sheet 或 OAuth Client ID。", "warning");
     $("authorizeBtn").disabled = true;
