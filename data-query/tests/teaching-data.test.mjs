@@ -14,6 +14,7 @@ import {
   replaceApprovedUSR1111And1149Overviews,
   replaceYunlin1106WithDedupedSource,
   replaceHualienMeteringPeriods,
+  replaceNational1149Official,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -491,4 +492,41 @@ test("Hualien metering replaces seven old month groups with six official periods
  assert.throws(()=>replaceHualienMeteringPeriods([...original,unaffected],metering.slice(1)),/18列/);
  assert.throws(()=>replaceHualienMeteringPeriods([...original,unaffected],metering.map((x,i)=>i===0?{...x,metric_value:999}:x)),/不吻合/);
  assert.throws(()=>replaceHualienMeteringPeriods([...original.slice(1),unaffected],metering),/基準/);
+});
+
+test("official NMOE 114.9 reconciles all 54 school items and replaces old 2866 once", () => {
+  const six = [
+    ["國文",331,[4,15,8,146,12,52,10,3,81]],
+    ["文法",535,[4,15,8,177,184,52,10,3,82]],
+    ["詞彙",535,[4,15,8,177,184,52,10,3,82]],
+    ["聽力",533,[4,15,8,176,184,51,10,3,82]],
+    ["閱讀",534,[4,15,8,177,184,51,10,3,82]],
+    ["數學",401,[4,15,8,177,12,52,3,49,81]],
+  ];
+  const group="diagnostic_person_time|國教署|114.9";
+  const nationalOld={metric_type:"diagnostic_person_time",project_name:"國教署",
+    batch_id:"hist-big-overview-20261008-v1",time_granularity:"month",
+    date_start:"2025-09-01",metric_value:2866};
+  const unaffected={metric_type:"root_person_time",project_name:"國教署",metric_value:77};
+  const rows=six.flatMap(([item,total,counts])=>counts.map((metric_value,i)=>({
+    metric_type:"diagnostic_person_time",project_name:"國教署",verified_group_key:group,
+    group_baseline:2866,group_target:2869,diagnostic_item:item,
+    school_name:(item==="數學"?["明里國小","育仁國小","長良國小","凌雲國中","富北國中","富岡國中","玉東國中","竹圍國中","觀音國中"]:
+      ["明里國小","育仁國小","長良國小","凌雲國中","富北國中","富岡國中","東里國中","玉東國中","觀音國中"])[i],
+    school_level:i<3?"國小":"國中",subject:["國文","數學"].includes(item)?item:"英文",
+    metric_value,date_start:"2025-09-01",date_end:"2025-09-30",
+    time_granularity:"month",academic_year:114,
+    source_reference:"20260819臺師大績效指標-PASSION診斷平台服務人次.xlsx::108-114國教署!V"+(17+i),
+  })));
+  assert.equal(rows.length,54);
+  assert.equal(rows.reduce((a,r)=>a+r.metric_value,0),2869);
+  const result=replaceNational1149Official([nationalOld,unaffected],rows);
+  assert.equal(result.length,55);
+  assert.equal(result.filter(r=>r.metric_type==="diagnostic_person_time").reduce((a,r)=>a+r.metric_value,0),2869);
+  assert.equal(result.find(r=>r.metric_type==="root_person_time"),unaffected);
+  assert.throws(()=>replaceNational1149Official([{...nationalOld,metric_value:2869}],rows),/不吻合/);
+  assert.throws(()=>replaceNational1149Official([nationalOld,unaffected],rows.slice(1)),/不吻合/);
+  assert.throws(()=>replaceNational1149Official([nationalOld,unaffected],rows.map((r,i)=>
+    i===0?{...r,metric_value:r.metric_value+1}:r)),/不吻合/);
+  assert.throws(()=>replaceNational1149Official(result,rows),/不吻合/);
 });
