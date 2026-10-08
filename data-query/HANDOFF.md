@@ -289,3 +289,17 @@ https://docs.google.com/spreadsheets/d/1N1WUYdUSUk5Tv5q_onoLADCssjdE2wDnsmaJMKiB
 - 11002官方587暫留不動；已知 ZIP 中英語452＋數學113＝565、國文22不在該包的逐筆原始來源中，587仍要對校。亦不改動整體正式 KPI。
 - 已在正式 `PASSION Teaching Data Hub` 的 `HIST_DIAG_DECISIONS!A19:H20` 寫入 `110.6` 與 `110.2` 兩條去識別決議，寫後讀回一致；狀態為 `MAKEUP_SAME_SESSION_RULE_CONFIRMED_SOURCE_COUNT_PENDING`、`SESSION_11002_NOT_SEPARATE_BY_MAKEUP_DATE`，**沒有變動TEACHING_FACTS、Verified Detail Store或公開查詢數字**。
 - 下一項精確動作：以此場次優先規則檢查11006同場次同人同項目的多次交卷及4筆英文子測驗空白來源認列，形成嚴格去重後的學校×項目總數，再決定658的整批替換目標。僅使用匿名聚合結果向GitHub／Google Sheets回寫；原始學生可識別資料不得提交外部平台。
+
+## 21. 雲林場次去重修復完成（2026-10-08）
+
+- 使用者再次確認：**11002 雲林場次應歸「110.02」而非原大表方便加總的110.01**；晚到補測仍歸原場次，不能按個人後測日期拆期；統計以原始有效紀錄為準。
+- 11002 原始 ZIP：**國文22、英文文法／詞彙／聽力／閱讀各113、數學113，共587**，同場次身份沒有可確證重複，總人次不變。Teaching Data Hub `TEACHING_FACTS!D253=2021-02-01`、`E253=2021-02-28`、`H253=下學期`；Verified Detail Store `PASSION Teaching Verified Detail Store!A2166:A2186` 21列 group_key 從 `diagnostic_person_time|雲林|110.1` 改為 `diagnostic_person_time|雲林|110.2`。兩個工作簿皆已讀回正確，587 **只移期，未重複加計**。
+- 11006 ZIP 依校／科／有效測次回核：**國文43**（44列中1列無日期且「整體閱讀理解能力」非有效數值）、**英語四項各112**（各113列中水碓國小1列測驗狀態為0、分數無正向有效值，應排除；有效4×112=448）、**數學123**（均已交卷）。數學出現1組「班級＋學號」碰撞，但**姓名不同**，非同一學生，不可錯扣一筆。合計 **43+448+123=614**，舊原總覽／既有六筆不分校科目摘要為658，**淨 -44**。原始來源中樟湖數學單校檔已完整包含於整合檔，不能重算。
+- 11101 ZIP 校驗：國文60（61列中1列無日期、亦無有效整體分數）；英語112×4=448；數學112已交卷，共 **620**，既有雲林 `110.12` 群組數字不變。數學及國文各有班級學號相同但**姓名不同**的碰撞，不能單憑學號去重；當期無核准移期指示，因此不自行改110.12期間。
+- 三包ZIP原始學生姓名、學號／身份證字號、逐題作答**只在本地使用**，未發送GitHub或Google Sheets；Google Sheet只保存四校×六項24列匿名分項統計。包含個資樣本的本地臨時檢視檔已刪除；用戶上傳的附件仍在本次對話，需由用戶自行處理。
+- 新增 `PASSION Teaching Verified Detail Store!HIST_DIAG_YUNLIN_1106_VERIFIED`（sheetId=1425261142，A1:T25），四校各6項24列，水碓126、永光253、華南135、樟湖100，總量614，baseline658，讀回24/24與四校總數驗證PASS。
+- 雙repo `teaching-data.js` 新增 `replaceYunlin1106WithDedupedSource`：只有看到既存六項基準43/123/123/123/123/123＝658，且匿名分校24列完整吻合固定名單、目標614、來源11006、期別110.6，才整組原子替換，不額外增減44；前端 `teaching.js` 讀新頁，`config.js` 指定頁籤，`teaching.html` cache token `20261008-13`，原repo測試新增11+個正反向案例與110.02群組驗收。
+- 真實 GitHub Actions **PASS**：公開 `PASSION data-query tests` run 37748166416 head `0d44ddd826304d4ff45d90f9e942c5f347c45d4b` 結論 success；公開 `pages build and deployment` run 37748165201 同一head結論 success。先前測試最初FAIL（測試比對錯誤訊息regex太窄），已改正後實際綠燈。Handoff 本身更新後的最新head如有新執行，仍須再次核驗。
+- `PASSION Teaching Data Hub!VERIFIED_DETAIL_INDEX!A8:J9` 新補111.1/114.9 USR 36列以及雲林110.6 24列索引，均 active；`HIST_DIAG_DECISIONS!A19:H21` 已記錄110.6=-44、110.2只移期、110.12=620不動，寫入後讀回一致。另修正 `PENDING_REVIEW!H3/H5` 111.1與114.9USR過時的「尚未原始查驗」敘述，改為已核對與已接入前端。
+- 依先前核准的原總量 123001／2315／15844，採納110.6 **-44**、110.02 **0**、110.12 **0** 後，正式查詢**預期**總量為 **診斷122957、扎根班2315、扎根人次15844**。CI／Pages 已成功，但 OAuth 授權的實際查詢頁尚未在本回合親自看到顯示值，因此仍為 `UI_ACCEPTANCE_PENDING`；不得將預期當作實測。
+- 下一項精確行動：授權帳號登入 `https://futurenowchen.github.io/PASSION-site/data-query/teaching.html`，查診斷122957、扎根2315／15844、雲林110.02=587、110.06=614（分校且無「未填」）、原110.12=620，確定未重複或顯示錯期。其餘 114.9 國教署富北/竹圍、110.9平和等未決資料不動。
