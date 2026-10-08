@@ -1,6 +1,6 @@
 // Aggregate-only release acceptance checks. Never read or emit student identities.
 export const TEACHING_ACCEPTANCE_BASELINE = Object.freeze({
-  diagnostic_person_time: 122957,
+  diagnostic_person_time: 122415,
   root_class: 2315,
   root_person_time: 15844,
   yunlin_1102: 587,
