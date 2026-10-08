@@ -12,6 +12,7 @@ import {
   applyApprovedHistoricalSupplements,
   applyOriginalPriorityHistoricalReplacement,
   replaceApproved1136OverviewWithRaw,
+  applyApprovedHistoricalDetailDecisions,
   teachingDateBounds,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -109,7 +110,7 @@ async function loadData() {
   setBusy(true);
   setStatus("正在從 Teaching Data Hub 讀取資料…");
   try {
-    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values] = await Promise.all([
+    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values, approvedDetailValues] = await Promise.all([
       fetchTeachingSheets({
         accessToken: state.accessToken,
         spreadsheetId: config.TEACHING_SPREADSHEET_ID,
@@ -143,6 +144,12 @@ async function loadData() {
         sheetName: config.TEACHING_RAW1136_SHEET,
         endColumn: "T",
       }),
+      fetchTeachingDetailSheet({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
+        sheetName: config.TEACHING_APPROVED_DETAIL_SHEET,
+        endColumn: "T",
+      }),
     ]);
     const baseRecords = canonicalizeTeaching(sheets);
     const verifiedDetail = canonicalizeVerifiedTeachingDetail(verifiedDetailValues);
@@ -173,8 +180,17 @@ async function loadData() {
       batch_id: "hist-diag-original-priority-1136-20261008-v1",
       source_type: "historical_diagnostic_original_priority",
     }));
-    state.records = replaceApproved1136OverviewWithRaw(
-      mergeVerifiedTeachingDetail(baseRecords, finalDetail), raw1136);
+    const approvedDetail = canonicalizeVerifiedTeachingDetail(approvedDetailValues).map((record, index) => ({
+      ...record,
+      fact_id: `approved-detail-20261008:${index + 1}`,
+      batch_id: "hist-approved-detail-20261008-v1",
+      source_type: "historical_user_approved_detail",
+    }));
+    state.records = applyApprovedHistoricalDetailDecisions(
+      replaceApproved1136OverviewWithRaw(
+        mergeVerifiedTeachingDetail(baseRecords, finalDetail), raw1136),
+      approvedDetail,
+    );
     state.page = 1;
     state.dateBounds = teachingDateBounds(state.records);
     buildFilterControls();
