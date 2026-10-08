@@ -627,3 +627,58 @@ export function applyApprovedHistoricalDetailDecisions(records = [], details = [
     ...details,
   ];
 }
+
+// Approved USR original priority: replace the entire overview rather than add
+// the original-source school/item details on top of an obsolete overview.
+export function replaceApprovedUSR1111And1149Overviews(records = [], sourceRows = []) {
+  const contracts = [
+    {"key":"diagnostic_person_time|USR|111.1","baseline":262,"target":280,"from":"2022-01-01","to":"2022-01-31","year":110,"file":"11101資料.xlsx","schools":{"富源國中":[18,"all"],"萬榮國中":[9,"all"],"平和國中":[29,"all"]},"rows":15},
+    {"key":"diagnostic_person_time|USR|114.9","baseline":29,"target":154,"from":"2025-09-01","to":"2025-09-30","year":114,"file":"11409資料.xlsx","schools":{"萬榮國中":[4,"all"],"東里國中":[9,"math"],"富里國中":[16,"all"],"海端國中":[6,"all"],"望安國中":[3,"all"]},"rows":21},
+  ];
+  if (sourceRows.length !== 36) throw new Error("111.1／114.9 USR 原始明細未達完整36列。");
+  const selected = new Set(contracts.map(c=>c.key));
+  const groups = new Map();
+  for (const row of sourceRows) {
+    if (!selected.has(row.verified_group_key)) throw new Error("USR 原始明細包含未核准群組。");
+    if (!groups.has(row.verified_group_key)) groups.set(row.verified_group_key, []);
+    groups.get(row.verified_group_key).push(row);
+  }
+  const removed = new Set();
+  for (const spec of contracts) {
+    const cohort = groups.get(spec.key) || [];
+    const old = records.filter(row => historicalOverviewGroupKey(row) === spec.key);
+    const identities = new Set();
+    let subtotal = 0;
+    if (cohort.length !== spec.rows ||
+        old.length !== 1 || old[0].metric_value !== spec.baseline ||
+        records.some(row=>row.verified_group_key === spec.key)) {
+      throw new Error("USR 原始優先整組替換基準／列數不符：" + spec.key);
+    }
+    for (const row of cohort) {
+      const school = spec.schools[row.school_name];
+      const allItems = ["數學","文法","詞彙","聽力","閱讀"];
+      const allowed = school?.[1] === "math" ? ["數學"] : allItems;
+      const identity = row.school_name + "|" + row.diagnostic_item;
+      const subject = row.diagnostic_item === "數學" ? "數學" : "英文";
+      if (!school || !allowed.includes(row.diagnostic_item) ||
+          identities.has(identity) ||
+          row.metric_type !== "diagnostic_person_time" ||
+          row.project_name !== "USR" ||
+          row.group_baseline !== spec.baseline || row.group_target !== spec.target ||
+          row.date_start !== spec.from || row.date_end !== spec.to ||
+          row.academic_year !== spec.year || row.school_level !== "國中" ||
+          row.grade !== "7" || row.subject !== subject ||
+          row.metric_value !== school[0] || !Number.isSafeInteger(row.metric_value) ||
+          !row.source_reference?.startsWith(spec.file + "::")) {
+        throw new Error("USR 原始明細科目／學校／來源不符：" + spec.key);
+      }
+      identities.add(identity);
+      subtotal += row.metric_value;
+    }
+    if (identities.size !== spec.rows || subtotal !== spec.target) {
+      throw new Error("USR 原始明細整組總量未對平：" + spec.key);
+    }
+    removed.add(spec.key);
+  }
+  return [...records.filter(row=>!removed.has(historicalOverviewGroupKey(row))), ...sourceRows];
+}
