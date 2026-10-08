@@ -21,7 +21,7 @@ function sampleRecords() {
       school_name, diagnostic_item: items[index],
     })));
   return [
-    metric("diagnostic_person_time", 120594),
+    metric("diagnostic_person_time", 120597),
     metric("root_class", 2315),
     metric("root_person_time", 15844),
     cohort("110.2", 587),
