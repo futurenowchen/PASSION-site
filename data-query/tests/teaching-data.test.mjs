@@ -11,6 +11,7 @@ import {
   applyApprovedHistoricalSupplements,
   applyOriginalPriorityHistoricalReplacement,
   replaceApproved1136OverviewWithRaw,
+  replaceApprovedUSR1111And1149Overviews,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -357,4 +358,49 @@ test("8 approved historical cohorts replace overview instead of stacking totals"
   assert.throws(()=>applyApprovedHistoricalDetailDecisions([
     ...base,{verified_group_key:"diagnostic_person_time|光華高工|112.6",metric_value:1272},
   ],details),/未對平/);
+});
+
+test("111.1 and 114.9 USR replace two full source-verified overview groups", () => {
+  const periods=[
+    {key:"diagnostic_person_time|USR|111.1",baseline:262,target:280,period:"111.1",
+      from:"2022-01-01",to:"2022-01-31",year:110,file:"11101資料.xlsx",
+      schools:[["富源國中",18,false],["萬榮國中",9,false],["平和國中",29,false]]},
+    {key:"diagnostic_person_time|USR|114.9",baseline:29,target:154,period:"114.9",
+      from:"2025-09-01",to:"2025-09-30",year:114,file:"11409資料.xlsx",
+      schools:[["萬榮國中",4,false],["東里國中",9,true],["富里國中",16,false],
+        ["海端國中",6,false],["望安國中",3,false]]},
+  ];
+  const baseline=[{metric_type:"root_class",metric_value:3}];
+  const detail=[];
+  for (const g of periods) {
+    baseline.push({batch_id:"hist-big-overview-20261008-v1",metric_type:"diagnostic_person_time",
+      project_name:"USR",date_start:g.from,time_granularity:"month",metric_value:g.baseline});
+    for (const [school,n,mathOnly] of g.schools) {
+      const items=mathOnly?["數學"]:["數學","文法","詞彙","聽力","閱讀"];
+      for (const item of items) detail.push({
+        verified_group_key:g.key,group_baseline:g.baseline,group_target:g.target,
+        metric_type:"diagnostic_person_time",project_name:"USR",date_start:g.from,
+        date_end:g.to,academic_year:g.year,school_name:school,school_level:"國中",
+        grade:"7",subject:item==="數學"?"數學":"英文",diagnostic_item:item,metric_value:n,
+        source_reference:g.file+"::"+(item==="數學"?"數學":"英語")+"::"+school+"::七年級",
+      });
+    }
+  }
+  const r=replaceApprovedUSR1111And1149Overviews(baseline,detail);
+  assert.equal(detail.length,36);
+  assert.equal(r.length,37);
+  assert.equal(teachingMetricTotals(r).diagnostic_person_time,434);
+  assert.equal(teachingMetricTotals(r).root_class,3);
+  assert.equal(r.some(x=>x.batch_id==="hist-big-overview-20261008-v1"),false);
+  assert.throws(()=>replaceApprovedUSR1111And1149Overviews(baseline,detail.slice(1)),/36列/);
+  assert.throws(()=>replaceApprovedUSR1111And1149Overviews(
+    baseline,detail.map((x,i)=>i===0?{...x,metric_value:x.metric_value+1}:x)),/不符/);
+  assert.throws(()=>replaceApprovedUSR1111And1149Overviews(
+    baseline,detail.map((x,i)=>i===0?{...x,source_reference:"unknown"}:x)),/不符/);
+  assert.throws(()=>replaceApprovedUSR1111And1149Overviews(
+    baseline,detail.map((x,i)=>i===0?{...x,diagnostic_item:"文法"}:x)),/不符/);
+  assert.throws(()=>replaceApprovedUSR1111And1149Overviews(
+    baseline.map(x=>x.metric_value===262?{...x,metric_value:263}:x),detail),/基準/);
+  assert.throws(()=>replaceApprovedUSR1111And1149Overviews(
+    [...baseline,{verified_group_key:"diagnostic_person_time|USR|114.9",metric_value:154}],detail),/基準/);
 });
