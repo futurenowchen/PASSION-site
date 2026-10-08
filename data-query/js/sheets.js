@@ -123,3 +123,46 @@ export async function fetchTeachingSheets({
     schools: ranges[1]?.values || [],
   };
 }
+
+
+export async function fetchTeachingDetailSheet({
+  accessToken,
+  spreadsheetId,
+  sheetName,
+}) {
+  const params = new URLSearchParams();
+  params.set("majorDimension", "ROWS");
+  params.set("valueRenderOption", "FORMATTED_VALUE");
+  params.set("fields", "values");
+
+  const range = `${quotedSheet(sheetName)}!A:S`;
+  const url =
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}?${params}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    let details = "";
+    try {
+      const body = await response.json();
+      details = body?.error?.message || JSON.stringify(body);
+    } catch {
+      details = await response.text();
+    }
+    const message =
+      response.status === 403
+        ? "這個 Google 帳號沒有 Verified Detail Store 的讀取權限。"
+        : response.status === 401
+          ? "Google 授權已失效，請重新登入。"
+          : `Verified Detail Store 讀取失敗（HTTP ${response.status}）。`;
+    throw new GoogleSheetsError(message, response.status, details);
+  }
+
+  const body = await response.json();
+  return body.values || [];
+}
