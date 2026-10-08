@@ -23,7 +23,7 @@ function sampleRecords() {
   return [
     metric("diagnostic_person_time", 120597),
     metric("root_class", 2315),
-    metric("root_person_time", 15844),
+    metric("root_person_time", 15842),
     cohort("110.2", 587),
     cohort("110.12", 620),
     ...yunlin,
