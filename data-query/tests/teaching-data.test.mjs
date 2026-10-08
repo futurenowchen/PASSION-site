@@ -12,6 +12,7 @@ import {
   applyOriginalPriorityHistoricalReplacement,
   replaceApproved1136OverviewWithRaw,
   replaceApprovedUSR1111And1149Overviews,
+  replaceYunlin1106WithDedupedSource,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -403,4 +404,59 @@ test("111.1 and 114.9 USR replace two full source-verified overview groups", () 
     baseline.map(x=>x.metric_value===262?{...x,metric_value:263}:x),detail),/基準/);
   assert.throws(()=>replaceApprovedUSR1111And1149Overviews(
     [...baseline,{verified_group_key:"diagnostic_person_time|USR|114.9",metric_value:154}],detail),/基準/);
+});
+
+test("Yunlin 110.6 dedup 658 to 614 removes old six totals atomically", () => {
+  const group = "diagnostic_person_time|雲林|110.6";
+  const items = ["國文","文法","詞彙","聽力","閱讀","數學"];
+  const old = items.map((item,index)=>({
+    verified_group_key:group,metric_type:"diagnostic_person_time",
+    project_name:"雲林",school_name:null,diagnostic_item:item,
+    metric_value:index===0?43:123,
+  }));
+  const source = [
+    ["水碓國小",[21,21,21,21,21,21]],
+    ["永光國小",[12,48,48,48,48,49]],
+    ["華南國小",[6,25,25,25,25,29]],
+    ["樟湖國中小",[4,18,18,18,18,24]],
+  ].flatMap(([school,counts]) => counts.map((value,i) => ({
+    verified_group_key:group,group_baseline:658,group_target:614,
+    metric_type:"diagnostic_person_time",project_name:"雲林",
+    school_name:school,school_level:"國小",grade:null,academic_year:109,
+    semester:"下學期",date_start:"2021-06-01",date_end:"2021-06-30",
+    subject:i===0?"國文":i===5?"數學":"英文",
+    diagnostic_item:items[i],metric_value:value,
+    source_reference:"11006雲林.zip::"+items[i]+"::"+school,
+  })));
+  const oldUnrelated = {metric_type:"root_class",metric_value:5};
+  const updated = replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source);
+  assert.equal(updated.length,25);
+  assert.equal(teachingMetricTotals(updated).diagnostic_person_time,614);
+  assert.equal(teachingMetricTotals(updated).root_class,5);
+  assert.equal(updated.some(row=>!row.school_name&&row.metric_type==="diagnostic_person_time"),false);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.slice(1)),/基準/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,metric_value:22}:r)),/無效/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,group_baseline:657}:r)),/無效/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,diagnostic_item:"數學"}:r)),/重複/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource([...old,oldUnrelated],source.map((r,i)=>i===0?{...r,school_name:"其他國小"}:r)),/無效/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource(updated,source),/基準/);
+  assert.throws(()=>replaceYunlin1106WithDedupedSource([
+    ...old,oldUnrelated,{
+      fact_id:"extra",batch_id:"hist-big-overview-20261008-v1",
+      project_name:"雲林",metric_type:"diagnostic_person_time",
+      time_granularity:"month",date_start:"2021-06-01",metric_value:658,
+    }],source),/基準/);
+});
+
+test("Yunlin 110.02 original session stays February without changing 587", () => {
+  const corrected = {
+    batch_id:"hist-big-overview-20261008-v1",
+    project_name:"雲林",metric_type:"diagnostic_person_time",
+    time_granularity:"month",date_start:"2021-02-01",date_end:"2021-02-28",
+    metric_value:587,
+  };
+  assert.equal(historicalOverviewGroupKey(corrected),"diagnostic_person_time|雲林|110.2");
+  assert.equal(mergeVerifiedTeachingDetail([corrected],[
+    {verified_group_key:"diagnostic_person_time|雲林|110.2",metric_value:587}
+  ]).length,1);
 });
