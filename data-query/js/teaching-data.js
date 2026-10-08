@@ -510,3 +510,50 @@ export function overlayHistoricalDiagnosticEnrichment(verifiedDetail = [], enric
     ...enrichment,
   ];
 }
+
+/**
+ * Replace the 113.6 USR historical overview with a complete, audited source cohort.
+ * The overview is removed atomically; source rows MUST NOT be appended to 109.
+ */
+export function replaceApproved1136OverviewWithRaw(records = [], raw = []) {
+  const groupKey = "diagnostic_person_time|USR|113.6";
+  const schools = {
+    "吉貝國中": [5, 5, 5, 5, 5],
+    "富里國中": [8, 8, 8, 8, 8],
+    "海端國中": [8, 8, 8, 8, 7],
+    "望安國中": [1, 1, 1, 1, 1],
+    "萬榮國中": [9, 9, 9, 9, 9],
+  };
+  const items = ["數學", "文法", "詞彙", "聽力", "閱讀"];
+  const legacy = records.filter(row => historicalOverviewGroupKey(row) === groupKey);
+  if (legacy.length !== 1 || legacy[0].metric_value !== 109 ||
+      records.some(row => row.verified_group_key === groupKey) || raw.length !== 25) {
+    throw new Error("113.6 USR 官方基準或完整原始群組不符，已停止載入。");
+  }
+  const seen = new Set();
+  let total = 0;
+  for (const row of raw) {
+    const expected = schools[row.school_name];
+    const itemIndex = items.indexOf(row.diagnostic_item);
+    const key = row.school_name + "|" + row.diagnostic_item;
+    if (row.verified_group_key !== groupKey ||
+        row.project_name !== "USR" || row.metric_type !== "diagnostic_person_time" ||
+        row.group_baseline !== 109 || row.group_target !== 154 ||
+        row.grade !== "7" || row.school_level !== "國中" ||
+        row.date_start !== "2024-06-01" || row.date_end !== "2024-06-30" ||
+        !expected || itemIndex < 0 || seen.has(key) ||
+        !Number.isSafeInteger(row.metric_value) ||
+        row.metric_value !== expected[itemIndex]) {
+      throw new Error("113.6 USR 原始資料重複、缺漏或數字不符，已停止載入。");
+    }
+    seen.add(key);
+    total += row.metric_value;
+  }
+  if (seen.size !== 25 || total !== 154) {
+    throw new Error("113.6 USR 原始群組總量未對平，已停止載入。");
+  }
+  return [
+    ...records.filter(row => historicalOverviewGroupKey(row) !== groupKey),
+    ...raw,
+  ];
+}
