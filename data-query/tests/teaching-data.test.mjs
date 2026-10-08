@@ -15,6 +15,7 @@ import {
   replaceYunlin1106WithDedupedSource,
   replaceHualienMeteringPeriods,
   replaceNational1149Official,
+  replaceUsrRoot1121,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -529,4 +530,24 @@ test("official NMOE 114.9 reconciles all 54 school items and replaces old 2866 o
   assert.throws(()=>replaceNational1149Official([nationalOld,unaffected],rows.map((r,i)=>
     i===0?{...r,metric_value:r.metric_value+1}:r)),/不吻合/);
   assert.throws(()=>replaceNational1149Official(result,rows),/不吻合/);
+});
+
+test("USR 112-1 subject-based people-time fixes isolated -2 discrepancy", () => {
+  const old={metric_type:"root_person_time",project_name:"USR",
+    batch_id:"hist-big-overview-20261008-v1",time_granularity:"semester",
+    date_start:"2023-08-01",metric_value:104};
+  const official=["英文","數學"].map((subject,i)=>({
+    metric_type:"root_person_time",project_name:"USR",subject,
+    verified_group_key:"root_person_time|USR|112-1",metric_value:51,
+    group_baseline:104,group_target:102,academic_year:112,
+    semester:"上學期",date_start:"2023-08-01",date_end:"2024-01-15",
+    source_reference:"20260819臺師大績效指標-PASSION診斷平台服務人次.xlsx::USR!"+(i===0?"K":"L")+"22",
+  }));
+  const independent={metric_type:"diagnostic_person_time",project_name:"USR",metric_value:99};
+  const updated=replaceUsrRoot1121([old,independent],official);
+  assert.equal(updated.filter(x=>x.metric_type==="root_person_time").reduce((n,x)=>n+x.metric_value,0),102);
+  assert.equal(updated.find(x=>x.metric_type==="diagnostic_person_time"),independent);
+  assert.throws(()=>replaceUsrRoot1121([{...old,metric_value:102}],official),/不吻合/);
+  assert.throws(()=>replaceUsrRoot1121([old],official.slice(1)),/不吻合/);
+  assert.throws(()=>replaceUsrRoot1121([old],official.map((r,i)=>i===1?{...r,metric_value:52}:r)),/無效/);
 });
