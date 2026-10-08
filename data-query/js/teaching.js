@@ -17,6 +17,7 @@ import {
   replaceHualienMeteringPeriods,
   replaceNational1149Official,
   replaceUsrRoot1121,
+  applyNmoe1109RawPriority,
   applyApprovedHistoricalDetailDecisions,
   teachingDateBounds,
   teachingDimensionValues,
@@ -116,7 +117,7 @@ async function loadData() {
   setBusy(true);
   setStatus("正在從 Teaching Data Hub 讀取資料…");
   try {
-    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values, approvedDetailValues, rawUSR11111149Values, yunlin1106Values, hualienMeteringValues, officialNmoe1149Values, usr1121RootValues] = await Promise.all([
+    const [sheets, verifiedDetailValues, enrichmentValues, supplementValues, rawAuthorityValues, raw1136Values, approvedDetailValues, rawUSR11111149Values, yunlin1106Values, hualienMeteringValues, officialNmoe1149Values, usr1121RootValues, nmoe1109RawValues] = await Promise.all([
       fetchTeachingSheets({
         accessToken: state.accessToken,
         spreadsheetId: config.TEACHING_SPREADSHEET_ID,
@@ -186,6 +187,12 @@ async function loadData() {
         sheetName: config.TEACHING_USR1121_ROOT_SHEET,
         endColumn: "T",
       }),
+      fetchTeachingDetailSheet({
+        accessToken: state.accessToken,
+        spreadsheetId: config.TEACHING_DETAIL_SPREADSHEET_ID,
+        sheetName: config.TEACHING_NMOE1109_RAW_SHEET,
+        endColumn: "T",
+      }),
     ]);
     const baseRecords = canonicalizeTeaching(sheets);
     const verifiedDetail = canonicalizeVerifiedTeachingDetail(verifiedDetailValues);
@@ -252,7 +259,13 @@ async function loadData() {
       batch_id:"hist-usr-1121-root-official-20261008-v1",
       source_type:"historical_official_subject_detail"
     }));
-    state.records = replaceUsrRoot1121(replaceNational1149Official(replaceHualienMeteringPeriods(replaceYunlin1106WithDedupedSource(
+    const nmoe1109Raw=canonicalizeVerifiedTeachingDetail(nmoe1109RawValues).map((record,index)=>({
+      ...record,
+      fact_id:"nmoe-1109-raw-priority-20261008:"+(index+1),
+      batch_id:"hist-nmoe-1109-raw-priority-20261008-v1",
+      source_type:"historical_diagnostic_original_priority_user_approved"
+    }));
+    state.records = applyNmoe1109RawPriority(replaceUsrRoot1121(replaceNational1149Official(replaceHualienMeteringPeriods(replaceYunlin1106WithDedupedSource(
       replaceApprovedUSR1111And1149Overviews(
         applyApprovedHistoricalDetailDecisions(
           replaceApproved1136OverviewWithRaw(
@@ -260,7 +273,7 @@ async function loadData() {
           approvedDetail,
         ), newerUSRRaw,
       ), yunlin1106Source,
-    ), hualienMetering), officialNmoe1149), usr1121Root);
+    ), hualienMetering), officialNmoe1149), usr1121Root), nmoe1109Raw);
     if (new URLSearchParams(window.location.search).get("acceptance") === "1") {
       const acceptance = evaluateTeachingAcceptance(state.records);
       const existing = document.getElementById("teachingAcceptanceResults");
@@ -642,6 +655,7 @@ async function boot() {
     !config.TEACHING_RAW1136_SHEET ||
     !config.TEACHING_APPROVED_DETAIL_SHEET ||
     !config.TEACHING_USR1111_1149_SHEET ||
+    !config.TEACHING_NMOE1109_RAW_SHEET ||
     !config.TEACHING_USR1121_ROOT_SHEET ||
     !config.TEACHING_NMOE1149_OFFICIAL_SHEET ||
     !config.TEACHING_HUALIEN_METERING_SHEET ||
