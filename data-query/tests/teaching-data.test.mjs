@@ -7,6 +7,7 @@ import {
   filterTeachingRecords,
   historicalOverviewGroupKey,
   mergeVerifiedTeachingDetail,
+  overlayHistoricalDiagnosticEnrichment,
   teachingDimensionValues,
   teachingMetricTotals,
 } from "../js/teaching-data.js";
@@ -165,4 +166,32 @@ test("verified detail also replaces semester-level root overview facts", () => {
     metric_type: "root_class",
   };
   assert.equal(historicalOverviewGroupKey(overview), "root_class|國教署|113-2");
+});
+
+test("validated early historical school-item rows replace, never add to existing total", () => {
+  const old = [
+    {verified_group_key:"diagnostic_person_time|國教署|105.9", metric_type:"diagnostic_person_time", diagnostic_item:"文法", metric_value:10},
+    {verified_group_key:"diagnostic_person_time|國教署|105.9", metric_type:"diagnostic_person_time", diagnostic_item:"詞彙", metric_value:7},
+    {verified_group_key:"root_class|國教署|105-1", metric_type:"root_class", diagnostic_item:"數學", metric_value:2},
+  ];
+  const incoming = [
+    {verified_group_key:"diagnostic_person_time|國教署|105.9",metric_type:"diagnostic_person_time",school_name:"富北國中",diagnostic_item:"文法",metric_value:3},
+    {verified_group_key:"diagnostic_person_time|國教署|105.9",metric_type:"diagnostic_person_time",school_name:"北安",diagnostic_item:"文法",metric_value:7},
+    {verified_group_key:"diagnostic_person_time|國教署|105.9",metric_type:"diagnostic_person_time",school_name:"北安",diagnostic_item:"詞彙",metric_value:7},
+  ];
+  const after = overlayHistoricalDiagnosticEnrichment(old,incoming);
+  assert.equal(after.length,4);
+  assert.equal(teachingMetricTotals(after).diagnostic_person_time,17);
+  assert.equal(teachingMetricTotals(after).root_class,2);
+  assert.deepEqual(after.filter(x=>x.metric_type==="diagnostic_person_time").map(x=>x.school_name),["富北國中","北安","北安"]);
+});
+test("enrichment fails closed on item mismatch, missing group, or missing school", () => {
+  const old=[{verified_group_key:"diagnostic_person_time|國教署|105.9",metric_type:"diagnostic_person_time",diagnostic_item:"閱讀",metric_value:5}];
+  const make=(key="diagnostic_person_time|國教署|105.9",item="閱讀",num=5,school="北安")=>
+    [{verified_group_key:key,metric_type:"diagnostic_person_time",diagnostic_item:item,metric_value:num,school_name:school}];
+  assert.throws(()=>overlayHistoricalDiagnosticEnrichment(old,make(undefined,"文法",5)),/分項不一致/);
+  assert.throws(()=>overlayHistoricalDiagnosticEnrichment(old,make(undefined,"閱讀",6)),/分項不一致/);
+  assert.throws(()=>overlayHistoricalDiagnosticEnrichment(old,make("diagnostic_person_time|國教署|106.1")) ,/分項不一致/);
+  assert.throws(()=>overlayHistoricalDiagnosticEnrichment(old,make(undefined,"閱讀",5,"")),/格式不完整/);
+  assert.equal(overlayHistoricalDiagnosticEnrichment(old,[]),old);
 });
