@@ -1,6 +1,6 @@
 // Aggregate-only release acceptance checks. Never read or emit student identities.
 export const TEACHING_ACCEPTANCE_BASELINE = Object.freeze({
-  diagnostic_person_time: 122414,
+  diagnostic_person_time: 122509,
   root_class: 2315,
   root_person_time: 15842,
   yunlin_1102: 587,
@@ -34,7 +34,11 @@ export function evaluateTeachingAcceptance(records = []) {
   const cohorts = new Map([
     ["110.2", []], ["110.6", []], ["110.12", []],
   ]);
+  const pinghe = [];
   for (const record of records) {
+    if (record.metric_type === "diagnostic_person_time" &&
+        record.project_name === "USR" &&
+        recordGroupKey(record) === "diagnostic_person_time|USR|110.9") pinghe.push(record);
     if (Object.hasOwn(totals, record.metric_type)) {
       totals[record.metric_type] += Number(record.metric_value || 0);
     }
@@ -62,6 +66,18 @@ export function evaluateTeachingAcceptance(records = []) {
       sum + Number(row.metric_value || 0), 0);
     checks.push(check(`yunlin-${period}`, `雲林 ${period} 人次`, actual, expected));
   }
+  const pingheOld = pinghe.filter(r =>
+    r.batch_id === "hist-big-overview-20261008-v1" && r.metric_value === 164);
+  const pingheNew = pinghe.filter(r => r.school_name === "平和國中");
+  const actualPinghe = new Map(pingheNew.map(r => [r.diagnostic_item, r.metric_value]));
+  const pingheTotal = pinghe.reduce((n, r) => n + Number(r.metric_value || 0), 0);
+  const pingheValid = pingheOld.length === 1 && pingheNew.length === 4 &&
+    pinghe.length === 5 && pingheTotal === 259 && actualPinghe.size === 4 &&
+    [["文法",29],["詞彙",26],["聽力",20],["閱讀",20]]
+      .every(([item,n]) => actualPinghe.get(item) === n);
+  checks.push(check("pinghe-110.9", "平和110.09實際完成四項測驗", 
+    pingheTotal + "人次／" + pingheNew.length + "項", "259人次／4項", pingheValid));
+
   const rows1106 = cohorts.get("110.6");
   const combinations = new Set(rows1106.map(row =>
     `${row.school_name || ""}|${row.diagnostic_item || ""}`));
