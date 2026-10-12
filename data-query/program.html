@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PASSION 學程成果資料查詢：錄取、認證、來源校院系所及暑期與遠距服務彙總">
+  <title>PASSION 學程資料查詢</title>
+  <link rel="stylesheet" href="./styles.css?v=20261012-program1">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="./config.js?v=20261012-program1"></script>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <div class="eyebrow">PASSION DATA</div>
+    <h1>資料查詢</h1>
+  </div>
+  <div class="auth-actions">
+    <button id="authorizeBtn" class="primary">使用 Google 帳號讀取資料</button>
+    <button id="reloadBtn" class="secondary" disabled>重新讀取</button>
+    <button id="signoutBtn" class="ghost" hidden>解除授權</button>
+  </div>
+</header>
+<main>
+  <nav class="data-tabs" aria-label="資料查詢分類">
+    <a class="data-tab" href="./index.html">活動資料</a>
+    <a class="data-tab" href="./teaching.html">教學資料</a>
+    <span class="data-tab disabled" aria-disabled="true">問卷資料</span>
+    <a class="data-tab active" href="./program.html" aria-current="page">PASSION學程資料</a>
+    <span class="data-tab disabled" aria-disabled="true">觀課資料</span>
+  </nav>
+
+  <section id="statusBox" class="status" data-kind="neutral">正在初始化…</section>
+
+  <section id="programWorkspace" hidden>
+    <div class="inline-warning" role="note">
+      <strong>統計口徑</strong>：既有對外成果為 498 位錄取生、149 位認證者（待重新對表）；
+      原始名單另有 500 筆錄取紀錄、144 筆已認證紀錄。兩套口徑分開呈現，不強行合併。
+      暑期與遠距資料仍有「待確認」的歷史數字，不能當作已核定的實際服務人次。
+    </div>
+
+    <div class="metric-grid" id="programKpis">
+      <article class="metric-card"><span>對外錄取人數（暫沿用）</span><strong id="programOfficialAdmitted">—</strong></article>
+      <article class="metric-card"><span>對外認證人數（待對帳）</span><strong id="programOfficialCertified">—</strong></article>
+      <article class="metric-card"><span>原始錄取紀錄數</span><strong id="programRawAdmitted">—</strong></article>
+      <article class="metric-card"><span>原始已認證紀錄</span><strong id="programRawCertified">—</strong></article>
+    </div>
+
+    <article class="panel">
+      <div class="panel-head"><div>
+        <h2>學程生來源校院系所</h2>
+        <p class="muted">依既有對外 498 人的校系彙總表查詢。篩選此區不會改變上方的全體 KPI、下方年度及服務統計。</p>
+      </div>
+      <button id="programDownloadBtn" class="secondary" type="button">下載校系篩選結果 CSV</button></div>
+
+      <div class="search-row program-search">
+        <label class="search-box"><span>校系關鍵字</span>
+          <input id="programKeyword" type="search" placeholder="搜尋學校、學院、系所">
+        </label>
+        <label><span>來源學校</span><select id="programSchool"><option value="">所有學校</option></select></label>
+        <label><span>學院</span><select id="programCollege"><option value="">所有學院</option></select></label>
+      </div>
+      <div class="program-filter-bottom">
+        <label><span>統計分組</span>
+          <select id="programGroup">
+            <option value="school">依學校</option>
+            <option value="college">依學院</option>
+            <option value="department">依科系</option>
+          </select>
+        </label>
+        <button id="programClearBtn" class="ghost" type="button">清除篩選</button>
+        <p id="programFilterInfo" class="muted" aria-live="polite"></p>
+      </div>
+
+      <div class="split">
+        <section>
+          <h3 id="programGroupTitle">依學校彙總</h3>
+          <div class="table-wrap compact">
+            <table id="programSummaryTable">
+              <thead><tr><th>群組</th><th>錄取人數</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+        <section>
+          <h3>校院系所明細</h3>
+          <div class="table-wrap">
+            <table id="programDepartmentTable">
+              <thead><tr><th>學校</th><th>學院</th><th>科系</th><th>錄取人數</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pager"><button id="programPrev" class="ghost" type="button">上一頁</button>
+            <span id="programPageInfo">—</span>
+            <button id="programNext" class="ghost" type="button">下一頁</button>
+          </div>
+        </section>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head"><div><h2>歷年錄取與認證紀錄</h2>
+        <p class="muted">按原始名單錄取年份歸類；同一年「已認證」表示該批錄取者後來取得認證，不代表當年度發證。</p>
+      </div></div>
+      <div class="table-wrap">
+        <table id="programYearlyTable">
+          <thead><tr><th>錄取年度（西元）</th><th>原始錄取筆數</th><th>其中已認證筆數</th></tr></thead><tbody></tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head"><div>
+        <h2>暑期實習與遠距教學服務</h2>
+        <p class="muted">僅呈現年度／學期彙總，不追蹤個別大學生或偏鄉學生。歷史大表的「修課人數」不等同實際服務大學生人數；尚未核定的服務不計入正式累計。</p>
+      </div></div>
+      <div class="program-filter-bottom">
+        <label><span>服務西元年</span><select id="programServiceYear"><option value="">全部年度</option></select></label>
+        <p id="programServiceInfo" class="muted"></p>
+      </div>
+      <h3>暑期實習（每年度）</h3>
+      <div class="table-wrap">
+        <table id="programSummerTable">
+          <thead><tr><th>服務年度</th><th>實習課程修課人數*</th><th>大學生服務人次</th><th>偏鄉學生扎根人次*</th><th>教學課時</th><th>狀態</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <h3>遠距教學（每學期）</h3>
+      <div class="table-wrap">
+        <table id="programRemoteTable">
+          <thead><tr><th>學年度／學期</th><th>遠距實習課程修課人數*</th><th>大學生服務人次</th><th>偏鄉學生扎根人次*</th><th>教學課時</th><th>狀態</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="muted">* 數值依績效大表既有修課／USR 扎根口徑暫載，非「實際到校參與人數」或「不重複偏鄉學生人數」。缺值以「—」顯示，不視為 0。待確認數字不加總為核定成果。</p>
+    </article>
+    <p class="muted">資料來源：PASSION Program Data Hub（Google Sheets，限已授權帳號）。本頁只讀彙總表，不讀取個別學員名單、學號或證號。</p>
+  </section>
+</main>
+<script type="module" src="./js/program.js?v=20261012-program1"></script>
+</body>
+</html>
