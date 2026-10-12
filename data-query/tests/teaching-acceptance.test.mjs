@@ -21,7 +21,15 @@ function sampleRecords() {
       school_name, diagnostic_item: items[index],
     })));
   return [
-    metric("diagnostic_person_time", 120593),
+    metric("diagnostic_person_time", 120429),
+    metric("diagnostic_person_time", 164, {project_name: "USR",
+      batch_id: "hist-big-overview-20261008-v1",
+      date_start: "2021-09-01", time_granularity: "month"}),
+    ...[["文法",29],["詞彙",26],["聽力",20],["閱讀",20]].map(([diagnostic_item, metric_value])=>
+      metric("diagnostic_person_time", metric_value, {
+        project_name: "USR", verified_group_key: "diagnostic_person_time|USR|110.9",
+        school_name: "平和國中", diagnostic_item,
+      })),
     metric("root_class", 2315),
     metric("root_person_time", 15842),
     cohort("110.2", 587),
@@ -30,10 +38,10 @@ function sampleRecords() {
   ];
 }
 
-test("all seven release acceptance checks pass for the approved aggregate baseline", () => {
+test("all eight release acceptance checks pass for the approved aggregate baseline", () => {
   const result = evaluateTeachingAcceptance(sampleRecords());
-  assert.equal(result.total, 7);
-  assert.equal(result.passed, 7);
+  assert.equal(result.total, 8);
+  assert.equal(result.passed, 8);
   assert.equal(result.allPassed, true);
 });
 
@@ -70,4 +78,16 @@ test("empty loaded data fails closed for all tracked baseline totals", () => {
   const result = evaluateTeachingAcceptance([]);
   assert.equal(result.allPassed, false);
   assert.equal(result.passed, 0);
+});
+
+
+test("rejects Pinghe incomplete four-item cohort even when aggregate total is restored", () => {
+  const rows = sampleRecords();
+  const pinghe = rows.find(x=>x.school_name==="平和國中"&&x.diagnostic_item==="閱讀");
+  const unrelated = rows.find(x=>x.metric_type==="diagnostic_person_time"&&!x.project_name);
+  pinghe.metric_value -= 1;
+  unrelated.metric_value += 1;
+  const failed = evaluateTeachingAcceptance(rows);
+  assert.equal(failed.checks.find(c=>c.code==="diagnostic").pass,true);
+  assert.equal(failed.checks.find(c=>c.code==="pinghe-110.9").pass,false);
 });
