@@ -18,6 +18,7 @@ import {
   replaceUsrRoot1121,
   applyNmoe1109RawPriority,
   replaceUsr1086WithThreeSchools,
+  addPinghe1109CompletedTests,
   applyApprovedHistoricalDetailDecisions,
   teachingDimensionValues,
   teachingMetricTotals,
@@ -633,4 +634,42 @@ test("USR 108.6 3 schools x 3 items replace existing 40/item with exact school t
    i===0?{...r,metric_value:19}:r)),/無效/);
  assert.throws(()=>replaceUsr1086WithThreeSchools([...originals,untouched],official.map((r,i)=>
    i===0?{...r,source_reference:"unverified"}:r)),/無效/);
+});
+
+
+test("Pinghe 110.9: actual completed items 29+26+20+20 are counted once on original 164", () => {
+  const key = "diagnostic_person_time|USR|110.9";
+  const old = {metric_type:"diagnostic_person_time", project_name:"USR",
+    batch_id:"hist-big-overview-20261008-v1",
+    time_granularity:"month", date_start:"2021-09-01",
+    metric_value:164};
+  const specs = [
+    ["文法",29,"文法(176)"],
+    ["詞彙",26,"詞彙(2318)"],
+    ["聽力",20,"聽力(178)"],
+    ["閱讀",20,"閱讀(177)"],
+  ];
+  const source = specs.map(([diagnostic_item, metric_value, fname])=>({
+    verified_group_key:key, metric_type:"diagnostic_person_time",
+    project_name:"USR", school_name:"平和國中", school_level:"國中",
+    county_city:"花蓮縣", subject:"英文", diagnostic_item, grade:"7",
+    metric_value, group_target:259, group_baseline:164,
+    date_start:"2021-09-01", date_end:"2021-09-30",
+    time_granularity:"month", academic_year:110, semester:"上學期",
+    source_reference:"110-1期初平和國中DCEC"+fname+"_適性測驗成績.xlsx::dataSheet!B2:AA30"
+  }));
+  const unrelated={metric_type:"root_person_time",project_name:"USR",metric_value:400};
+  const result=addPinghe1109CompletedTests([old,unrelated],source);
+  assert.equal(result.length,6);
+  assert.equal(result.filter(r=>r.metric_type==="diagnostic_person_time")
+    .reduce((n,r)=>n+r.metric_value,0),259);
+  assert.equal(result.find(x=>x.metric_type==="root_person_time"),unrelated);
+  assert.deepEqual(source.map(r=>r.metric_value),[29,26,20,20]);
+  assert.throws(()=>addPinghe1109CompletedTests(result,source),/舊底帳/);
+  assert.throws(()=>addPinghe1109CompletedTests([old],source.slice(1)),/舊底帳/);
+  assert.throws(()=>addPinghe1109CompletedTests([old],source.map((r,i)=>
+    i===0?{...r,metric_value:19}:r)),/來源欄位/);
+  assert.throws(()=>addPinghe1109CompletedTests([old],source.map((r,i)=>
+    i===0?{...r,source_reference:"invalid"}:r)),/來源欄位/);
+  assert.throws(()=>addPinghe1109CompletedTests([{...old,metric_value:240}],source),/舊底帳/);
 });
