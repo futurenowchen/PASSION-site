@@ -990,3 +990,57 @@ export function replaceUsr1086WithThreeSchools(records = [], rawRows = []) {
     throw new Error("USR 108.6 三校三科來源未完整對齊官方各40。");
   return [...records.filter(r=>!old.includes(r)),...rawRows];
 }
+
+
+/**
+ * User-approved 2026-10-12 audit policy: one item-time per successfully
+ * completed subtest (status P=4 AND end time R present), including valid zeros.
+ * The 2021-09 source raw-export has no Pinghe English row, while the separate
+ * 110.9 USR overview already contains 164 other school/item times.
+ * Exactly four new school/item aggregates (29+26+20+20) raise that cohort
+ * to 259, never append the older 19x4=76 complete-case subset.
+ */
+export function addPinghe1109CompletedTests(records = [], completedRows = []) {
+  const key = "diagnostic_person_time|USR|110.9";
+  const expected = new Map([
+    ["文法", [29, "文法(176)"]],
+    ["詞彙", [26, "詞彙(2318)"]],
+    ["聽力", [20, "聽力(178)"]],
+    ["閱讀", [20, "閱讀(177)"]],
+  ]);
+  const old = records.filter(r => historicalOverviewGroupKey(r) === key);
+  if (old.length !== 1 || old[0].metric_value !== 164 ||
+      old[0].metric_type !== "diagnostic_person_time" ||
+      old[0].project_name !== "USR" ||
+      records.some(r => r.verified_group_key === key) ||
+      completedRows.length !== 4) {
+    throw new Error("110.9 平和實測補計舊底帳或筆數不符，停止載入。");
+  }
+  const seen = new Set();
+  let total = 0;
+  for (const r of completedRows) {
+    const spec = expected.get(r.diagnostic_item);
+    if (!spec || seen.has(r.diagnostic_item) ||
+        r.verified_group_key !== key ||
+        r.metric_type !== "diagnostic_person_time" ||
+        r.project_name !== "USR" ||
+        r.school_name !== "平和國中" || r.school_level !== "國中" ||
+        r.county_city !== "花蓮縣" || r.subject !== "英文" ||
+        r.grade !== "7" || r.metric_value !== spec[0] ||
+        r.group_baseline !== 164 || r.group_target !== 259 ||
+        r.date_start !== "2021-09-01" || r.date_end !== "2021-09-30" ||
+        r.time_granularity !== "month" || r.academic_year !== 110 ||
+        r.semester !== "上學期" ||
+        !r.source_reference?.startsWith("110-1期初平和國中DCEC" + spec[1]) ||
+        !r.source_reference?.endsWith("::dataSheet!B2:AA30")) {
+      throw new Error("110.9 平和實測來源欄位、去重或有效筆數不符：" + (r.diagnostic_item || "?"));
+    }
+    seen.add(r.diagnostic_item);
+    total += r.metric_value;
+  }
+  if (seen.size !== 4 || total !== 95 ||
+      old[0].metric_value + total !== 259) {
+    throw new Error("110.9 平和四項成功測驗總量未對平259。");
+  }
+  return [...records, ...completedRows];
+}
