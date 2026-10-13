@@ -229,6 +229,13 @@ function currentFilterState() {
 
 function renderAll() {
   state.filtered = applyFilters(state.records, currentFilterState());
+  const importedInterviews = state.filtered.filter(record => record.source_type === "interview_import");
+  $("interviewImportNote").hidden = !importedInterviews.length;
+  $("interviewImportNote").textContent = importedInterviews.length
+    ? "本次篩選含歷史匿名訪談補登 " + importedInterviews.length.toLocaleString() +
+      " 場、" + importedInterviews.reduce((n,r)=>n+r.total_participant_count,0).toLocaleString() +
+      " 受訪人次；未包含訪談團隊成員。原始學程／活動計畫全名及實際活動形式另待確認。"
+    : "";
   renderMetrics();
   renderAggregation();
   renderDetails();
