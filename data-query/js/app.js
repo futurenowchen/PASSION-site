@@ -8,6 +8,7 @@ import {
   canonicalizeSources,
   dimensionValues,
   metricTotal,
+  sortActivityRecords,
 } from "./data.js";
 import {fetchPassionSheets, GoogleSheetsError} from "./sheets.js";
 import {clearSheetsSession, restoreSheetsSession, storeSheetsSession} from "./auth-session.js";
@@ -228,7 +229,10 @@ function currentFilterState() {
 }
 
 function renderAll() {
-  state.filtered = applyFilters(state.records, currentFilterState());
+  state.filtered = sortActivityRecords(
+    applyFilters(state.records, currentFilterState()),
+    $("detailSort").value,
+  );
   const importedInterviews = state.filtered.filter(record => record.source_type === "interview_import");
   $("interviewImportNote").hidden = !importedInterviews.length;
   $("interviewImportNote").textContent = importedInterviews.length
@@ -398,6 +402,10 @@ function bindUi() {
   $("nextPage").addEventListener("click", () => {
     state.page += 1;
     renderDetails();
+  });
+  $("detailSort").addEventListener("change", () => {
+    state.page = 1;
+    renderAll();
   });
   $("downloadBtn").addEventListener("click", downloadCsv);
   $("clearFiltersBtn").addEventListener("click", clearFilters);
