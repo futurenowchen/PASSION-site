@@ -460,7 +460,11 @@ export function canonicalizeInterviewImport(values = []) {
     ["PIV-20261013-V3-0287",["2023-06-06","卓楓國小",2,"111學生訪談名單!46:49"]],
     ["PIV-20261013-V3-0288",["2023-06-27","卓楓國小",2,"111學生訪談名單!50:51"]],
   ]);
-  let dateOnlyCount=0;
+  const confirmedTeacherSources=new Map([
+    ["訪談紀錄彙整.xlsx::112學生訪談名單!60",["望安國中","組長"]],
+    ["訪談紀錄彙整.xlsx::112學生訪談名單!62",["富里國中","主任"]],
+  ]);
+  let dateOnlyCount=0,confirmedTeacherCount=0;
   for(const row of values.slice(1)){
     const id=cleanText(pick(row,headers,"批次ID"));
     if(!id)continue;
@@ -479,6 +483,10 @@ export function canonicalizeInterviewImport(values = []) {
     const status=cleanText(pick(row,headers,"核定狀態"));
     const count=(teacher??0)+(student??0)+(other??0);
     const expectedType=teacher&&student?"教師與學生":teacher?"教師":student?"學生":"校方人員";
+    const confirmedTeacher=confirmedTeacherSources.get(source);
+    const teacherVerified=!confirmedTeacher ||
+      (confirmedTeacher[0]===school && name.includes(confirmedTeacher[1]) &&
+       type==="教師" && teacher===1 && student===0 && other===0);
     const dateOnly=expectedDateOnly.get(id);
     const dateOnlyValid=dateOnly && dateOnly[0]===date && dateOnly[1]===school &&
       dateOnly[2]===student && teacher===0 && other===0 &&
@@ -489,12 +497,13 @@ export function canonicalizeInterviewImport(values = []) {
        !school||!subject||!name||!project||!source?.startsWith("訪談紀錄彙整.xlsx::")||
        cleanText(pick(row,headers,"活動類別"))!=="訪談"||
        [teacher,student,other].some(n=>n===null||n<0)||count<1||
-       type!==expectedType||(!dateOnlyValid && (dateOnly || status!=="已核定（受訪者人次；時段已確認）"))||
+       type!==expectedType||!teacherVerified||(!dateOnlyValid && (dateOnly || status!=="已核定（受訪者人次；時段已確認）"))||
        /meet\.google\.com|https?:\/\//i.test(name+" "+notes+" "+source)){
       throw new Error("訪談V2原始場次、核定口徑或個資欄位不合規："+(id||"未知"));
     }
     seen.add(id);
     if(dateOnlyValid)dateOnlyCount++;
+    if(confirmedTeacher)confirmedTeacherCount++;
     byYear.set(year,(byYear.get(year)||0)+1);
     records.push({
       activity_id:id,source_type:"interview_import",source_row_number:null,
@@ -515,11 +524,11 @@ export function canonicalizeInterviewImport(values = []) {
     });
   }
   const expectedYears=new Map([[110,16],[111,45],[112,73],[113,80],[114,74]]);
-  if(records.length!==288||dateOnlyCount!==3||
+  if(records.length!==288||dateOnlyCount!==3||confirmedTeacherCount!==2||
      records.reduce((n,r)=>n+r.total_participant_count,0)!==396||
-     records.reduce((n,r)=>n+r.teacher_participant_count,0)!==162||
+     records.reduce((n,r)=>n+r.teacher_participant_count,0)!==164||
      records.reduce((n,r)=>n+r.interview_student_count,0)!==232||
-     records.reduce((n,r)=>n+r.interview_other_school_staff_count,0)!==2||
+     records.reduce((n,r)=>n+r.interview_other_school_staff_count,0)!==0||
      [...expectedYears].some(([y,n])=>byYear.get(y)!==n))
     throw new Error("110–114訪談V3場次／人次／年度數量未對平，停止載入。");
   return records;
