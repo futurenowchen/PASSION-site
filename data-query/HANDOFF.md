@@ -444,3 +444,11 @@ User uploaded local-only `11009資料.xlsx`, `11409資料.xlsx`, `10806資料.xl
 - \`INTERVIEW_IMPORT_ISSUES_20261013!A4:H4\` 已把原19「待補時段」改成「已補登三筆活動／不需補時間」；A5:H5仍列鶴岡四筆缺日期；A9:H9正式讀V3、不疊加V1/V2。112未完成16列仍按使用者指示不計。
 - 網站公開 \`futurenowchen/PASSION-site/data-query/js/sheets.js\` 只讀V3 A:P；\`js/data.js\` 識別V2既有285行＋V3新增3行，逐列來源／校名／日期／學生人次固定護欄及累計288/396、各年度檢查，其他未知缺時段不構成載入失敗。活動頁 \`index.html\` 快取 token \`20261013-interview3\`。\`tests/interview-import.test.mjs\` fixture及各量調至V3。四檔已同步私有 \`futurenowchen/passion-activity-data/web/\`。
 - 目前V3資料/JS函式/雙repo已核驗，但尚未取得GitHub Actions node tests及Google OAuth正式網站互動PASS。後續須驗收網站「訪談」類別，V1/V2舊分頁不可同加；鶴岡四人只問日期，不問時段。
+
+## 38. 2026-10-13 訪談分類定案：112學生名單兩位校方主管應列「教師訪談」
+
+- 使用者確認「就是教師訪談，職稱可以保留」：\`訪談紀錄彙整.xlsx::112學生訪談名單!60\` 望安國中**組長**及 \`!62\` 富里國中**主任**，均改計教師訪談。只保留職稱於公開資料標題，**不匯出個人姓名**。\`!54\` 吉貝國中主任早已正確計教師，未重複修改。
+- 直接在 canonical Google Mirror \`1bu5qvqOIV9c3VA10Af3UPizXEzJTGmVlsZFTVvUSV0c\` 的 \`INTERVIEW_IMPORT_110_114_20261013_V3\` 原地更新**第130列／第132列**：J=教師、K=1、L=0、M=0；I活動名稱分別保留「組長訪談」「主任訪談」及原時段，O備註保留職稱／確認依據；A識別碼、B日期、N來源與其他原始分頁不變。\`INTERVIEW_IMPORT_ISSUES_20261013!A8:H8\` 改為 \`V3-07\` 已確認／分類結案、待確認0列。
+- 完整 Google Sheet 288列重新讀回：**288場／總受訪396人次；教師164、學生232、其他校方0**。只修正人次分類，不新增/刪除場次或改動總量，保留原始檔及 V1/V2 稽核資料。
+- 公開 \`futurenowchen/PASSION-site/data-query/js/data.js\` 將 fail-closed checksum 教師162→164、其他校方2→0；對正式來源 \`!60\`、\`!62\` 新增來源/學校/職稱/教師受訪人次 guard，防止日後反向誤分類；\`tests/interview-import.test.mjs\` 新增職稱保留及負向分類驗證，函式 harness **5/5 PASS**，真正的Google Sheets整批JS整合驗證PASS。入口 \`index.html\` cache token=\`20261013-interview4\`。三個檔案均同步私有 \`futurenowchen/passion-activity-data/web/\`。
+- 瀏覽器實際Google OAuth 登入畫面及GitHub Actions完整Node CLI未在本輪取得PASS；不要聲稱已實際畫面驗收。這兩位的分類不再需要詢問。
