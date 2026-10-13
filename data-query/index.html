@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="PASSION 活動資料自由查詢系統">
   <title>PASSION 資料查詢</title>
-  <link rel="stylesheet" href="./styles.css?v=20261013-interview4">
+  <link rel="stylesheet" href="./styles.css?v=20261013-activity-sort1">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="./config.js?v=20261013-interview4"></script>
+  <script src="./config.js?v=20261013-activity-sort1"></script>
 </head>
 <body>
   <header class="topbar">
@@ -101,7 +101,16 @@
                 <h2>活動明細</h2>
                 <p id="detailCount" class="muted"></p>
               </div>
-              <button id="downloadBtn" class="secondary">下載篩選結果 CSV</button>
+              <div class="detail-actions">
+                <label class="detail-sort-label" for="detailSort">
+                  <span>日期排序</span>
+                  <select id="detailSort" aria-label="活動日期排序">
+                    <option value="desc">最新在前</option>
+                    <option value="asc">最舊在前</option>
+                  </select>
+                </label>
+                <button id="downloadBtn" class="secondary">下載篩選結果 CSV</button>
+              </div>
             </div>
             <div class="table-wrap">
               <table id="detailTable">
@@ -126,6 +135,6 @@
     </section>
   </main>
 
-  <script type="module" src="./js/app.js?v=20261013-interview4"></script>
+  <script type="module" src="./js/app.js?v=20261013-activity-sort1"></script>
 </body>
 </html>
