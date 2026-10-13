@@ -599,6 +599,18 @@ export function applyFilters(records, state = {}) {
   });
 }
 
+/** Sort the entire filtered result set before pagination or CSV export. */
+export function sortActivityRecords(records, direction = "desc") {
+  const factor = direction === "asc" ? 1 : -1;
+  return [...records].sort((a, b) => {
+    const dateA = a.activity_date || "";
+    const dateB = b.activity_date || "";
+    if (!dateA) return dateB ? 1 : 0;
+    if (!dateB) return -1;
+    return factor * dateA.localeCompare(dateB);
+  });
+}
+
 export function metricValue(record, metricLabel) {
   const column = METRICS[metricLabel];
   if (column === undefined) throw new Error(`Unknown metric: ${metricLabel}`);
