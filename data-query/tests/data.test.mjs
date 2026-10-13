@@ -7,6 +7,8 @@ import {
   aggregate,
   applyFilters,
   canonicalizeSources,
+  canonicalizeLegacy,
+  canonicalizeCurrent,
   dimensionValues,
   metricTotal,
   sortActivityRecords,
@@ -38,7 +40,7 @@ const current = [
 ];
 
 test("canonical rules preserve confirmed teacher metric policy", () => {
-  const records = canonicalizeSources({legacy, current});
+  const records = [...canonicalizeLegacy(legacy), ...canonicalizeCurrent(current)];
   assert.equal(records.length, 2);
 
   const old = records.find(r => r.source_type === "legacy");
@@ -55,13 +57,13 @@ test("canonical rules preserve confirmed teacher metric policy", () => {
 });
 
 test("current rows before 2023 are excluded", () => {
-  const records = canonicalizeSources({legacy: [], current});
+  const records = canonicalizeCurrent(current);
   assert.equal(records.length, 1);
   assert.equal(records[0].activity_date, "2025-09-01");
 });
 
 test("filter semantics are OR within dimension and AND across dimensions", () => {
-  const records = canonicalizeSources({legacy, current});
+  const records = [...canonicalizeLegacy(legacy), ...canonicalizeCurrent(current)];
   const filtered = applyFilters(records, {
     keyword: "博幼 英文",
     filters: {
@@ -74,7 +76,7 @@ test("filter semantics are OR within dimension and AND across dimensions", () =>
 });
 
 test("dimension tokens and aggregation work without double-counting source rows", () => {
-  const records = canonicalizeSources({legacy, current});
+  const records = [...canonicalizeLegacy(legacy), ...canonicalizeCurrent(current)];
   assert.deepEqual(dimensionValues(records, "subject"), ["英文"]);
   assert.equal(metricTotal(records, "教師參與人次"), 55);
   const grouped = aggregate(records, "教師參與人次", "project_family");
@@ -96,7 +98,7 @@ test("legacy non-school venue stays in venue fields and is excluded from service
     legacy[0],
     ["2021/12/29","「心心向榮」偏鄉國民小學學力增能計畫","臺北市","臺師大、Xpark","記者會及校外參訪","","其他",0,0,0,0,0,0,0,"",""],
   ];
-  const [record] = canonicalizeSources({legacy: venueOnlyLegacy, current: []});
+  const [record] = canonicalizeLegacy(venueOnlyLegacy);
   assert.equal(record.service_region, null);
   assert.equal(record.service_target, null);
   assert.equal(record.venue_region, "臺北市");
@@ -110,7 +112,7 @@ test("current service-region normalization drops obvious non-region spillover", 
     currentHeader,
     ["2023/09/08","深耕偏鄉教育計畫：深化、廣化、國際化、永續化","現場","臺灣/臺北市, USR科技化教學產業學分學程","大學生","臺灣/臺北市","臺師大","無","會議","","","","",0,0,0,0,0,0,0,0,0,0,0,0,0,0,""],
   ];
-  const [record] = canonicalizeSources({legacy: [], current: dirtyCurrent});
+  const [record] = canonicalizeCurrent(dirtyCurrent);
   assert.equal(record.service_region, "臺北市");
 });
 
@@ -168,4 +170,9 @@ test("filtering before global date sorting preserves page-boundary chronology", 
   assert.equal(pages.flat().length,62);
   assert.ok(pages.flat().every((r,i,arr)=>i===0||arr[i-1].activity_date>=r.activity_date));
   assert.ok(pages.flat().every(r=>r.category==="訪談"));
+});
+
+
+test("combined source loading fails closed when required verified interview data is absent", () => {
+  assert.throws(() => canonicalizeSources({legacy, current}), /缺少110–114訪談修正版批次/);
 });
