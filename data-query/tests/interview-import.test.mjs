@@ -10,7 +10,7 @@ function sourceRows() {
   for(const [year,teacherSessions,studentSessions,otherSessions,studentCounts] of [
     [110,8,8,0,[2,2,2,2,1,1,1,1]],
     [111,32,10,0,[5,5,5,5,5,5,5,4,4,4]],
-    [112,33,38,2,[...Array(7).fill(2),...Array(31).fill(1)]],
+    [112,35,38,0,[...Array(7).fill(2),...Array(31).fill(1)]],
     [113,46,34,0,[...Array(8).fill(2),...Array(26).fill(1)]],
     [114,43,31,0,[...Array(5).fill(3),...Array(26).fill(2)]]
   ]) {
@@ -29,6 +29,16 @@ function sourceRows() {
         "匿名資料；不含訪談者姓名或視訊網址",
         "已核定（受訪者人次；時段已確認）"]);
     }
+  }
+  const leaders=out.filter(r=>r[2]===112 && r[9]==="教師").slice(0,2);
+  assert.equal(leaders.length,2);
+  for(const [row,school,role,source] of [
+    [leaders[0],"望安國中","組長","112學生訪談名單!60"],
+    [leaders[1],"富里國中","主任","112學生訪談名單!62"],
+  ]){
+    row[5]=school;
+    row[8]=school+" "+role+"訪談";
+    row[13]="訪談紀錄彙整.xlsx::"+source;
   }
   for(const [index,date,school,students,source] of [
     [286,"2023/05/30","玉東國中",15,"111學生訪談名單!2:17"],
@@ -49,9 +59,9 @@ test("110-114 V3 dated sessions and 396 interviewee person-times",()=>{
   assert.equal(list.length,288);
   assert.equal(metricTotal(list,"活動場次"),288);
   assert.equal(metricTotal(list,"總參與人次"),396);
-  assert.equal(metricTotal(list,"教師參與人次"),162);
+  assert.equal(metricTotal(list,"教師參與人次"),164);
   assert.equal(list.reduce((n,x)=>n+x.interview_student_count,0),232);
-  assert.equal(list.reduce((n,x)=>n+x.interview_other_school_staff_count,0),2);
+  assert.equal(list.reduce((n,x)=>n+x.interview_other_school_staff_count,0),0);
   assert.equal(applyFilters(list,{filters:{category:["訪談"]}}).length,288);
   for(const [yr,num] of [[110,16],[111,45],[112,73],[113,80],[114,74]])
     assert.equal(list.filter(x=>x.academic_year===yr).length,num);
@@ -77,4 +87,21 @@ test("rejects mistaken roles, incomplete imports, or leaked call URLs",()=>{
   assert.throws(()=>canonicalizeInterviewImport(y),/不合規/);
   const z=sourceRows();z[1][14]="https://meet.google.com/unsafe";
   assert.throws(()=>canonicalizeInterviewImport(z),/不合規/);
+});
+
+test("confirmed school leaders remain distinct teacher interviews with job titles",()=>{
+  const x=sourceRows();
+  const leader=x.find(r=>r[13]==="訪談紀錄彙整.xlsx::112學生訪談名單!60");
+  const director=x.find(r=>r[13]==="訪談紀錄彙整.xlsx::112學生訪談名單!62");
+  assert.equal(leader[9],"教師");
+  assert.match(leader[8],/組長/);
+  assert.equal(director[9],"教師");
+  assert.match(director[8],/主任/);
+  const wrongRole=sourceRows();
+  const bad=wrongRole.find(r=>r[13]==="訪談紀錄彙整.xlsx::112學生訪談名單!62");
+  bad[9]="校方人員";bad[10]=0;bad[12]=1;
+  assert.throws(()=>canonicalizeInterviewImport(wrongRole),/不合規/);
+  const missingTitle=sourceRows();
+  missingTitle.find(r=>r[13]==="訪談紀錄彙整.xlsx::112學生訪談名單!60")[8]="望安國中訪談";
+  assert.throws(()=>canonicalizeInterviewImport(missingTitle),/不合規/);
 });
