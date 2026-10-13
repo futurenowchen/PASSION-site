@@ -68,7 +68,7 @@ test("110-114 V3 dated sessions and 396 interviewee person-times",()=>{
 });
 test("canonicalizeSources loads V3 dated rows without original student IDs",()=>{
   const list=canonicalizeSources({interviews:sourceRows()});
-  assert.equal(list.length,285);
+  assert.equal(list.length,288);
   assert.ok(list.every(r=>r.rooted_student_count===null));
   assert.equal(list.filter(r=>r.activity_id.startsWith("PIV-20261013-V3-")).length,3);
 });
