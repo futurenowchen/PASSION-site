@@ -229,6 +229,10 @@ input:focus, select:focus {
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
 .panel { border-radius: 18px; padding: 17px; margin-bottom: 15px; min-width: 0; }
 .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.detail-actions { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: flex-end; gap: 10px; }
+.detail-sort-label { min-width: 146px; }
+.detail-sort-label > span { margin-bottom: 4px; }
+.detail-sort-label select { min-width: 146px; }
 
 .table-wrap {
   overflow: auto;
@@ -295,6 +299,7 @@ body.busy { cursor: progress; }
   .topbar { padding: 22px 16px; }
   .search-row, .metric-grid { grid-template-columns: 1fr; }
   .panel-head { align-items: flex-start; flex-direction: column; }
+  .detail-actions { justify-content: flex-start; width: 100%; }
 }
 
 
