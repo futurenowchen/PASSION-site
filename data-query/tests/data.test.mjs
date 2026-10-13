@@ -9,6 +9,7 @@ import {
   canonicalizeSources,
   dimensionValues,
   metricTotal,
+  sortActivityRecords,
 } from "../js/data.js";
 
 const legacy = [
@@ -119,4 +120,52 @@ test("filter UI includes separate venue dimensions", () => {
   assert.equal(FILTER_LABELS.venue, "舉辦地點");
   assert.equal(FILTER_FIELDS.includes("venue_region"), true);
   assert.equal(FILTER_FIELDS.includes("venue"), true);
+});
+
+test("activity details sort by actual dates, latest first by default", () => {
+  const rows = [
+    {activity_date:"2021-06-10",activity_id:"legacy:5"},
+    {activity_date:"2026-10-06",activity_id:"current:1200"},
+    {activity_date:"2024-08-27",activity_id:"interview:300"},
+    {activity_date:"2023-05-30",activity_id:"interview:200"},
+  ];
+  const before = rows.map(r => r.activity_id);
+  const newest = sortActivityRecords(rows);
+  const oldest = sortActivityRecords(rows, "asc");
+  assert.deepEqual(newest.map(r => r.activity_date), [
+    "2026-10-06","2024-08-27","2023-05-30","2021-06-10",
+  ]);
+  assert.deepEqual(oldest.map(r => r.activity_date), [
+    "2021-06-10","2023-05-30","2024-08-27","2026-10-06",
+  ]);
+  assert.deepEqual(rows.map(r => r.activity_id), before, "source order must not mutate");
+});
+
+test("same-day rows keep original order and rows without dates sort last", () => {
+  const rows = [
+    {activity_date:"2025-06-06",activity_id:"legacy:2"},
+    {activity_date:null,activity_id:"missing"},
+    {activity_date:"2025-06-06",activity_id:"current:11"},
+    {activity_date:"2022-06-06",activity_id:"legacy:1"},
+  ];
+  assert.deepEqual(sortActivityRecords(rows).map(r => r.activity_id), [
+    "legacy:2","current:11","legacy:1","missing",
+  ]);
+  assert.deepEqual(sortActivityRecords(rows,"asc").map(r => r.activity_id), [
+    "legacy:1","legacy:2","current:11","missing",
+  ]);
+});
+
+test("filtering before global date sorting preserves page-boundary chronology", () => {
+  const entries = Array.from({length:125},(_,i)=>({
+    activity_date:`2025-${String(1+(i%12)).padStart(2,"0")}-${String(1+Math.floor(i/12)%28).padStart(2,"0")}`,
+    activity_id:`source:${i}`,category:i%2?"訪談":"增能研習",
+  }));
+  const filtered = applyFilters(entries,{filters:{category:["訪談"]}});
+  const sorted = sortActivityRecords(filtered);
+  const pages = [sorted.slice(0,20),sorted.slice(20,40),sorted.slice(40,60),sorted.slice(60)];
+  assert.equal(sorted.length,62);
+  assert.equal(pages.flat().length,62);
+  assert.ok(pages.flat().every((r,i,arr)=>i===0||arr[i-1].activity_date>=r.activity_date));
+  assert.ok(pages.flat().every(r=>r.category==="訪談"));
 });
