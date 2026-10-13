@@ -1,56 +1,68 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {canonicalizeInterviewImport,canonicalizeSources,aggregate,applyFilters,metricTotal} from "../js/data.js";
-
-const HEADER=["批次ID","活動日期","學年度","計畫名稱","活動形式","服務對象",
+import {canonicalizeInterviewImport,canonicalizeSources,applyFilters,metricTotal} from "../js/data.js";
+const HEAD=["批次ID","活動日期","學年度","計畫名稱","活動形式","服務對象",
  "科目","活動類別","其他活動名稱","訪談種類","受訪教師人次","受訪學生人次",
- "來源原始檔位置","備註","核定狀態"];
-const school="富北國中";
-function fixture(){
-  const rows=[HEADER];
-  for(let i=0;i<243;i++){
-    const teacher=i<121,year=i<15?111:i<85?112:i<165?113:114;
-    const date={111:"2023/05/30",112:"2024/05/15",113:"2025/05/22",114:"2026/05/28"}[year];
-    const students=teacher?0:(i-121<92?2:1);
-    rows.push(["PIV-20261013-"+String(i+1).padStart(4,"0"),date,year,
-      "PASSION扎根團隊（原檔未列正式計畫全名）","待確認",school,"英文","訪談",
-      teacher?"富北國中 英文 教師訪談":"富北國中 英文 學生訪談",
-      teacher?"教師":"學生",teacher?1:0,students,
-      "訪談紀錄彙整.xlsx::"+(teacher?"112教師訪談名單":"114學生訪談名單")+"!"+(i+2),
-      "原始訪談名單已確認完成；沒有受訪者姓名或視訊連結","已核定（僅受訪者人次）"]);
+ "受訪校方其他人員人次","來源原始檔位置","備註","核定狀態"];
+
+function sourceRows() {
+  const out=[HEAD];let id=1;
+  for(const [year,teacherSessions,studentSessions,otherSessions,studentCounts] of [
+    [110,8,8,0,[2,2,2,2,1,1,1,1]],
+    [111,32,10,0,[5,5,5,5,5,5,5,4,4,4]],
+    [112,33,38,2,[...Array(7).fill(2),...Array(31).fill(1)]],
+    [113,46,34,0,[...Array(8).fill(2),...Array(26).fill(1)]],
+    [114,43,31,0,[...Array(5).fill(3),...Array(26).fill(2)]]
+  ]) {
+    const types=[
+      ...Array.from({length:teacherSessions},()=>[1,0,0,"教師"]),
+      ...Array.from({length:studentSessions},(_,i)=>[0,studentCounts[i],0,"學生"]),
+      ...Array.from({length:otherSessions},()=>[0,0,1,"校方人員"]),
+    ];
+    for(const [t,s,o,kind] of types) {
+      const time=String(8+Math.floor(id/60)).padStart(2,"0")+":"+
+        String(id%60).padStart(2,"0");
+      out.push(["PIV-20261013-V2-"+String(id++).padStart(4,"0"),
+        (year+1912)+"/05/01",year,"PASSION扎根團隊","待確認",
+        "富北國中","語文","訪談","富北國中訪談（"+time+"）",kind,t,s,o,
+        "訪談紀錄彙整.xlsx::"+year+"學生訪談名單!"+id,
+        "匿名資料；不含訪談者姓名或視訊網址",
+        "已核定（受訪者人次；時段已確認）"]);
+    }
   }
-  return rows;
+  return out;
 }
-test("243 anonymous interview sessions count 335 interviewee person-times only",()=>{
-  const parsed=canonicalizeInterviewImport(fixture());
-  assert.equal(parsed.length,243);
-  assert.equal(parsed.reduce((n,r)=>n+r.teacher_participant_count,0),121);
-  assert.equal(parsed.reduce((n,r)=>n+r.interview_student_count,0),214);
-  assert.equal(parsed.reduce((n,r)=>n+r.total_participant_count,0),335);
-  assert.ok(parsed.every(r=>r.rooted_student_count===null));
+test("110-114 corrected V2 academic sessions and 377 interviewee person-times",()=>{
+  const list=canonicalizeInterviewImport(sourceRows());
+  assert.equal(list.length,285);
+  assert.equal(metricTotal(list,"活動場次"),285);
+  assert.equal(metricTotal(list,"總參與人次"),377);
+  assert.equal(metricTotal(list,"教師參與人次"),162);
+  assert.equal(list.reduce((n,x)=>n+x.interview_student_count,0),213);
+  assert.equal(list.reduce((n,x)=>n+x.interview_other_school_staff_count,0),2);
+  assert.equal(applyFilters(list,{filters:{category:["訪談"]}}).length,285);
+  for(const [yr,num] of [[110,16],[111,42],[112,73],[113,80],[114,74]])
+    assert.equal(list.filter(x=>x.academic_year===yr).length,num);
 });
-test("interview batch merges once and is searchable as activity",()=>{
-  const data=canonicalizeSources({interviews:fixture()});
-  assert.equal(data.length,243);
-  assert.equal(applyFilters(data,{filters:{category:["訪談"]}}).length,243);
-  assert.equal(metricTotal(data,"活動場次"),243);
-  assert.equal(metricTotal(data,"總參與人次"),335);
+test("canonicalizeSources includes one V2 batch and no original students IDs",()=>{
+  const list=canonicalizeSources({interviews:sourceRows()});
+  assert.equal(list.length,285);
+  assert.ok(list.every(r=>r.rooted_student_count===null));
+  assert.ok(list.every(r=>r.activity_id.startsWith("PIV-20261013-V2-")));
 });
-test("duplicate ID and missing completion are rejected (fail-closed)",()=>{
-  const dup=fixture();dup[2][0]=dup[1][0];
-  assert.throws(()=>canonicalizeInterviewImport(dup),/重複/);
-  const pending=fixture();pending[2][14]="待確認";
-  assert.throws(()=>canonicalizeInterviewImport(pending),/不合規/);
+test("rejects duplicates, wrong academic year, unpublished cohort counts",()=>{
+  const x=sourceRows();x[2][0]=x[1][0];
+  assert.throws(()=>canonicalizeInterviewImport(x),/不合規/);
+  const y=sourceRows();y[1][2]=114;
+  assert.throws(()=>canonicalizeInterviewImport(y),/不合規/);
+  const z=sourceRows();z.pop();
+  assert.throws(()=>canonicalizeInterviewImport(z),/未對平/);
 });
-test("the reported ROC academic year must agree with the actual activity date",()=>{
-  const source=fixture();source[1][1]="2023/08/01";
-  assert.throws(()=>canonicalizeInterviewImport(source),/不合規/);
-});
-test("a missing person, source or wrong cohort size is not silently counted",()=>{
-  const rows=fixture();rows[1][10]=0;
-  assert.throws(()=>canonicalizeInterviewImport(rows),/不合規/);
-  const rows2=fixture();rows2.pop();
-  assert.throws(()=>canonicalizeInterviewImport(rows2),/未對平/);
-  const rows3=fixture();rows3[1][12]="";
-  assert.throws(()=>canonicalizeInterviewImport(rows3),/不合規/);
+test("rejects mistaken roles, incomplete imports, or leaked call URLs",()=>{
+  const x=sourceRows();x[1][15]="待確認";
+  assert.throws(()=>canonicalizeInterviewImport(x),/不合規/);
+  const y=sourceRows();y[1][11]=1;
+  assert.throws(()=>canonicalizeInterviewImport(y),/不合規/);
+  const z=sourceRows();z[1][14]="https://meet.google.com/unsafe";
+  assert.throws(()=>canonicalizeInterviewImport(z),/不合規/);
 });
