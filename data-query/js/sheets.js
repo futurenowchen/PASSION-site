@@ -20,7 +20,7 @@ export async function fetchPassionSheets({
   const params = new URLSearchParams();
   params.append("ranges", `${quotedSheet(legacySheet)}!A:U`);
   params.append("ranges", `${quotedSheet(currentSheet)}!A:BA`);
-  params.append("ranges", quotedSheet("INTERVIEW_IMPORT_110_114_20261013_V2") + "!A:P");
+  params.append("ranges", quotedSheet("INTERVIEW_IMPORT_110_114_20261013_V3") + "!A:P");
   params.set("majorDimension", "ROWS");
   params.set("valueRenderOption", "FORMATTED_VALUE");
   params.set("fields", "valueRanges(range,values)");
