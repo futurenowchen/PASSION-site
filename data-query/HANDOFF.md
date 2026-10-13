@@ -452,3 +452,13 @@ User uploaded local-only `11009資料.xlsx`, `11409資料.xlsx`, `10806資料.xl
 - 完整 Google Sheet 288列重新讀回：**288場／總受訪396人次；教師164、學生232、其他校方0**。只修正人次分類，不新增/刪除場次或改動總量，保留原始檔及 V1/V2 稽核資料。
 - 公開 \`futurenowchen/PASSION-site/data-query/js/data.js\` 將 fail-closed checksum 教師162→164、其他校方2→0；對正式來源 \`!60\`、\`!62\` 新增來源/學校/職稱/教師受訪人次 guard，防止日後反向誤分類；\`tests/interview-import.test.mjs\` 新增職稱保留及負向分類驗證，函式 harness **5/5 PASS**，真正的Google Sheets整批JS整合驗證PASS。入口 \`index.html\` cache token=\`20261013-interview4\`。三個檔案均同步私有 \`futurenowchen/passion-activity-data/web/\`。
 - 瀏覽器實際Google OAuth 登入畫面及GitHub Actions完整Node CLI未在本輪取得PASS；不要聲稱已實際畫面驗收。這兩位的分類不再需要詢問。
+
+## 39. 2026-10-13 活動明細依日期排序（含訪談批次）
+
+- 使用者在「活動明細」篩選後看到「符合379筆活動」，發現日期未按時間順序。讀公開 \`data-query/js/app.js\` 確認 \`renderAll()\` 原本將 \`applyFilters(state.records, currentFilterState())\` 直接交給 \`renderDetails()\`；來源順序是 \`legacy → current → interview_import\`，不保證日期順序，翻頁時更容易跳年。
+- 公開 \`data-query/js/data.js\` 新增純函式 \`sortActivityRecords(records,direction="desc")\`，**只回傳新陣列**，以ISO活動日期排序；無日期置尾，同日期遵守JS stable sort，原相對順序不動。預設最近日期在前，支援 \`asc\` 最早日期在前。
+- \`data-query/js/app.js\` 改在 \`renderAll()\` **篩選後、統計/分頁前**對整個 \`state.filtered\` 排序；切換 \`detailSort\` 會重置第1頁並重繪。表格分頁按 \`state.filtered.slice(...)\`；CSV按相同 \`state.filtered\` map，所以可見結果與匯出順序一致，不改任何原始活動場次、人次、來源Sheet。
+- \`data-query/index.html\` 在「活動明細」標題旁新增「日期排序」下拉選單（最新在前／最舊在前），預設最新在前；入口JS/CSS快取版號 \`20261013-activity-sort1\`；\`data-query/styles.css\` 加入桌機/手機排列。一般活動篩選數字不受影響，例如使用者當下篩出的379筆仍是379筆，只改順序。
+- \`data-query/tests/data.test.mjs\` 新增跨來源、最新/最舊、同日穩定、缺日期、先篩選再排序分頁邊界測試；同時修復此檔之前直接用不含interviews的 \`canonicalizeSources()\` 造成的過時單元測試失敗，改為分別測 \`canonicalizeLegacy()/canonicalizeCurrent()\`，另加「正式合併來源缺interviews必須 fail-closed」測試。以真實repo模組與測試內容在隔離V8 harness**17/17 PASS**；\`app.js\`語法、sort UI/wiring及CSV共用順序檢查PASS，不冒稱 Node/GitHub Actions已PASS。
+- 五對公開/私有鏡像 \`data.js,app.js,index.html,styles.css,tests/data.test.mjs\` 已於本輪同步至 \`futurenowchen/PASSION-site/data-query/\` 和 \`futurenowchen/passion-activity-data/web/\`。正式GitHub Pages部署以及以Google OAuth登入現場驗收若未證實，均只能標記待驗證。
+- 下一步：登入 \`https://futurenowchen.github.io/PASSION-site/data-query/index.html\`，確認原379筆篩選集合在「最新在前」頁1→頁2→末頁日期單調遞減，切換「最舊在前」反向，CSV與同一篩選排序一致；若畫面還顯示舊版，先確認最新Pages部署與刷新快取，不重複匯入Google Sheet資料。
