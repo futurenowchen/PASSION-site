@@ -25,7 +25,7 @@ function sourceRows() {
       out.push(["PIV-20261013-V2-"+String(id++).padStart(4,"0"),
         (year+1912)+"/05/01",year,"PASSION扎根團隊","待確認",
         "富北國中","語文","訪談","富北國中訪談（"+time+"）",kind,t,s,o,
-        "訪談紀錄彙整.xlsx::"+year+"學生訪談名單!"+id,
+        "訪談紀錄彙整.xlsx::"+year+"測試示意!"+id,
         "匿名資料；不含訪談者姓名或視訊網址",
         "已核定（受訪者人次；時段已確認）"]);
     }
