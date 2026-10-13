@@ -434,3 +434,13 @@ User uploaded local-only `11009資料.xlsx`, `11409資料.xlsx`, `10806資料.xl
 - 公開 repo \`futurenowchen/PASSION-site\`：\`data-query/js/sheets.js\` 活動查詢現在**僅讀V2** A:P、不讀V1；\`data-query/js/data.js\` \`canonicalizeInterviewImport\` 更新 V2 16欄、ID正規式、日期/學年度、身分分科、人數及285場、377人次及各學年度群組 fail-closed 守門，驗證計畫、來源、狀態與防外洩URL。 \`data-query/index.html\` cache token \`20261013-interview2\`；\`tests/interview-import.test.mjs\` 已改 V2 285/377 數量、負向防篡改、角色/年份/來源與隱私。相同檔案同步私有 \`futurenowchen/passion-activity-data/web/\`。
 - 已直接把**新分頁真實Google Sheet回傳值**交給公開 repo 相同 JS 純函式驗證：**PASS** 285場/377人次，按110–114各16/42/73/80/74場，教師162、學生213、校方2；活動分類篩選「訪談」285場，未輸出個資。GitHub Actions正式Node測試與GitHub Pages Google OAuth UI 尚未得到 PASS 證據，**不能稱網站部署或畫面驗收已通過**。
 - 下一步：使用有權存取Google活動Mirror之帳號，開啟 \`https://futurenowchen.github.io/PASSION-site/data-query/index.html\`，登入後篩選「訪談」，核對除舊活動外「interview_import」正好285場與377人次，確認V1不另計。其後如拿到111缺日時段補證，追加獨立修訂批次並再次排重；不要編造日期／時段，也不要將人次當不重複訪談人數。
+
+## 37. 2026-10-13 訪談僅需活動日期；修正誤判缺時段與 V3 補登
+
+- 使用者明確修正：「紀錄日期就好了，時間不重要，我們的表也沒有時間？」原活動 Google 表單的 **活動日期 B** 是必要活動欄；**會議時間 AO** 屬會議欄，不是訪談必填。舊 \`全統整\` 僅有日期／性質／類別，沒有訪談時間專欄。不得再以「訪談缺時間」排除已完成且日期確實存在的活動。先前另一規則「已有證據表明不同時段即不同場」仍保留用於去重；實際儲存/檢索只需活動日期，時段無須向使用者索取。
+- 重新查 \`訪談紀錄彙整.xlsx::111學生訪談名單\`：原本被V2排除的19名已完成、日期明確但無時間受訪者，可按**同校同日、沒有分場證據**彙成三筆活動：玉東國中 **2023/05/30**，原始2–17共16列其中一人兩科重複，**15人次**；卓楓國小 **2023/06/06**，合併姓名欄 C46:C47/C48:C49、日期由47/49補回，**2人次**；卓楓國小 **2023/06/27**，50–51列，**2人次**。若未來有獨立分場證據，可修正場數；**目前不推算不存在的時間**。
+- 真正缺日期的只有 \`111學生訪談名單!H69:H72\` 鶴岡國小四人原始欄位，H69:H72全空、未合併；已完成依使用者確認，不計正式場次直到日期查明。不要求時間。
+- Google 活動Mirror \`1bu5qvqOIV9c3VA10Af3UPizXEzJTGmVlsZFTVvUSV0c\` 使用原V2分頁複製生成唯一新的 \`INTERVIEW_IMPORT_110_114_20261013_V3\`（sheetId 180013117），保留原285行並追加三行 PIV-20261013-V3-0286..0288。**V3共288場／396受訪人次（教師162、學生232、校方其他2）**。年度依序 110=16/20，111=45/98，112=73/80，113=80/88，114=74/110。新3行共19位，不存姓名/個資/Meet網址。Google Sheets整表回讀及當前 \`canonicalizeInterviewImport\` JS 程式以真實288行整合測試 PASS。
+- \`INTERVIEW_IMPORT_ISSUES_20261013!A4:H4\` 已把原19「待補時段」改成「已補登三筆活動／不需補時間」；A5:H5仍列鶴岡四筆缺日期；A9:H9正式讀V3、不疊加V1/V2。112未完成16列仍按使用者指示不計。
+- 網站公開 \`futurenowchen/PASSION-site/data-query/js/sheets.js\` 只讀V3 A:P；\`js/data.js\` 識別V2既有285行＋V3新增3行，逐列來源／校名／日期／學生人次固定護欄及累計288/396、各年度檢查，其他未知缺時段不構成載入失敗。活動頁 \`index.html\` 快取 token \`20261013-interview3\`。\`tests/interview-import.test.mjs\` fixture及各量調至V3。四檔已同步私有 \`futurenowchen/passion-activity-data/web/\`。
+- 目前V3資料/JS函式/雙repo已核驗，但尚未取得GitHub Actions node tests及Google OAuth正式網站互動PASS。後續須驗收網站「訪談」類別，V1/V2舊分頁不可同加；鶴岡四人只問日期，不問時段。
