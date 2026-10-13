@@ -102,7 +102,8 @@ async function loadData() {
     renderAll();
     setStatus(
       `資料載入完成：歷史 ${state.records.filter(r => r.source_type === "legacy").length.toLocaleString()} 筆，` +
-      `Current ${state.records.filter(r => r.source_type === "current").length.toLocaleString()} 筆。`,
+      `Current ${state.records.filter(r => r.source_type === "current").length.toLocaleString()} 筆，` +
+      `歷史訪談補登 ${state.records.filter(r => r.source_type === "interview_import").length.toLocaleString()} 筆（僅已核定受訪紀錄）。`,
       "success",
     );
     $("workspace").hidden = false;
