@@ -30,25 +30,37 @@ function sourceRows() {
         "已核定（受訪者人次；時段已確認）"]);
     }
   }
+  for(const [index,date,school,students,source] of [
+    [286,"2023/05/30","玉東國中",15,"111學生訪談名單!2:17"],
+    [287,"2023/06/06","卓楓國小",2,"111學生訪談名單!46:49"],
+    [288,"2023/06/27","卓楓國小",2,"111學生訪談名單!50:51"],
+  ]){
+    out.push(["PIV-20261013-V3-"+String(index).padStart(4,"0"),
+      date,111,"PASSION扎根團隊","待確認",school,"語文","訪談",
+      school+"學生訪談","學生",0,students,0,
+      "訪談紀錄彙整.xlsx::"+source,
+      "匿名；僅按日期建立活動，不以缺訪談時間阻擋",
+      "已核定（受訪者人次；僅日期）"]);
+  }
   return out;
 }
-test("110-114 corrected V2 academic sessions and 377 interviewee person-times",()=>{
+test("110-114 V3 dated sessions and 396 interviewee person-times",()=>{
   const list=canonicalizeInterviewImport(sourceRows());
-  assert.equal(list.length,285);
-  assert.equal(metricTotal(list,"活動場次"),285);
-  assert.equal(metricTotal(list,"總參與人次"),377);
+  assert.equal(list.length,288);
+  assert.equal(metricTotal(list,"活動場次"),288);
+  assert.equal(metricTotal(list,"總參與人次"),396);
   assert.equal(metricTotal(list,"教師參與人次"),162);
-  assert.equal(list.reduce((n,x)=>n+x.interview_student_count,0),213);
+  assert.equal(list.reduce((n,x)=>n+x.interview_student_count,0),232);
   assert.equal(list.reduce((n,x)=>n+x.interview_other_school_staff_count,0),2);
-  assert.equal(applyFilters(list,{filters:{category:["訪談"]}}).length,285);
-  for(const [yr,num] of [[110,16],[111,42],[112,73],[113,80],[114,74]])
+  assert.equal(applyFilters(list,{filters:{category:["訪談"]}}).length,288);
+  for(const [yr,num] of [[110,16],[111,45],[112,73],[113,80],[114,74]])
     assert.equal(list.filter(x=>x.academic_year===yr).length,num);
 });
-test("canonicalizeSources includes one V2 batch and no original students IDs",()=>{
+test("canonicalizeSources loads V3 dated rows without original student IDs",()=>{
   const list=canonicalizeSources({interviews:sourceRows()});
   assert.equal(list.length,285);
   assert.ok(list.every(r=>r.rooted_student_count===null));
-  assert.ok(list.every(r=>r.activity_id.startsWith("PIV-20261013-V2-")));
+  assert.equal(list.filter(r=>r.activity_id.startsWith("PIV-20261013-V3-")).length,3);
 });
 test("rejects duplicates, wrong academic year, unpublished cohort counts",()=>{
   const x=sourceRows();x[2][0]=x[1][0];
