@@ -20,6 +20,7 @@ export async function fetchPassionSheets({
   const params = new URLSearchParams();
   params.append("ranges", `${quotedSheet(legacySheet)}!A:U`);
   params.append("ranges", `${quotedSheet(currentSheet)}!A:BA`);
+  params.append("ranges", "`'INTERVIEW_IMPORT_110_114_20261013'!A:O`".slice(1,-1));
   params.set("majorDimension", "ROWS");
   params.set("valueRenderOption", "FORMATTED_VALUE");
   params.set("fields", "valueRanges(range,values)");
@@ -64,6 +65,7 @@ export async function fetchPassionSheets({
   return {
     legacy: ranges[0]?.values || [],
     current: ranges[1]?.values || [],
+    interviews: ranges[2]?.values || [],
   };
 }
 
