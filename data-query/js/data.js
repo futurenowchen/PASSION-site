@@ -441,8 +441,92 @@ export function canonicalizeCurrent(values = []) {
   return records;
 }
 
-export function canonicalizeSources({legacy = [], current = []}) {
-  return [...canonicalizeLegacy(legacy), ...canonicalizeCurrent(current)];
+/**
+ * 110-114 interview history is stored as a separate approved, anonymous batch.
+ * Interviewees are counted as participants, but students are NOT assumed to be
+ * 扎根生 and interviewers are NOT counted without a confirmed attendance basis.
+ * No student names, respondent IDs or video URLs are read.
+ */
+export function canonicalizeInterviewImport(values = []) {
+  if (values.length < 2) return [];
+  const headers = headerMap(values[0]);
+  const required = ["批次ID","活動日期","學年度","計畫名稱","服務對象","科目",
+    "活動類別","其他活動名稱","訪談種類","受訪教師人次","受訪學生人次",
+    "來源原始檔位置","核定狀態"];
+  if (required.some(key => !headers.has(key))) {
+    throw new Error("訪談匯入資料缺少必要欄位，停止載入。");
+  }
+  const seen = new Set();
+  const records = [];
+  for (const row of values.slice(1)) {
+    const id = cleanText(pick(row, headers, "批次ID"));
+    if (!id) continue;
+    const date = toIsoDate(pick(row, headers, "活動日期"));
+    const year = toInt(pick(row, headers, "學年度"));
+    const school = cleanText(pick(row, headers, "服務對象"));
+    const category = cleanText(pick(row, headers, "活動類別"));
+    const kind = cleanText(pick(row, headers, "訪談種類"));
+    const teacher = toInt(pick(row, headers, "受訪教師人次"));
+    const student = toInt(pick(row, headers, "受訪學生人次"));
+    const activityName = cleanText(pick(row, headers, "其他活動名稱"));
+    const source = cleanText(pick(row, headers, "來源原始檔位置"));
+    const status = cleanText(pick(row, headers, "核定狀態"));
+    if (seen.has(id) || !/^PIV-20261013-\d{4}$/.test(id) ||
+        !date || year < 111 || year > 114 || academicYearRoc(date) !== year ||
+        !school || !activityName || category !== "訪談" ||
+        !["教師","學生"].includes(kind) ||
+        teacher === null || student === null ||
+        teacher < 0 || student < 0 || teacher + student < 1 ||
+        (kind === "教師" && student !== 0) ||
+        (kind === "學生" && teacher !== 0) ||
+        status !== "已核定（僅受訪者人次）" ||
+        !source?.startsWith("訪談紀錄彙整.xlsx::")) {
+      throw new Error("訪談歷史批次存在重複／不合規紀錄，停止載入：" + (id || "未知"));
+    }
+    seen.add(id);
+    const project = cleanText(pick(row, headers, "計畫名稱"));
+    const subject = cleanText(pick(row, headers, "科目"));
+    const notes = cleanText(pick(row, headers, "備註"));
+    records.push({
+      activity_id:id, source_type:"interview_import", source_row_number:null,
+      activity_date:date, academic_year:year, project,
+      project_raw:project, project_family:project,
+      category:"訪談", category_raw:"訪談",
+      subject, subject_raw:subject, activity_name:activityName,
+      activity_mode:null,
+      service_target:school, service_target_raw:school,
+      service_region:null, service_region_raw:null,
+      venue_region:null, venue:null,
+      ntnu_professor_count:null, ntnu_staff_count:null,
+      ntnu_student_count:null, alumni_count:null,
+      advisor_teacher_count:null, rooted_student_count:null,
+      partner_school_staff_count:teacher,
+      government_staff_count:null, npo_staff_count:null,
+      external_teacher_count:null, external_university_professor_count:null,
+      external_university_staff_count:null, external_university_student_count:null,
+      media_count:null, legacy_external_participant_count:null,
+      teacher_participant_count:teacher,
+      total_participant_count:teacher+student,
+      interview_student_count:student,
+      notes:(notes || "") + "；僅計受訪者，未包含訪談團隊人員",
+      source_reference:source,
+    });
+  }
+  if (records.length !== 243 ||
+      records.reduce((sum,r)=>sum+r.total_participant_count,0) !== 335 ||
+      records.reduce((sum,r)=>sum+(r.interview_student_count||0),0)!==214 ||
+      records.reduce((sum,r)=>sum+r.teacher_participant_count,0)!==121) {
+    throw new Error("110-114訪談批次總筆數／受訪人次未對平，停止載入。");
+  }
+  return records;
+}
+
+export function canonicalizeSources({legacy = [], current = [], interviews = []}) {
+  return [
+    ...canonicalizeLegacy(legacy),
+    ...canonicalizeCurrent(current),
+    ...canonicalizeInterviewImport(interviews),
+  ];
 }
 
 function tokens(value) {
