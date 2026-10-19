@@ -2,8 +2,8 @@
   const newsHost = document.getElementById('home-news-list');
   const activityHost = document.getElementById('home-activity-list');
   const heroCarousel = document.getElementById('home-hero-carousel');
-  const heroSlides = heroCarousel ? [...heroCarousel.querySelectorAll('[data-hero-slide]')] : [];
-  const heroDots = heroCarousel ? [...heroCarousel.querySelectorAll('[data-hero-dot]')] : [];
+  let heroSlides = [];
+  let heroDots = [];
   const heroPrev = heroCarousel ? heroCarousel.querySelector('[data-hero-prev]') : null;
   const heroNext = heroCarousel ? heroCarousel.querySelector('[data-hero-next]') : null;
 
@@ -26,6 +26,84 @@
   }[char]));
 
   const formatDate = (value = '') => value.replace(/-/g, '.');
+
+  // The ordered photo pool is maintained by the /admin/ CMS.
+  // Only repository-hosted images can become carousel sources.
+  function safeHeroImagePath(source) {
+    if (typeof source !== 'string') return null;
+    let path = source.trim();
+    if (path.startsWith('/PASSION-site/')) path = path.slice('/PASSION-site/'.length);
+    else if (path.startsWith('/')) path = path.slice(1);
+    if (!path.startsWith('images/hero/')) return null;
+    if (path.split('/').some((part) => !part || part === '.' || part === '..')) return null;
+    if (!/\.(?:jpe?g|png|webp|avif)$/i.test(path)) return null;
+    if (/[?#\\]/.test(path) || /%2f|%5c|%2e/i.test(path)) return null;
+    return path;
+  }
+
+  async function loadHeroCarousel() {
+    if (!heroCarousel) return;
+    const slidesHost = heroCarousel.querySelector('.home-hero-slides');
+    const dotsHost = heroCarousel.querySelector('.home-hero-carousel-dots');
+    if (!slidesHost || !dotsHost) return;
+
+    try {
+      const response = await fetch('data/hero.json', { cache: 'no-cache' });
+      if (!response.ok) throw new Error('Hero config HTTP ' + response.status);
+      const data = await response.json();
+      if (!Array.isArray(data.slides) || !data.slides.length || data.slides.length > 30) {
+        throw new Error('Hero config: slides must contain 1–30 images');
+      }
+      const slides = data.slides.map((item) => ({
+        src: safeHeroImagePath(item && item.src),
+        alt: item && typeof item.alt === 'string' ? item.alt.trim() : ''
+      }));
+      if (slides.some((slide) => !slide.src || !slide.alt)) {
+        throw new Error('Hero config: invalid image path or missing alternative text');
+      }
+
+      const slideNodes = document.createDocumentFragment();
+      const dotNodes = document.createDocumentFragment();
+
+      slides.forEach((item, index) => {
+        const figure = document.createElement('figure');
+        figure.className = 'home-hero-slide' + (index === 0 ? ' is-active' : '');
+        figure.dataset.heroSlide = '';
+        figure.setAttribute('aria-hidden', String(index !== 0));
+
+        const image = document.createElement('img');
+        image.src = item.src;
+        image.alt = item.alt;
+        image.loading = index < 2 ? 'eager' : 'lazy';
+        image.decoding = 'async';
+        if (index === 0) image.fetchPriority = 'high';
+        figure.append(image);
+        slideNodes.append(figure);
+
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.dataset.heroDot = String(index);
+        dot.setAttribute('aria-label', '顯示第 ' + (index + 1) + ' 張照片');
+        if (index === 0) {
+          dot.className = 'is-active';
+          dot.setAttribute('aria-current', 'true');
+        }
+        dotNodes.append(dot);
+      });
+
+      slidesHost.replaceChildren(slideNodes);
+      dotsHost.replaceChildren(dotNodes);
+      heroSlides = [...heroCarousel.querySelectorAll('[data-hero-slide]')];
+      heroDots = [...heroCarousel.querySelectorAll('[data-hero-dot]')];
+      heroCarousel.classList.toggle('is-single-slide', heroSlides.length < 2);
+      if (heroSlides.length > 1) initHeroCarousel();
+    } catch (error) {
+      console.error('首頁輪播照片池載入失敗：', error);
+      slidesHost.textContent = '輪播照片目前無法載入。';
+      slidesHost.classList.add('home-hero-loading');
+      heroCarousel.classList.add('is-single-slide');
+    }
+  }
 
   function initHeroCarousel() {
     if (!heroCarousel || heroSlides.length < 2) return;
@@ -185,7 +263,7 @@
 
   }
 
-  initHeroCarousel();
+  loadHeroCarousel();
 
   Promise.all([
     fetch('data/news.json', { cache: 'no-cache' }).then((response) => {

@@ -3170,3 +3170,18 @@ main section a:not(.button):not(.button-link) {
   }
 }
 
+/* Dynamic home-photo pool: loading/empty states and single-slide controls. */
+.home-hero-loading {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 24px;
+  place-items: center;
+  color: #5b343b;
+  text-align: center;
+}
+.home-hero-media.is-single-slide .home-hero-carousel-arrow,
+.home-hero-media.is-single-slide .home-hero-carousel-dots {
+  display: none;
+}

@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+# PASSION 首頁照片池。此階段只開放輪播管理，不開放活動或最新消息編輯。
+backend:
+  name: github
+  repo: futurenowchen/PASSION-site
+  branch: main
+  auth_methods: [token]
+
+site_url: https://futurenowchen.github.io/PASSION-site/
+display_url: https://futurenowchen.github.io/PASSION-site/
+
+# 上傳到 repo 的首頁專用照片資料夾（避免碰觸活動紀實原始素材）。
+media_folder: /images/hero
+public_folder: /PASSION-site/images/hero
+
+collections:
+  - name: home
+    label: 首頁內容
+    files:
+      - name: hero
+        label: 首頁輪播照片池
+        file: data/hero.json
+        format: json
+        fields:
+          - label: 輪播照片（由上而下就是輪播順序）
+            label_singular: 一張輪播照片
+            name: slides
+            widget: list
+            summary: "{{alt}}"
+            thumbnail: src
+            collapsed: true
+            min: 1
+            max: 30
+            allow_reorder: true
+            allow_add: true
+            allow_remove: true
+            fields:
+              - label: 照片（可從照片池選擇或上傳）
+                name: src
+                widget: image
+                required: true
+              - label: 照片描述（供無障礙閱讀）
+                name: alt
+                widget: string
+                required: true
+                hint: 簡短描述照片畫面，例如「PASSION教師帶領學生進行閱讀活動」。
