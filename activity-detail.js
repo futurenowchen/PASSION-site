@@ -41,7 +41,8 @@
           '<h1>' + escapeHtml(item.title) + '</h1>' +
         '</header>' +
         (item.cover ? '<figure class="activity-detail-cover"><img src="' + escapeHtml(item.cover) + '" alt="" /></figure>' : '') +
-        '<div class="activity-detail-body">' + escapeHtml(item.body).replace(/\n/g, '<br />') + '</div>';
+        '<div class="activity-detail-body">' + escapeHtml(item.body).replace(/\n/g, '<br />') + '</div>' +
+        (/^https:\/\//.test(item.source_url || '') ? '<div class="activity-provenance"><strong>資料來源</strong><a href="' + escapeHtml(item.source_url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.source_label || '查看原始報導') + ' ↗</a></div>' : '');
     })
     .catch((error) => {
       console.error(error);
