@@ -2272,7 +2272,7 @@ main section a:not(.button):not(.button-link) {
 
 .home-activity-image {
   display: block;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: var(--brand-soft);
 }
