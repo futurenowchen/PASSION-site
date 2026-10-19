@@ -20,7 +20,8 @@
     empty.hidden=visible.length>0;
     list.innerHTML=visible.map((item)=>{
       const category=labels[item.category]||'活動紀實';
-      return '<article class="activity-card"><div class="activity-cover"><img src="'+escapeHtml(item.cover)+'" alt="" loading="lazy" /></div><div class="activity-card-body"><div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div><h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+'<a class="activity-read-more" href="activity-detail.html?id='+encodeURIComponent(item.id)+'">閱讀完整紀實 →</a></div></article>';
+      const cover=item.cover?'<img src="'+escapeHtml(item.cover)+'" alt="" loading="lazy" />':'<div class="activity-cover-placeholder" aria-hidden="true"><span>PASSION</span><strong>教育現場紀實</strong></div>';
+      return '<article class="activity-card"><div class="activity-cover">'+cover+'</div><div class="activity-card-body"><div class="activity-meta"><time datetime="'+escapeHtml(item.date)+'">'+formatDate(item.date)+'</time><span>'+escapeHtml(category)+'</span></div><h3>'+escapeHtml(item.title)+'</h3><p class="activity-summary">'+escapeHtml(item.summary)+'</p>'+'<a class="activity-read-more" href="activity-detail.html?id='+encodeURIComponent(item.id)+'">閱讀完整紀實 →</a></div></article>';
     }).join('');
   }
   function setFilter(container,value,type){container.querySelectorAll('.activity-filter').forEach((button)=>button.classList.toggle('is-active',button.dataset[type]===value));}
