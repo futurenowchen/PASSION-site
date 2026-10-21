@@ -66,21 +66,30 @@
         throw new Error('Hero config: invalid image path or missing alternative text');
       }
 
+      // Only the first load shows 00-cover.jpg. Other photos are shuffled
+      // without repetition until the current round finishes.
+      if (!window.PassionHeroPlayback) throw new Error('Hero playback script unavailable');
+      const playback = window.PassionHeroPlayback.createPlaybackOrder(
+        slides.length, slides[0].src === 'images/hero/00-cover.jpg'
+      );
+      const initialIndex = playback.current();
+      const upcomingIndex = playback.peekNext();
       const slideNodes = document.createDocumentFragment();
 
       slides.forEach((item, index) => {
         const figure = document.createElement('figure');
-        figure.className = 'home-hero-slide' + (index === 0 ? ' is-active' : '');
+        figure.className = 'home-hero-slide' + (index === initialIndex ? ' is-active' : '');
         figure.dataset.heroSlide = '';
-        figure.setAttribute('aria-hidden', String(index !== 0));
+        figure.setAttribute('aria-hidden', String(index !== initialIndex));
 
         const image = document.createElement('img');
-        if (index < 2) image.src = item.src;
+        const preload = index === initialIndex || index === upcomingIndex;
+        if (preload) image.src = item.src;
         else image.dataset.lazySrc = item.src;
         image.alt = item.alt;
-        image.loading = index < 2 ? 'eager' : 'lazy';
+        image.loading = preload ? 'eager' : 'lazy';
         image.decoding = 'async';
-        if (index === 0) image.fetchPriority = 'high';
+        if (index === initialIndex) image.fetchPriority = 'high';
         figure.append(image);
         slideNodes.append(figure);
 
@@ -89,7 +98,7 @@
       slidesHost.replaceChildren(slideNodes);
       heroSlides = [...heroCarousel.querySelectorAll('[data-hero-slide]')];
       heroCarousel.classList.toggle('is-single-slide', heroSlides.length < 2);
-      if (heroSlides.length > 1) initHeroCarousel();
+      if (heroSlides.length > 1) initHeroCarousel(playback);
     } catch (error) {
       console.error('首頁輪播照片池載入失敗：', error);
       slidesHost.textContent = '輪播照片目前無法載入。';
@@ -98,18 +107,17 @@
     }
   }
 
-  function initHeroCarousel() {
+  function initHeroCarousel(playback) {
     if (!heroCarousel || heroSlides.length < 2) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const intervalMs = 5000;
-    let current = 0;
     let timer = null;
     let touchStartX = null;
 
-    const show = (nextIndex) => {
-      current = (nextIndex + heroSlides.length) % heroSlides.length;
-      for (const i of [current, (current + 1) % heroSlides.length]) {
+    const show = (currentIndex) => {
+      for (const i of [currentIndex, playback.peekNext()]) {
+        if (i === null) continue;
         const img = heroSlides[i].querySelector('img');
         if (img && img.dataset.lazySrc) {
           img.src = img.dataset.lazySrc;
@@ -118,7 +126,7 @@
       }
 
       heroSlides.forEach((slide, index) => {
-        const active = index === current;
+        const active = index === currentIndex;
         slide.classList.toggle('is-active', active);
         slide.setAttribute('aria-hidden', String(!active));
       });
@@ -133,17 +141,17 @@
 
     const start = () => {
       if (reduceMotion || timer || document.hidden) return;
-      timer = window.setInterval(() => show(current + 1), intervalMs);
+      timer = window.setInterval(() => show(playback.next()), intervalMs);
     };
 
     heroPrev?.addEventListener('click', () => {
-      show(current - 1);
+      show(playback.previous());
       stop();
       start();
     });
 
     heroNext?.addEventListener('click', () => {
-      show(current + 1);
+      show(playback.next());
       stop();
       start();
     });
@@ -168,7 +176,7 @@
       touchStartX = null;
 
       if (Math.abs(delta) >= 45) {
-        show(current + (delta < 0 ? 1 : -1));
+        show(delta < 0 ? playback.next() : playback.previous());
       }
       start();
     }, { passive: true });
@@ -178,7 +186,7 @@
       else start();
     });
 
-    show(0);
+    show(playback.current());
     start();
   }
 
