@@ -3,7 +3,6 @@
   const activityHost = document.getElementById('home-activity-list');
   const heroCarousel = document.getElementById('home-hero-carousel');
   let heroSlides = [];
-  let heroDots = [];
   const heroPrev = heroCarousel ? heroCarousel.querySelector('[data-hero-prev]') : null;
   const heroNext = heroCarousel ? heroCarousel.querySelector('[data-hero-next]') : null;
 
@@ -44,15 +43,14 @@
   async function loadHeroCarousel() {
     if (!heroCarousel) return;
     const slidesHost = heroCarousel.querySelector('.home-hero-slides');
-    const dotsHost = heroCarousel.querySelector('.home-hero-carousel-dots');
-    if (!slidesHost || !dotsHost) return;
+    if (!slidesHost) return;
 
     try {
       const response = await fetch('data/hero.json', { cache: 'no-cache' });
       if (!response.ok) throw new Error('Hero config HTTP ' + response.status);
       const data = await response.json();
-      if (!Array.isArray(data.slides) || !data.slides.length || data.slides.length > 30) {
-        throw new Error('Hero config: slides must contain 1–30 images');
+      if (!Array.isArray(data.slides) || !data.slides.length) {
+        throw new Error('Hero config: slides must contain at least one image');
       }
       const slides = data.slides.map((item) => ({
         src: safeHeroImagePath(item && item.src),
@@ -63,7 +61,6 @@
       }
 
       const slideNodes = document.createDocumentFragment();
-      const dotNodes = document.createDocumentFragment();
 
       slides.forEach((item, index) => {
         const figure = document.createElement('figure');
@@ -72,7 +69,8 @@
         figure.setAttribute('aria-hidden', String(index !== 0));
 
         const image = document.createElement('img');
-        image.src = item.src;
+        if (index < 2) image.src = item.src;
+        else image.dataset.lazySrc = item.src;
         image.alt = item.alt;
         image.loading = index < 2 ? 'eager' : 'lazy';
         image.decoding = 'async';
@@ -80,21 +78,10 @@
         figure.append(image);
         slideNodes.append(figure);
 
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.dataset.heroDot = String(index);
-        dot.setAttribute('aria-label', '顯示第 ' + (index + 1) + ' 張照片');
-        if (index === 0) {
-          dot.className = 'is-active';
-          dot.setAttribute('aria-current', 'true');
-        }
-        dotNodes.append(dot);
       });
 
       slidesHost.replaceChildren(slideNodes);
-      dotsHost.replaceChildren(dotNodes);
       heroSlides = [...heroCarousel.querySelectorAll('[data-hero-slide]')];
-      heroDots = [...heroCarousel.querySelectorAll('[data-hero-dot]')];
       heroCarousel.classList.toggle('is-single-slide', heroSlides.length < 2);
       if (heroSlides.length > 1) initHeroCarousel();
     } catch (error) {
@@ -116,6 +103,13 @@
 
     const show = (nextIndex) => {
       current = (nextIndex + heroSlides.length) % heroSlides.length;
+      for (const i of [current, (current + 1) % heroSlides.length]) {
+        const img = heroSlides[i].querySelector('img');
+        if (img && img.dataset.lazySrc) {
+          img.src = img.dataset.lazySrc;
+          delete img.dataset.lazySrc;
+        }
+      }
 
       heroSlides.forEach((slide, index) => {
         const active = index === current;
@@ -123,15 +117,6 @@
         slide.setAttribute('aria-hidden', String(!active));
       });
 
-      heroDots.forEach((dot, index) => {
-        const active = index === current;
-        dot.classList.toggle('is-active', active);
-        if (active) {
-          dot.setAttribute('aria-current', 'true');
-        } else {
-          dot.removeAttribute('aria-current');
-        }
-      });
     };
 
     const stop = () => {
@@ -157,13 +142,6 @@
       start();
     });
 
-    heroDots.forEach((dot, index) => {
-      dot.addEventListener('click', () => {
-        show(index);
-        stop();
-        start();
-      });
-    });
 
     heroCarousel.addEventListener('mouseenter', stop);
     heroCarousel.addEventListener('mouseleave', start);

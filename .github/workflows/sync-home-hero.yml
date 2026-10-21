@@ -1,0 +1,26 @@
+name: Sync homepage photo folder
+on:
+  push:
+    branches: [main]
+    paths: ['images/hero/**', 'scripts/sync-hero-pool.cjs']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sync-hero-folder
+  cancel-in-progress: false
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/sync-hero-pool.cjs
+      - name: Commit changed manifest
+        run: |
+          if git diff --quiet -- data/hero.json; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/hero.json
+          git commit -m "chore(hero): sync photo folder"
+          git push

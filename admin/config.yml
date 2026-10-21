@@ -30,7 +30,6 @@ collections:
             thumbnail: src
             collapsed: true
             min: 1
-            max: 30
             allow_reorder: true
             allow_add: true
             allow_remove: true
