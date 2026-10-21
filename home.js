@@ -52,7 +52,13 @@
       if (!Array.isArray(data.slides) || !data.slides.length) {
         throw new Error('Hero config: slides must contain at least one image');
       }
-      const slides = data.slides.map((item) => ({
+      // The reserved cover always displays first even if the CMS reorders the JSON.
+      const orderedSlides = [...data.slides];
+      const pinnedIndex = orderedSlides.findIndex((item) =>
+        safeHeroImagePath(item && item.src) === 'images/hero/00-cover.jpg'
+      );
+      if (pinnedIndex > 0) orderedSlides.unshift(...orderedSlides.splice(pinnedIndex, 1));
+      const slides = orderedSlides.map((item) => ({
         src: safeHeroImagePath(item && item.src),
         alt: item && typeof item.alt === 'string' ? item.alt.trim() : ''
       }));

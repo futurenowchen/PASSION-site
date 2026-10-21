@@ -22,7 +22,7 @@ collections:
         file: data/hero.json
         format: json
         fields:
-          - label: 輪播照片（由上而下就是輪播順序）
+          - label: 輪播照片（00-cover.jpg 優先，其餘由上而下排序）
             label_singular: 一張輪播照片
             name: slides
             widget: list

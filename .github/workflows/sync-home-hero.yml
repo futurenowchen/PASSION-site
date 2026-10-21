@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: node scripts/sync-hero-pool.cjs
+      - name: Verify photo ordering
+        run: node --test tests/hero-photo-pool.test.cjs
       - name: Commit changed manifest
         run: |
           if git diff --quiet -- data/hero.json; then exit 0; fi

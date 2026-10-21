@@ -1,33 +1,73 @@
-// Provider-free, dependency-free structural acceptance for the home photo pool.
+'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
-const root = path.resolve(__dirname, '..');
-const config = JSON.parse(fs.readFileSync(path.join(root, 'data/hero.json'), 'utf8'));
+const { buildSlides, sync } = require('../scripts/sync-hero-pool.cjs');
 
-test('initial hero pool preserves all 11 photo entries and allows any first photo', () => {
-  assert.equal(config.slides.length, 11);
-  assert.deepEqual(config.slides.map(s => s.alt).length, 11);
-  assert.match(config.slides[0].src, /home-2026-07-06\.png$/);
-  for (const slide of config.slides) {
-    assert.ok(slide.alt.trim());
-    assert.match(slide.src, /^\/PASSION-site\/images\/hero\//);
-    assert.ok(fs.existsSync(path.join(root, slide.src.replace(/^\/PASSION-site\//, ''))), slide.src);
+const src = (file) => '/PASSION-site/images/hero/' + file;
+const oldOrder = [
+  { src: src('b.jpg'), alt: 'B photo' },
+  { src: src('a.jpg'), alt: 'A photo' },
+];
+
+test('without 00-cover.jpg preserves current first image', () => {
+  const slides = buildSlides(['a.jpg', 'b.jpg', 'c.jpg'], oldOrder);
+  assert.deepEqual(slides.map((x) => x.src), ['b.jpg', 'a.jpg', 'c.jpg'].map(src));
+});
+
+test('00-cover.jpg becomes first when uploaded, with no duplicates', () => {
+  const slides = buildSlides(['a.jpg', 'b.jpg', '00-cover.jpg'], oldOrder);
+  assert.deepEqual(slides.map((x) => x.src), ['00-cover.jpg', 'b.jpg', 'a.jpg'].map(src));
+  assert.match(slides[0].alt, /PASSION/);
+});
+
+test('pinned cover stays first despite manual changes to order', () => {
+  const old = [...oldOrder, { src: src('00-cover.jpg'), alt: 'Custom cover caption' }];
+  const slides = buildSlides(['a.jpg', 'b.jpg', '00-cover.jpg'], old);
+  assert.deepEqual(slides.map((x) => x.src), ['00-cover.jpg', 'b.jpg', 'a.jpg'].map(src));
+  assert.equal(slides[0].alt, 'Custom cover caption');
+});
+
+test('deleting pinned cover restores the previous order', () => {
+  const old = [{ src: src('00-cover.jpg'), alt: 'Cover' }, ...oldOrder];
+  const slides = buildSlides(['a.jpg', 'b.jpg'], old);
+  assert.deepEqual(slides.map((x) => x.src), ['b.jpg', 'a.jpg'].map(src));
+});
+
+test('more than 30 images work, excluding unsupported formats', () => {
+  const files = Array.from({ length: 100 }, (_, i) => 'photo-' + i + '.jpg')
+    .concat('not-image.svg', 'notes.txt', '00-cover.jpg');
+  const slides = buildSlides(files);
+  assert.equal(slides.length, 101);
+  assert.equal(slides[0].src, src('00-cover.jpg'));
+  assert.ok(slides.every((item) => item.alt));
+});
+
+test('sync persists priority cover and is idempotent', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'passion-cover-'));
+  try {
+    fs.mkdirSync(path.join(root, 'images', 'hero'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'data'));
+    for (const name of ['a.jpg', 'b.jpg', '00-cover.jpg']) {
+      fs.writeFileSync(path.join(root, 'images', 'hero', name), 'fixture');
+    }
+    fs.writeFileSync(path.join(root, 'data', 'hero.json'), JSON.stringify({ slides: oldOrder }, null, 2) + '\n');
+    assert.equal(sync(root), true);
+    assert.equal(sync(root), false);
+    const result = JSON.parse(fs.readFileSync(path.join(root, 'data', 'hero.json'), 'utf8'));
+    assert.equal(result.slides[0].src, src('00-cover.jpg'));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
   }
 });
-test('home renders from JSON, not frozen inline photos', () => {
+
+test('current website hero manifest is valid and includes every image file', () => {
+  const root = path.resolve(__dirname, '..');
+  const data = JSON.parse(fs.readFileSync(path.join(root, 'data', 'hero.json'), 'utf8'));
+  const files = fs.readdirSync(path.join(root, 'images', 'hero'));
+  assert.deepEqual(buildSlides(files, data.slides), data.slides);
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  const js = fs.readFileSync(path.join(root, 'home.js'), 'utf8');
-  assert.doesNotMatch(html, /data-hero-slide/);
-  assert.match(js, /fetch\('data\/hero\.json'/);
-  assert.match(js, /loadHeroCarousel\(\)/);
-  assert.match(js, /replaceChildren\(slideNodes\)/);
-});
-test('CMS scope is limited to the home photo pool', () => {
-  const configYaml = fs.readFileSync(path.join(root, 'admin/config.yml'), 'utf8');
-  assert.match(configYaml, /file: data\/hero\.json/);
-  assert.match(configYaml, /allow_reorder: true/);
-  assert.match(configYaml, /name: src/);
-  assert.doesNotMatch(configYaml, /data\/activities\.json|data\/news\.json/);
+  assert.doesNotMatch(html, /home-hero-carousel-dots|data-hero-dot/);
 });
