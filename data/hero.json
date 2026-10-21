@@ -1,6 +1,10 @@
 {
   "slides": [
     {
+      "src": "/PASSION-site/images/hero/00-cover.jpg",
+      "alt": "PASSION 扎根教學團隊首頁輪播首圖"
+    },
+    {
       "src": "/PASSION-site/images/hero/fb-1647622224033892.jpg",
       "alt": "PASSION暑期成果展中學生進行英語拼讀活動"
     },
@@ -43,6 +47,22 @@
     {
       "src": "/PASSION-site/images/hero/fb-1647622194033895.jpg",
       "alt": "PASSION 教育現場：fb-1647622194033895"
+    },
+    {
+      "src": "/PASSION-site/images/hero/16.jpg",
+      "alt": "PASSION 教育現場：16"
+    },
+    {
+      "src": "/PASSION-site/images/hero/DSC_1848.jpg",
+      "alt": "PASSION 教育現場：DSC_1848"
+    },
+    {
+      "src": "/PASSION-site/images/hero/DSC03513.JPG",
+      "alt": "PASSION 教育現場：DSC03513"
+    },
+    {
+      "src": "/PASSION-site/images/hero/DSC05761.JPG",
+      "alt": "PASSION 教育現場：DSC05761"
     }
   ]
 }
