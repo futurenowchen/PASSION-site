@@ -11,7 +11,6 @@ class TestOptimizeHeroImages(unittest.TestCase):
         self.root = Path(self.tmp.name) / 'PASSION-site'
         self.hero = self.root / 'images' / 'hero'
         self.hero.mkdir(parents=True)
-        self.backup = Path(self.tmp.name) / 'outside-hero-backup'
         self.jpg = self.hero / '00-cover.jpg'
         im = Image.effect_noise((3600, 2400), 50).convert('RGB')
         im.save(self.jpg, 'JPEG', quality=97)
@@ -23,30 +22,37 @@ class TestOptimizeHeroImages(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def test_preview_is_readonly_and_apply_preserves_names_and_backup(self):
+    def test_preview_is_readonly_and_apply_updates_original_without_backup(self):
         before = self.jpg.read_bytes()
-        preview = optimize(self.hero, self.root, None, False, 2400, 86, 5)
+        preview = optimize(self.hero, self.root, False, 2400, 86, 5)
         self.assertTrue(any(r.filename=='00-cover.jpg' and r.status=='READY' for r in preview))
         self.assertEqual(self.jpg.read_bytes(), before)
-        modified = optimize(self.hero, self.root, self.backup, True, 2400, 86, 5)
+        modified = optimize(self.hero, self.root, True, 2400, 86, 5)
         self.assertTrue(any(r.filename=='00-cover.jpg' and r.status=='UPDATED' for r in modified))
-        self.assertEqual((self.backup/'00-cover.jpg').read_bytes(), before)
+        self.assertNotEqual(self.jpg.read_bytes(), before)
         self.assertLess(self.jpg.stat().st_size, len(before))
         with Image.open(self.jpg) as im:
             self.assertEqual(im.size, (2400, 1600))
         self.assertEqual(self.png.suffix, '.png')
         self.assertIn('wrong.png', [x.filename for x in modified if x.status=='SKIP'])
 
-    def test_backup_cannot_be_inside_repo(self):
-        with self.assertRaises(ValueError):
-            optimize(self.hero, self.root, self.root/'backup', True, 2400, 86, 5)
+    def test_repeat_apply_does_not_create_extra_files(self):
+        before = set(p.name for p in self.hero.iterdir())
+        optimize(self.hero, self.root, True, 2400, 86, 5)
+        optimize(self.hero, self.root, True, 2400, 86, 5)
+        self.assertEqual(set(p.name for p in self.hero.iterdir()), before)
 
-    def test_repeated_backups_are_not_overwritten(self):
-        self.backup.mkdir()
-        (self.backup/'00-cover.jpg').write_bytes(b'original saved earlier')
-        with self.assertRaises(FileExistsError):
-            optimize(self.hero, self.root, self.backup, True, 2400, 86, 5)
-        self.assertEqual((self.backup/'00-cover.jpg').read_bytes(), b'original saved earlier')
+    def test_invalid_quality_fails_without_writing(self):
+        before = self.jpg.read_bytes()
+        with self.assertRaises(ValueError):
+            optimize(self.hero, self.root, True, 2400, 20, 5)
+        self.assertEqual(self.jpg.read_bytes(), before)
+
+    def test_format_mismatch_skips_bad_extension(self):
+        before = self.wrong.read_bytes()
+        results = optimize(self.hero, self.root, True, 2400, 86, 5)
+        self.assertEqual(self.wrong.read_bytes(), before)
+        self.assertIn('wrong.png', [x.filename for x in results if x.status == 'SKIP'])
 
 
 if __name__ == '__main__':

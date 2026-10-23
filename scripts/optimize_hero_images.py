@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Safely optimize PASSION homepage photos without changing names or formats.
 
-Default is a read-only preview. Use --apply --backup-dir OUTSIDE_REPO to write.
+Default is a read-only preview. Use --apply to update original files in place.
 Only existing images/hero assets are considered; hero.json and other media are untouched.
 """
 
@@ -12,7 +12,6 @@ from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
 import os
-import shutil
 import sys
 import tempfile
 
@@ -71,22 +70,22 @@ def optimized_bytes(source: Path, max_edge: int, quality: int) -> tuple[bytes | 
             output = BytesIO()
             work.save(output, **save_kwargs)
             result = output.getvalue()
+            # Decode the output completely before it can replace the original.
+            with Image.open(BytesIO(result)) as verified:
+                verified.load()
+                if verified.format != expected_format or verified.size != work.size:
+                    return None, "encoded image failed format/dimension validation"
             return result, f"{dimensions[0]}x{dimensions[1]} -> {work.width}x{work.height}"
     except (UnidentifiedImageError, OSError, ValueError) as exc:
         return None, f"decode/encode error: {exc}"
 
 
-def optimize(hero_dir: Path, repo_root: Path, backup_dir: Path | None,
+def optimize(hero_dir: Path, repo_root: Path,
              apply: bool, max_edge: int, quality: int, min_savings: int) -> list[Result]:
     if not hero_dir.is_dir() or not within(hero_dir, repo_root):
         raise ValueError("Hero folder must exist inside the PASSION-site repo")
     if max_edge < 800 or quality < 50 or quality > 100 or not 0 <= min_savings <= 80:
         raise ValueError("Invalid sizing/quality/savings options")
-    if apply:
-        if backup_dir is None or within(backup_dir, repo_root):
-            raise ValueError("--apply requires --backup-dir outside the repository")
-        if backup_dir.resolve() == hero_dir.resolve():
-            raise ValueError("Backup cannot be the source folder")
     results = []
     files = sorted((p for p in hero_dir.iterdir() if p.is_file() and p.suffix.lower() in
                     set(FORMAT_BY_EXTENSION) | {".avif"}), key=lambda p: p.name.lower())
@@ -103,12 +102,6 @@ def optimize(hero_dir: Path, repo_root: Path, backup_dir: Path | None,
         if not apply:
             results.append(Result(photo.name, "READY", size, len(candidate), f"saves {savings:.1f}%; {note}"))
             continue
-        assert backup_dir is not None
-        backup_dir.mkdir(parents=True, exist_ok=True)
-        backup = backup_dir / photo.name
-        if backup.exists():
-            raise FileExistsError(f"Backup already exists, use a NEW backup directory: {backup}")
-        shutil.copy2(photo, backup)
         fd, temp_name = tempfile.mkstemp(prefix=".hero-optimized-", suffix=photo.suffix, dir=photo.parent)
         try:
             with os.fdopen(fd, "wb") as stream:
@@ -126,14 +119,13 @@ def optimize(hero_dir: Path, repo_root: Path, backup_dir: Path | None,
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true", help="Update original images (default: preview only)")
-    parser.add_argument("--backup-dir", type=Path, help="Required with --apply; MUST be outside repo")
     parser.add_argument("--max-edge", type=int, default=2400)
     parser.add_argument("--quality", type=int, default=86)
     parser.add_argument("--min-savings", type=int, default=5, help="Minimum percentage saved")
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parent.parent
     try:
-        items = optimize(repo_root / "images" / "hero", repo_root, args.backup_dir,
+        items = optimize(repo_root / "images" / "hero", repo_root,
                          args.apply, args.max_edge, args.quality, args.min_savings)
     except (ValueError, OSError) as err:
         print(f"ERROR: {err}", file=sys.stderr)
