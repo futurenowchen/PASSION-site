@@ -17,7 +17,7 @@ git status --short
 git diff --stat
 ```
 
-Defaults: long edge <= 2400px, JPEG/WebP quality 86, minimum size saving 5%.
+Defaults: long edge <= 1600px, JPEG/WebP quality 78, minimum size saving 5%.
 PNG remains PNG and receives lossless compression. AVIF and animated images
 are skipped; mismatches such as JPEG bytes disguised as PNG are skipped.
 The team maintains its original image archive separately, so this tool does
@@ -30,3 +30,9 @@ classroom photos look good. Keep `git diff` scoped to `images/hero/`.
 
 The team/school production domain `passiontw.net` has a separate deployment
 step that is not handled by this local image optimizer.
+
+Image size policy: The split homepage Hero occupies about 60% of desktop width and
+uses a 16:9 viewport on smaller screens. This batch preset prioritizes practical
+web delivery size rather than archival resolution. The aspect ratio is retained
+(no crop). Larger high-DPI screens may look slightly softer. Use explicit
+`--max-edge` / `--quality` options for exceptions without changing site markup.

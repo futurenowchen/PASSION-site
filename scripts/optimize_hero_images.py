@@ -119,8 +119,8 @@ def optimize(hero_dir: Path, repo_root: Path,
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true", help="Update original images (default: preview only)")
-    parser.add_argument("--max-edge", type=int, default=2400)
-    parser.add_argument("--quality", type=int, default=86)
+    parser.add_argument("--max-edge", type=int, default=1600)
+    parser.add_argument("--quality", type=int, default=78)
     parser.add_argument("--min-savings", type=int, default=5, help="Minimum percentage saved")
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parent.parent

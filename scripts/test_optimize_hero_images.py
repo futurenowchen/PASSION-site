@@ -2,7 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 from PIL import Image
-from optimize_hero_images import optimize
+from optimize_hero_images import optimize, main
+from unittest.mock import patch
 
 
 class TestOptimizeHeroImages(unittest.TestCase):
@@ -41,6 +42,11 @@ class TestOptimizeHeroImages(unittest.TestCase):
         optimize(self.hero, self.root, True, 2400, 86, 5)
         optimize(self.hero, self.root, True, 2400, 86, 5)
         self.assertEqual(set(p.name for p in self.hero.iterdir()), before)
+
+    def test_default_settings_are_web_sized(self):
+        with patch('optimize_hero_images.optimize', return_value=[]) as mock_opt:
+            self.assertEqual(main([]), 0)
+        self.assertEqual(mock_opt.call_args.args[2:], (False, 1600, 78, 5))
 
     def test_invalid_quality_fails_without_writing(self):
         before = self.jpg.read_bytes()
