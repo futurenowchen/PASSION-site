@@ -264,3 +264,16 @@ PASSION 資料檢視平臺／資料查詢系統有**獨立 handoff**：
 - GitHub workflow commits source compression and derivatives, and skips its own bot-triggered reruns.
 - Do not reintroduce the archived high-resolution photos into `images/hero/` as the deployment format.
 - **Official host handoff:** `passiontw.net` uses a manually installed whole-repo ZIP; GitHub Pages being green does not prove the university-hosted site has the same bits. Download a fresh ZIP only after both GitHub optimization and Pages workflows succeed; extract cleanly and replace the old release as a unit. Inspect homepage rotation and Network image requests on the university host after upload.
+
+
+## 17. University-host 404 AVIF mitigation (2026-10-29; supersedes section 16 where conflicting)
+
+The official `passiontw.net` screenshot shows multiple 404 responses for `/images/hero-optimized/*.avif`. This is an official-host compatibility / packaging failure, though a precise server-side MIME/route cause was not directly proven. GitHub Pages success does not test the university host.
+
+Resolution:
+- Frontend Hero uses only standard JPEG at stable relative paths (`images/hero/*.jpg`), not `<picture>`, AVIF, WebP, or the optimized-variant manifest.
+- Only the current and immediately upcoming slides receive `src`; the remaining 44 have inert `data-lazy-src` until requested. The pinned first photo, shuffled 45-photo pool, arrows, touch, and five-second autoplay remain unchanged.
+- Removed unused `images/hero-optimized/` derivatives (276 files) and `data/hero-optimized.json` from the distribution; the original high-resolution archives remain outside GitHub.
+- Added `data/hero-source-state.json` (Git blob checksums) to ensure only changed photo uploads get in-place compression through `scripts/optimize-hero.cjs`, preventing repeated JPEG degradation.
+- Site photo uploads should be JPEG; non-JPEG uploads fail validation in the compressor rather than silently introducing unsupported formats.
+- Acceptance must separately prove GitHub Actions, GitHub Pages, and an **actual manually updated ZIP deployment** to `passiontw.net`. Only after the university deploy may the 404 production incident be marked RESOLVED.

@@ -1,124 +1,98 @@
 'use strict';
-// Repo keeps only web-sized images in images/hero; external backups own originals.
+
+// PASSION's archival originals are backed up outside the site repository.
+// The production Hero pool keeps only standard, web-sized JPEG files so a
+// manually deployed ZIP works on ordinary static servers without AVIF MIME setup.
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const sharp = require('sharp');
 
-const root = path.resolve(__dirname, '..');
-const version = 'hero-avif52-webp74-jpeg76-v1';
-const sizes = [900, 1600];
-const formats = {
-  avif: ['avif', { quality: 52, effort: 4 }],
-  webp: ['webp', { quality: 74, effort: 5 }],
-  jpeg: ['jpg', { quality: 76, progressive: true, mozjpeg: true }]
-};
-function inputName(src) {
-  const prefix = '/PASSION-site/images/hero/';
-  if (typeof src !== 'string' || !src.startsWith(prefix)) throw new Error('Invalid hero source');
-  const encoded = src.slice(prefix.length);
-  const name = decodeURIComponent(encoded);
-  if (!name || encodeURIComponent(name) !== encoded || /[/\\]/.test(name) ||
-      !/\.(jpe?g|png|webp|avif)$/i.test(name)) throw new Error('Unsafe hero filename: ' + src);
+const ROOT = path.resolve(__dirname, '..');
+const MANIFEST = 'data/hero-source-state.json';
+const SOURCE_PREFIX = '/PASSION-site/images/hero/';
+const MAX_WIDTH = 1600;
+const MAX_BYTES_WITHOUT_REENCODE = 400000;
+
+function sourceName(src) {
+  if (typeof src !== 'string' || !src.startsWith(SOURCE_PREFIX)) {
+    throw new Error('Unexpected Hero source path: ' + src);
+  }
+  const encoded = src.slice(SOURCE_PREFIX.length);
+  let name;
+  try { name = decodeURIComponent(encoded); }
+  catch { throw new Error('Invalid URL encoding: ' + src); }
+  if (!name || encodeURIComponent(name) !== encoded ||
+      name.includes('/') || name.includes('\\') || !/\.jpe?g$/i.test(name)) {
+    throw new Error('Only safely named JPEG uploads are supported: ' + src);
+  }
   return name;
 }
-async function generate(base = root) {
-  const srcDir = path.join(base, 'images/hero');
-  const destDir = path.join(base, 'images/hero-optimized');
-  const manifestPath = path.join(base, 'data/hero-optimized.json');
-  const slides = JSON.parse(fs.readFileSync(path.join(base, 'data/hero.json'), 'utf8')).slides;
-  const previous = fs.existsSync(manifestPath) ?
-    JSON.parse(fs.readFileSync(manifestPath, 'utf8')).variants || {} : {};
-  if (!Array.isArray(slides) || slides.length === 0) throw new Error('No hero slides');
-  fs.mkdirSync(destDir, { recursive: true });
-  const keep = new Set();
-  const variants = {};
-  let inputBytes = 0, created = 0;
-  const desktopBytes = { avif: 0, webp: 0, jpeg: 0 };
-  for (const slide of slides) {
-    const name = inputName(slide.src);
-    const input = path.join(srcDir, name);
-    const bytes = fs.readFileSync(input);
-    inputBytes += bytes.length;
-    // When the CMS source is already the optimized desktop JPEG and all
-    // derivatives are present, reuse them to avoid repeated lossy encoding.
-    const cached = previous[slide.src];
-    const validVariant = (item) => item &&
-      /^images\/hero-optimized\/[a-f0-9]{24}-\d+\.(avif|webp|jpg)$/.test(item.src) &&
-      Number.isInteger(item.width) && item.width > 0 && item.width <= 1600 &&
-      fs.existsSync(path.join(base, item.src));
-    const reusable = cached && ['avif', 'webp', 'jpeg'].every(format =>
-      Array.isArray(cached[format]) && cached[format].length > 0 &&
-      cached[format].every(validVariant));
-    if (reusable) {
-      const desktopJpeg = path.join(base, cached.jpeg.at(-1).src);
-      if (bytes.equals(fs.readFileSync(desktopJpeg))) {
-        variants[slide.src] = cached;
-        for (const [format, assets] of Object.entries(cached)) {
-          for (const item of assets) keep.add(path.basename(item.src));
-          desktopBytes[format] += fs.statSync(path.join(base, assets.at(-1).src)).size;
-        }
-        continue;
+
+function gitBlobSha(buffer) {
+  return crypto.createHash('sha1')
+    .update('blob ' + buffer.length + '\0')
+    .update(buffer)
+    .digest('hex');
+}
+
+async function optimize(base = ROOT) {
+  const config = JSON.parse(fs.readFileSync(path.join(base, 'data/hero.json'), 'utf8'));
+  if (!Array.isArray(config.slides) || config.slides.length === 0) {
+    throw new Error('Hero manifest has no slides');
+  }
+  const statePath = path.join(base, MANIFEST);
+  let previous = { version: 1, images: {} };
+  if (fs.existsSync(statePath)) previous = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  if (previous.version !== 1) throw new Error('Unsupported photo optimization state version');
+
+  const next = { version: 1, images: {} };
+  let changed = 0, before = 0, after = 0;
+  for (const slide of config.slides) {
+    const name = sourceName(slide.src);
+    if (Object.hasOwn(next.images, slide.src)) throw new Error('Duplicate Hero source: ' + slide.src);
+    const filename = path.join(base, 'images/hero', name);
+    const data = fs.readFileSync(filename);
+    before += data.length;
+    const currentSha = gitBlobSha(data);
+    if (previous.images[slide.src] === currentSha) {
+      next.images[slide.src] = currentSha;
+      after += data.length;
+      continue;
+    }
+
+    const meta = await sharp(data).metadata();
+    const orientedWidth = [5, 6, 7, 8].includes(meta.orientation) ? meta.height : meta.width;
+    let output = data;
+    if (orientedWidth > MAX_WIDTH || data.length > MAX_BYTES_WITHOUT_REENCODE) {
+      const resized = await sharp(data).rotate()
+        .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+        .jpeg({ quality: 76, progressive: true, mozjpeg: true }).toBuffer();
+      if (orientedWidth > MAX_WIDTH || resized.length < data.length) {
+        output = resized;
       }
     }
-    const hash = crypto.createHash('sha256').update(version).update(bytes).digest('hex').slice(0, 24);
-    const info = await sharp(input).metadata();
-    const nativeWidth = [5,6,7,8].includes(info.orientation) ? info.height : info.width;
-    if (!nativeWidth) throw new Error('Invalid photo: ' + input);
-    const widths = [...new Set(sizes.map(n => Math.min(n, nativeWidth)))];
-    variants[slide.src] = {};
-    for (const [format, [extension, options]] of Object.entries(formats)) {
-      const outputs = [];
-      for (const width of widths) {
-        const file = hash + '-' + width + '.' + extension;
-        const output = path.join(destDir, file);
-        keep.add(file);
-        if (!fs.existsSync(output)) {
-          let p = sharp(input).rotate().resize({ width, withoutEnlargement: true });
-          if (format === 'avif') p = p.avif(options);
-          else if (format === 'webp') p = p.webp(options);
-          else p = p.flatten({ background: '#fff' }).jpeg(options);
-          await p.toFile(output);
-          created++;
-        }
-        const meta = await sharp(output).metadata();
-        if (!meta.width || meta.width > width) throw new Error('Bad output: ' + file);
-        outputs.push({ src: 'images/hero-optimized/' + file, width: meta.width });
-      }
-      variants[slide.src][format] = outputs;
-      desktopBytes[format] += fs.statSync(path.join(base, outputs.at(-1).src)).size;
+    if (output !== data) {
+      const tmp = filename + '.optimized.tmp';
+      fs.writeFileSync(tmp, output);
+      fs.renameSync(tmp, filename);
+      changed++;
     }
-    // The user keeps archival originals separately. Commit only a web-sized
-    // source image, retaining its original filename so CMS and URLs keep working.
-    const jpegFallback = path.join(base, variants[slide.src].jpeg.at(-1).src);
-    if (/\.jpe?g$/i.test(name)) {
-      fs.copyFileSync(jpegFallback, input);
-    } else {
-      const extension = path.extname(name).toLowerCase();
-      const temp = input + '.webtmp';
-      let pipeline = sharp(input).rotate().resize({ width: 1600, withoutEnlargement: true });
-      if (extension === '.png') pipeline = pipeline.png({ compressionLevel: 9 });
-      else if (extension === '.webp') pipeline = pipeline.webp({ quality: 80 });
-      else if (extension === '.avif') pipeline = pipeline.avif({ quality: 56, effort: 4 });
-      else throw new Error('Unsupported image type: ' + name);
-      await pipeline.toFile(temp);
-      fs.renameSync(temp, input);
-    }
+    next.images[slide.src] = gitBlobSha(output);
+    after += output.length;
   }
-  for (const name of fs.readdirSync(destDir)) {
-    if (/^[a-f0-9]{24}-\d+\.(avif|webp|jpg)$/.test(name) && !keep.has(name)) {
-      fs.unlinkSync(path.join(destDir, name));
-    }
+  const value = JSON.stringify(next, null, 2) + '\n';
+  if (!fs.existsSync(statePath) || fs.readFileSync(statePath, 'utf8') !== value) {
+    fs.writeFileSync(statePath, value);
   }
-  fs.writeFileSync(manifestPath, JSON.stringify({ version: 1, generator: version, variants }, null, 2) + '\n');
   console.log(JSON.stringify({
-    images: slides.length, generated: created,
-    sourceMB: +(inputBytes / 1048576).toFixed(2),
-    optimizedDesktopMB: Object.fromEntries(Object.entries(desktopBytes).map(([k,v]) => [k, +(v / 1048576).toFixed(2)]))
+    photos: config.slides.length, files_replaced: changed,
+    input_MiB: +(before / 1048576).toFixed(2),
+    output_MiB: +(after / 1048576).toFixed(2)
   }, null, 2));
-  return { variants };
+  return next;
 }
 if (require.main === module) {
-  generate().catch(e => { console.error(e); process.exitCode = 1; });
+  optimize().catch(e => { console.error(e); process.exitCode = 1; });
 }
-module.exports = { generate, inputName };
+module.exports = { optimize, sourceName, gitBlobSha };

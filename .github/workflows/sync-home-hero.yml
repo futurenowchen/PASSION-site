@@ -1,9 +1,10 @@
-name: Sync and optimize homepage photo pool
+name: Optimize homepage JPEG photo pool
 on:
   push:
     branches: [main]
     paths:
       - 'images/hero/**'
+      - 'data/hero.json'
       - 'scripts/sync-hero-pool.cjs'
       - 'scripts/optimize-hero.cjs'
       - '.github/workflows/sync-home-hero.yml'
@@ -17,28 +18,30 @@ jobs:
   optimize:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install Sharp image converter
+      - name: Install image optimizer
         run: npm install --no-save --no-package-lock sharp@0.34.4
-      - name: Synchronize original photo pool
+      - name: Synchronize photo list
         run: node scripts/sync-hero-pool.cjs
-      - name: Generate AVIF, WebP and JPEG at 900/1600px
+      - name: Optimize newly uploaded JPEG images in place
         run: node scripts/optimize-hero.cjs
-      - name: Check image integrity and responsive outputs
-        run: node --test tests/hero-photo-pool.test.cjs tests/hero-playback.test.cjs tests/hero-optimization.test.cjs
-      - name: Commit web-sized sources and derived photos
+      - name: Syntax and regression tests
         run: |
-          git add data/hero.json data/hero-optimized.json images/hero/ images/hero-optimized/
+          node --check home.js
+          node --test tests/hero-photo-pool.test.cjs tests/hero-playback.test.cjs tests/hero-optimization.test.cjs
+      - name: Commit web-sized images and state
+        run: |
+          git add images/hero/ data/hero.json data/hero-source-state.json
           if git diff --cached --quiet; then
-            echo "Optimized assets already current."
+            echo "Photo pool already optimized."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "build(hero): publish web-sized sources and responsive derivatives"
+          git commit -m "build(hero): compress new JPEG photos for static hosting"
           git push

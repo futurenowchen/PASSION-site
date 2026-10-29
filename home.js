@@ -3,7 +3,6 @@
   const activityHost = document.getElementById('home-activity-list');
   const heroCarousel = document.getElementById('home-hero-carousel');
   let heroSlides = [];
-  let heroOptimized = null;
   const heroPrev = heroCarousel ? heroCarousel.querySelector('[data-hero-prev]') : null;
   const heroNext = heroCarousel ? heroCarousel.querySelector('[data-hero-next]') : null;
 
@@ -50,14 +49,6 @@
       const response = await fetch('data/hero.json', { cache: 'no-cache' });
       if (!response.ok) throw new Error('Hero config HTTP ' + response.status);
       const data = await response.json();
-      // Optimized variants are published separately; fall back to originals until ready.
-      try {
-        const optimizedResponse = await fetch('data/hero-optimized.json', { cache: 'no-cache' });
-        if (optimizedResponse.ok) {
-          const candidate = await optimizedResponse.json();
-          if (candidate.version === 1 && candidate.variants) heroOptimized = candidate.variants;
-        }
-      } catch (_) { /* Original JPEG remains valid. */ }
       if (!Array.isArray(data.slides) || !data.slides.length) {
         throw new Error('Hero config: slides must contain at least one image');
       }
@@ -91,61 +82,21 @@
         figure.dataset.heroSlide = '';
         figure.setAttribute('aria-hidden', String(index !== initialIndex));
 
+        // The university host serves standard JPEG reliably. Keep unplayed
+        // photos inert: no src, srcset or <picture> until needed.
         const image = document.createElement('img');
         const preload = index === initialIndex || index === upcomingIndex;
-        const original = item.src;
-        const variants = heroOptimized && heroOptimized['/PASSION-site/' + original];
-        let picture = null;
-        if (variants && ['avif', 'webp', 'jpeg'].every(k =>
-          Array.isArray(variants[k]) && variants[k].length > 0 &&
-          variants[k].every(x => /^images\/hero-optimized\/[a-f0-9]{24}-\d+\.(avif|webp|jpg)$/.test(x.src) &&
-            Number.isInteger(x.width) && x.width > 0 && x.width <= 1600))) {
-          picture = document.createElement('picture');
-          for (const [format, mime] of [['avif', 'image/avif'], ['webp', 'image/webp']]) {
-            const source = document.createElement('source');
-            source.type = mime;
-            source.dataset.srcset = variants[format].map(x => x.src + ' ' + x.width + 'w').join(', ');
-            source.sizes = '(max-width: 760px) 100vw, 60vw';
-            picture.append(source);
-          }
-          image.dataset.srcset = variants.jpeg.map(x => x.src + ' ' + x.width + 'w').join(', ');
-          image.sizes = '(max-width: 760px) 100vw, 60vw';
-          image.dataset.optimizedFallback = variants.jpeg.at(-1).src;
-        }
-        if (preload) image.src = picture ? image.dataset.optimizedFallback : original;
-        else image.dataset.lazySrc = picture ? image.dataset.optimizedFallback : original;
-        // If a variant is unavailable in a manually deployed ZIP, retry the stable
-        // compressed image in images/hero instead of leaving a broken slide.
-        image.addEventListener('error', () => {
-          if (image.dataset.originalFallbackTried === '1') {
-            figure.dataset.heroLoadFailed = 'true';
-            console.error('首頁照片無法載入：', original);
-            return;
-          }
-          image.dataset.originalFallbackTried = '1';
-          const wrapper = image.parentElement;
-          if (wrapper && wrapper.tagName === 'PICTURE') {
-            wrapper.querySelectorAll('source').forEach((source) => source.remove());
-          }
-          image.removeAttribute('srcset');
-          image.removeAttribute('sizes');
-          delete image.dataset.srcset;
-          image.src = original;
-        });
         image.alt = item.alt;
         image.loading = preload ? 'eager' : 'lazy';
         image.decoding = 'async';
         if (index === initialIndex) image.fetchPriority = 'high';
-        if (picture) picture.append(image);
-        figure.append(picture || image);
-        if (preload && picture) {
-          for (const source of picture.querySelectorAll('source')) {
-            source.srcset = source.dataset.srcset;
-            delete source.dataset.srcset;
-          }
-          image.srcset = image.dataset.srcset;
-          delete image.dataset.srcset;
-        }
+        image.addEventListener('error', () => {
+          figure.dataset.heroLoadFailed = 'true';
+          console.error('首頁輪播圖片無法載入：', item.src);
+        });
+        if (preload) image.src = item.src;
+        else image.dataset.lazySrc = item.src;
+        figure.append(image);
         slideNodes.append(figure);
 
       });
@@ -175,19 +126,6 @@
         if (i === null) continue;
         const img = heroSlides[i].querySelector('img');
         if (img && img.dataset.lazySrc) {
-          const picture = img.parentElement;
-          if (picture && picture.tagName === 'PICTURE') {
-            for (const source of picture.querySelectorAll('source')) {
-              if (source.dataset.srcset) {
-                source.srcset = source.dataset.srcset;
-                delete source.dataset.srcset;
-              }
-            }
-            if (img.dataset.srcset) {
-              img.srcset = img.dataset.srcset;
-              delete img.dataset.srcset;
-            }
-          }
           img.src = img.dataset.lazySrc;
           delete img.dataset.lazySrc;
         }
