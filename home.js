@@ -3,6 +3,7 @@
   const activityHost = document.getElementById('home-activity-list');
   const heroCarousel = document.getElementById('home-hero-carousel');
   let heroSlides = [];
+  let heroOptimized = null;
   const heroPrev = heroCarousel ? heroCarousel.querySelector('[data-hero-prev]') : null;
   const heroNext = heroCarousel ? heroCarousel.querySelector('[data-hero-next]') : null;
 
@@ -49,6 +50,14 @@
       const response = await fetch('data/hero.json', { cache: 'no-cache' });
       if (!response.ok) throw new Error('Hero config HTTP ' + response.status);
       const data = await response.json();
+      // Optimized variants are published separately; fall back to originals until ready.
+      try {
+        const optimizedResponse = await fetch('data/hero-optimized.json', { cache: 'no-cache' });
+        if (optimizedResponse.ok) {
+          const candidate = await optimizedResponse.json();
+          if (candidate.version === 1 && candidate.variants) heroOptimized = candidate.variants;
+        }
+      } catch (_) { /* Original JPEG remains valid. */ }
       if (!Array.isArray(data.slides) || !data.slides.length) {
         throw new Error('Hero config: slides must contain at least one image');
       }
@@ -84,13 +93,41 @@
 
         const image = document.createElement('img');
         const preload = index === initialIndex || index === upcomingIndex;
-        if (preload) image.src = item.src;
-        else image.dataset.lazySrc = item.src;
+        const original = item.src;
+        const variants = heroOptimized && heroOptimized['/PASSION-site/' + original];
+        let picture = null;
+        if (variants && ['avif', 'webp', 'jpeg'].every(k =>
+          Array.isArray(variants[k]) && variants[k].length > 0 &&
+          variants[k].every(x => /^images\/hero-optimized\/[a-f0-9]{24}-\d+\.(avif|webp|jpg)$/.test(x.src) &&
+            Number.isInteger(x.width) && x.width > 0 && x.width <= 1600))) {
+          picture = document.createElement('picture');
+          for (const [format, mime] of [['avif', 'image/avif'], ['webp', 'image/webp']]) {
+            const source = document.createElement('source');
+            source.type = mime;
+            source.dataset.srcset = variants[format].map(x => x.src + ' ' + x.width + 'w').join(', ');
+            source.sizes = '(max-width: 760px) 100vw, 60vw';
+            picture.append(source);
+          }
+          image.dataset.srcset = variants.jpeg.map(x => x.src + ' ' + x.width + 'w').join(', ');
+          image.sizes = '(max-width: 760px) 100vw, 60vw';
+          image.dataset.optimizedFallback = variants.jpeg.at(-1).src;
+        }
+        if (preload) image.src = picture ? image.dataset.optimizedFallback : original;
+        else image.dataset.lazySrc = picture ? image.dataset.optimizedFallback : original;
         image.alt = item.alt;
         image.loading = preload ? 'eager' : 'lazy';
         image.decoding = 'async';
         if (index === initialIndex) image.fetchPriority = 'high';
-        figure.append(image);
+        if (picture) picture.append(image);
+        figure.append(picture || image);
+        if (preload && picture) {
+          for (const source of picture.querySelectorAll('source')) {
+            source.srcset = source.dataset.srcset;
+            delete source.dataset.srcset;
+          }
+          image.srcset = image.dataset.srcset;
+          delete image.dataset.srcset;
+        }
         slideNodes.append(figure);
 
       });
@@ -120,6 +157,19 @@
         if (i === null) continue;
         const img = heroSlides[i].querySelector('img');
         if (img && img.dataset.lazySrc) {
+          const picture = img.parentElement;
+          if (picture && picture.tagName === 'PICTURE') {
+            for (const source of picture.querySelectorAll('source')) {
+              if (source.dataset.srcset) {
+                source.srcset = source.dataset.srcset;
+                delete source.dataset.srcset;
+              }
+            }
+            if (img.dataset.srcset) {
+              img.srcset = img.dataset.srcset;
+              delete img.dataset.srcset;
+            }
+          }
           img.src = img.dataset.lazySrc;
           delete img.dataset.lazySrc;
         }
