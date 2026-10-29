@@ -1,6 +1,6 @@
 # PASSION-site Development Handoff
 
-Last updated: 2026-10-06  
+Last updated: 2026-10-29  
 Repository: `futurenowchen/PASSION-site`  
 Primary branch: `main`
 
@@ -30,7 +30,7 @@ Content/data:
 - `data/news.json`: latest-news archive.
 - `images/activity/<year>/`: local activity cover images stored in repo.
 
-No separate CMS exists yet.
+A limited Sveltia CMS exists at `/admin/` for the homepage Hero photo pool only; activities and news are not managed through this CMS.
 
 ## 3. Content-source decisions already made
 
@@ -250,3 +250,17 @@ PASSION 資料檢視平臺／資料查詢系統有**獨立 handoff**：
 - 私有 canonical 原始碼 repo：futurenowchen/passion-activity-data 的根目錄 HANDOFF.md，同步維護。
 
 本文件仍管主網站、活動／新聞／媒體與頁面設計。要接續資料檢視平臺，請優先讀資料查詢的專屬 handoff，避免以本文件中較早的網站 checkpoint 誤判資料庫狀態。
+
+
+## 16. Hero broken-image and source-size repair (2026-10-29)
+
+**Validated main implementation:** `af616c51aaee005f2dcfe4de4de054de4cbfd652`. Its GitHub Actions photo check and GitHub Pages deployment both passed.
+
+- The 46-photo pool and first pinned `00-cover.jpg` are unchanged; subsequent photos still shuffle without repeats until the round ends.
+- A responsive `<picture>` container was missing a block-level full-height/width CSS rule. `styles.css` now sizes `.home-hero-slide picture` explicitly; image loading failure falls back to its stable original-location JPEG, avoiding a blank slide when a derived asset is not deployed.
+- The team confirms **original full-resolution photos are backed up outside GitHub**. The live `images/hero/` files are **web-sized JPEG copies with the same names**, not the archival originals. As of this checkpoint, the 46 source paths shrank from 77.32 MiB to 8.56 MiB.
+- Responsive AVIF, WebP, JPEG derivatives remain in `images/hero-optimized/`, indexed by `data/hero-optimized.json`. No original-path redirect or filename change was made, preserving the existing CMS and source manifest.
+- `scripts/optimize-hero.cjs` now reuses derivatives when the source is already the generated JPEG, avoiding generational quality loss. On future uploads it generates 900/1600px variants and replaces the uploaded site copy with the web-sized format while keeping the name.
+- GitHub workflow commits source compression and derivatives, and skips its own bot-triggered reruns.
+- Do not reintroduce the archived high-resolution photos into `images/hero/` as the deployment format.
+- **Official host handoff:** `passiontw.net` uses a manually installed whole-repo ZIP; GitHub Pages being green does not prove the university-hosted site has the same bits. Download a fresh ZIP only after both GitHub optimization and Pages workflows succeed; extract cleanly and replace the old release as a unit. Inspect homepage rotation and Network image requests on the university host after upload.
