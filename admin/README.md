@@ -47,3 +47,12 @@ https://futurenowchen.github.io/PASSION-site/admin/
 - 沒有 `00-cover.jpg` 時，所有照片都參與隨機輪播。
 - 原有的 GitHub 自動同步、左右切換、觸控手勢及每五秒自動播放保留，底部圓點仍不顯示。
 - 洗牌只改變瀏覽器中當次觀看的播放順序，不需要更動 `data/hero.json`。正式站 `passiontw.net` 的部署方式仍須工程師確認。
+
+
+## 2026-10-29: archive-free deployment
+- The team maintains original-resolution photo backups outside this repository.
+- `images/hero/` contains only optimized web-sized image sources with stable filenames so the CMS continues to work.
+- `images/hero-optimized/` contains responsive AVIF / WebP / JPEG variants; `data/hero-optimized.json` is their generated manifest.
+- If a pre-built archive omits the optimized manifest or derivatives, the homepage falls back to the stable web-sized source.
+- The GitHub Actions conversion step synchronizes the manifest, generates derivatives, and replaces uploaded large JPEGs with web-sized copies in one change.
+- When using full ZIP deployment, download only after the optimization workflow and Pages build have finished. Deploy a clean extraction rather than merging with an older directory.

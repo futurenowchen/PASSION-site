@@ -15,6 +15,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   optimize:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -30,14 +31,14 @@ jobs:
         run: node scripts/optimize-hero.cjs
       - name: Check image integrity and responsive outputs
         run: node --test tests/hero-photo-pool.test.cjs tests/hero-playback.test.cjs tests/hero-optimization.test.cjs
-      - name: Commit generated derivatives, never originals
+      - name: Commit web-sized sources and derived photos
         run: |
-          git add data/hero.json data/hero-optimized.json images/hero-optimized/
+          git add data/hero.json data/hero-optimized.json images/hero/ images/hero-optimized/
           if git diff --cached --quiet; then
             echo "Optimized assets already current."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "build(hero): publish responsive image derivatives"
+          git commit -m "build(hero): publish web-sized sources and responsive derivatives"
           git push

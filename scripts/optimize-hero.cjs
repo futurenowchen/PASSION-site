@@ -1,5 +1,5 @@
 'use strict';
-// Canonical photos stay in images/hero; this generates web-only derivatives.
+// Repo keeps only web-sized images in images/hero; external backups own originals.
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -27,6 +27,8 @@ async function generate(base = root) {
   const destDir = path.join(base, 'images/hero-optimized');
   const manifestPath = path.join(base, 'data/hero-optimized.json');
   const slides = JSON.parse(fs.readFileSync(path.join(base, 'data/hero.json'), 'utf8')).slides;
+  const previous = fs.existsSync(manifestPath) ?
+    JSON.parse(fs.readFileSync(manifestPath, 'utf8')).variants || {} : {};
   if (!Array.isArray(slides) || slides.length === 0) throw new Error('No hero slides');
   fs.mkdirSync(destDir, { recursive: true });
   const keep = new Set();
@@ -34,9 +36,31 @@ async function generate(base = root) {
   let inputBytes = 0, created = 0;
   const desktopBytes = { avif: 0, webp: 0, jpeg: 0 };
   for (const slide of slides) {
-    const input = path.join(srcDir, inputName(slide.src));
+    const name = inputName(slide.src);
+    const input = path.join(srcDir, name);
     const bytes = fs.readFileSync(input);
     inputBytes += bytes.length;
+    // When the CMS source is already the optimized desktop JPEG and all
+    // derivatives are present, reuse them to avoid repeated lossy encoding.
+    const cached = previous[slide.src];
+    const validVariant = (item) => item &&
+      /^images\/hero-optimized\/[a-f0-9]{24}-\d+\.(avif|webp|jpg)$/.test(item.src) &&
+      Number.isInteger(item.width) && item.width > 0 && item.width <= 1600 &&
+      fs.existsSync(path.join(base, item.src));
+    const reusable = cached && ['avif', 'webp', 'jpeg'].every(format =>
+      Array.isArray(cached[format]) && cached[format].length > 0 &&
+      cached[format].every(validVariant));
+    if (reusable) {
+      const desktopJpeg = path.join(base, cached.jpeg.at(-1).src);
+      if (bytes.equals(fs.readFileSync(desktopJpeg))) {
+        variants[slide.src] = cached;
+        for (const [format, assets] of Object.entries(cached)) {
+          for (const item of assets) keep.add(path.basename(item.src));
+          desktopBytes[format] += fs.statSync(path.join(base, assets.at(-1).src)).size;
+        }
+        continue;
+      }
+    }
     const hash = crypto.createHash('sha256').update(version).update(bytes).digest('hex').slice(0, 24);
     const info = await sharp(input).metadata();
     const nativeWidth = [5,6,7,8].includes(info.orientation) ? info.height : info.width;
@@ -63,6 +87,22 @@ async function generate(base = root) {
       }
       variants[slide.src][format] = outputs;
       desktopBytes[format] += fs.statSync(path.join(base, outputs.at(-1).src)).size;
+    }
+    // The user keeps archival originals separately. Commit only a web-sized
+    // source image, retaining its original filename so CMS and URLs keep working.
+    const jpegFallback = path.join(base, variants[slide.src].jpeg.at(-1).src);
+    if (/\.jpe?g$/i.test(name)) {
+      fs.copyFileSync(jpegFallback, input);
+    } else {
+      const extension = path.extname(name).toLowerCase();
+      const temp = input + '.webtmp';
+      let pipeline = sharp(input).rotate().resize({ width: 1600, withoutEnlargement: true });
+      if (extension === '.png') pipeline = pipeline.png({ compressionLevel: 9 });
+      else if (extension === '.webp') pipeline = pipeline.webp({ quality: 80 });
+      else if (extension === '.avif') pipeline = pipeline.avif({ quality: 56, effort: 4 });
+      else throw new Error('Unsupported image type: ' + name);
+      await pipeline.toFile(temp);
+      fs.renameSync(temp, input);
     }
   }
   for (const name of fs.readdirSync(destDir)) {

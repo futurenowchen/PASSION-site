@@ -114,6 +114,24 @@
         }
         if (preload) image.src = picture ? image.dataset.optimizedFallback : original;
         else image.dataset.lazySrc = picture ? image.dataset.optimizedFallback : original;
+        // If a variant is unavailable in a manually deployed ZIP, retry the stable
+        // compressed image in images/hero instead of leaving a broken slide.
+        image.addEventListener('error', () => {
+          if (image.dataset.originalFallbackTried === '1') {
+            figure.dataset.heroLoadFailed = 'true';
+            console.error('首頁照片無法載入：', original);
+            return;
+          }
+          image.dataset.originalFallbackTried = '1';
+          const wrapper = image.parentElement;
+          if (wrapper && wrapper.tagName === 'PICTURE') {
+            wrapper.querySelectorAll('source').forEach((source) => source.remove());
+          }
+          image.removeAttribute('srcset');
+          image.removeAttribute('sizes');
+          delete image.dataset.srcset;
+          image.src = original;
+        });
         image.alt = item.alt;
         image.loading = preload ? 'eager' : 'lazy';
         image.decoding = 'async';

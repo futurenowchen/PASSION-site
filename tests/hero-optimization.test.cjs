@@ -23,3 +23,21 @@ test('responsive markup defers inactive photos and supports all formats', () => 
   assert.match(source,/dataset\.lazySrc/);
   assert.match(source,/hero-optimized\.json/);
 });
+
+test('all original-path JPEGs are web sized and match generated JPEG fallbacks', () => {
+  const optimized = JSON.parse(fs.readFileSync(path.join(root,'data/hero-optimized.json'), 'utf8'));
+  assert.equal(Object.keys(optimized.variants).length, slides.length);
+  for (const slide of slides) {
+    const original = fs.readFileSync(path.join(root,'images/hero',inputName(slide.src)));
+    const variant = optimized.variants[slide.src];
+    assert.ok(variant, 'variant missing');
+    const jpg = fs.readFileSync(path.join(root,variant.jpeg.at(-1).src));
+    if (/\.jpe?g$/i.test(slide.src)) assert.ok(original.equals(jpg), 'uncompressed source retained: ' + slide.src);
+  }
+});
+test('picture container fills hero and has an image error fallback', () => {
+  const css = fs.readFileSync(path.join(root,'styles.css'),'utf8');
+  const home = fs.readFileSync(path.join(root,'home.js'),'utf8');
+  assert.match(css, /\.home-hero-slide picture\s*\{[^}]*width:\s*100%;[^}]*height:\s*100%/);
+  assert.match(home, /originalFallbackTried/);
+});

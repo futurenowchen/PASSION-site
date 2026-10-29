@@ -2990,6 +2990,12 @@ main section a:not(.button):not(.button-link) {
   pointer-events: auto;
 }
 
+.home-hero-slide picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .home-hero-slide img {
   display: block;
   width: 100%;
