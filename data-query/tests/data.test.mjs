@@ -176,3 +176,27 @@ test("filtering before global date sorting preserves page-boundary chronology", 
 test("combined source loading fails closed when required verified interview data is absent", () => {
   assert.throws(() => canonicalizeSources({legacy, current}), /缺少110–114訪談修正版批次/);
 });
+
+
+test("authorized staff name search covers legacy/current professors and研習", () => {
+  const old = [[...legacy[0],
+    "師大人員姓名\n (研究員+教授)", "顧問老師姓名", "大學生姓名"],
+    [...legacy[1], "林若瑄、陳明美", "許顧問", "學生甲"]];
+  const now = [[...currentHeader,
+    "師大教授姓名","師大助理/研究員姓名","顧問老師姓名",
+    "扎根生姓名","大學生/修業生/學友 姓名"],
+    [...current[1], "林若瑄計畫主持人", "研究員乙", "黃顧問", "學生乙", "修業生丙"]];
+  const records = [...canonicalizeLegacy(old), ...canonicalizeCurrent(now)];
+  assert.equal(records.length, 2);
+  assert.equal(applyFilters(records,{keyword:"林若瑄"}).length, 2);
+  assert.equal(applyFilters(records,{keyword:"林若瑄 研習"}).length, 2);
+  assert.equal(applyFilters(records,{keyword:"林若瑄 研習",filters:{category:["增能研習"]}}).length, 2);
+  assert.equal(applyFilters(records,{keyword:"研究員乙"}).length, 1);
+  assert.equal(applyFilters(records,{keyword:"許顧問"}).length, 1);
+  assert.equal(applyFilters(records,{keyword:"黃顧問"}).length, 1);
+  assert.equal(applyFilters(records,{keyword:"學生乙"}).length, 0);
+  assert.equal(applyFilters(records,{keyword:"修業生丙"}).length, 0);
+  assert.equal(applyFilters(records,{keyword:"學生甲"}).length, 0);
+  assert.ok(records.every(r => !("professor_name" in r)));
+  assert.equal(metricTotal(records,"活動場次"), 2);
+});
