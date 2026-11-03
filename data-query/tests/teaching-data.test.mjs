@@ -538,6 +538,7 @@ test("official NMOE 114.9 reconciles all 54 school items and replaces old 2866 o
 test("USR 112-1 subject-based people-time fixes isolated -2 discrepancy", () => {
   const old={metric_type:"root_person_time",project_name:"USR",
     batch_id:"hist-big-overview-20261008-v1",time_granularity:"semester",
+    academic_year:112,semester:"上學期",
     date_start:"2023-08-01",metric_value:104};
   const official=["英文","數學"].map((subject,i)=>({
     metric_type:"root_person_time",project_name:"USR",subject,
