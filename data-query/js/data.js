@@ -110,6 +110,7 @@ const TOKEN_FIELDS = new Set(["subject", "service_region", "service_target", "ve
 const SEARCH_FIELDS = [
   "project","project_family","project_raw","category","subject","service_region","service_region_raw",
   "service_target","service_target_raw","venue_region","venue","activity_name","notes",
+  "staff_search_names",
 ];
 
 export function cleanText(value) {
@@ -274,6 +275,11 @@ function firstNonEmpty(...values) {
   return null;
 }
 
+// Name fields remain in authorized browser memory; do not index student/alumni names.
+function staffNameIndex(...values) {
+  return values.map(cleanText).filter(Boolean).join(" ") || null;
+}
+
 function baseRecord(sourceType, rowNumber) {
   return {
     activity_id: `${sourceType}:${rowNumber}`,
@@ -340,6 +346,10 @@ export function canonicalizeLegacy(values = []) {
       category: normalizeCategory(categoryRaw),
       category_raw: categoryRaw,
       activity_name: cleanText(pick(row, headers, "性質")),
+      staff_search_names: staffNameIndex(
+        pick(row, headers, "師大人員姓名 (研究員+教授)"),
+        pick(row, headers, "顧問老師姓名"),
+      ),
       ntnu_professor_count: ntnuProfessor,
       ntnu_staff_count: ntnuStaff,
       ntnu_student_count: students,
@@ -431,6 +441,11 @@ export function canonicalizeCurrent(values = []) {
         pick(row, headers, "其他活動名稱"),
       ),
       ...counts,
+      staff_search_names: staffNameIndex(
+        pick(row, headers, "師大教授姓名"),
+        pick(row, headers, "師大助理/研究員姓名"),
+        pick(row, headers, "顧問老師姓名"),
+      ),
       legacy_external_participant_count: null,
       total_participant_count: total,
       teacher_participant_count: teacher,
