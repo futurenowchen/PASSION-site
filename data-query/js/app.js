@@ -9,7 +9,7 @@ import {
   dimensionValues,
   metricTotal,
   sortActivityRecords,
-} from "./data.js";
+} from "./data.js?v=20261103-staff-search1";
 import {fetchPassionSheets, GoogleSheetsError} from "./sheets.js";
 import {clearSheetsSession, restoreSheetsSession, storeSheetsSession} from "./auth-session.js";
 
