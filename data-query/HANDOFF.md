@@ -462,3 +462,14 @@ User uploaded local-only `11009資料.xlsx`, `11409資料.xlsx`, `10806資料.xl
 - \`data-query/tests/data.test.mjs\` 新增跨來源、最新/最舊、同日穩定、缺日期、先篩選再排序分頁邊界測試；同時修復此檔之前直接用不含interviews的 \`canonicalizeSources()\` 造成的過時單元測試失敗，改為分別測 \`canonicalizeLegacy()/canonicalizeCurrent()\`，另加「正式合併來源缺interviews必須 fail-closed」測試。以真實repo模組與測試內容在隔離V8 harness**17/17 PASS**；\`app.js\`語法、sort UI/wiring及CSV共用順序檢查PASS，不冒稱 Node/GitHub Actions已PASS。
 - 五對公開/私有鏡像 \`data.js,app.js,index.html,styles.css,tests/data.test.mjs\` 已於本輪同步至 \`futurenowchen/PASSION-site/data-query/\` 和 \`futurenowchen/passion-activity-data/web/\`。正式GitHub Pages部署以及以Google OAuth登入現場驗收若未證實，均只能標記待驗證。
 - 下一步：登入 \`https://futurenowchen.github.io/PASSION-site/data-query/index.html\`，確認原379筆篩選集合在「最新在前」頁1→頁2→末頁日期單調遞減，切換「最舊在前」反向，CSV與同一篩選排序一致；若畫面還顯示舊版，先確認最新Pages部署與刷新快取，不重複匯入Google Sheet資料。
+
+## 40. 2026-11-03 活動自由搜尋加入團隊人員姓名（零原始資料搬移）
+
+- 使用者發現自由搜尋「胡翠君」無法找到教授參與的研習。查公開 \`data-query/js/data.js\`：\`SEARCH_FIELDS\` 原僅含計畫、分類、學校、活動名稱、備註；\`canonicalizeLegacy\` / \`canonicalizeCurrent\` 根本沒有取用已有的姓名欄。
+- 使用 Google Mirror **只讀**確認：\`LEGACY_RAW\` 原始 P「師大人員姓名 (研究員+教授)」、Q「顧問老師姓名」，\`RAW_CURRENT\` AE「師大教授姓名」、AF「師大助理/研究員姓名」、AG「顧問老師姓名」。以「胡翠君」查來源：2023+ \`RAW_CURRENT!AE\` 命中272原始列；2016-2022 \`LEGACY_RAW!P\` 命中52原始列；這是**來源列數**，非研習場次，不可直接當研習數。抽樣2023/01/07 \`增能研習\`、2021/12/11 \`增能\` 均確有胡翠君且資料可 canonicalize 到分類 \`增能研習\`。
+- 公開 \`futurenowchen/PASSION-site/data-query/js/data.js\` 新增 \`staffNameIndex\`，僅在已授權的瀏覽器記憶體將舊P/Q和新AE/AF/AG投射至隱藏查詢欄 \`staff_search_names\`，加入 \`SEARCH_FIELDS\`，沿用多關鍵字 AND 與分類篩選；原 Google OAuth、Google Sheets 私有權限、統計口徑、日期、去重、場次、人次都不變。**不索引學生／修業生／大學生姓名**，不新增人名表格欄或CSV匯出欄，也未把實際姓名／資料寫入GitHub。
+- \`data-query/index.html\` 提示「胡翠君 研習」與「原始資料有登錄的教授／研究員／顧問老師姓名」，\`data-query/js/app.js\` 將 \`data.js\` import version 提升為 \`?v=20261103-staff-search1\`，入口 \`index.html\` 同步更新JS/CSS cache token；GitHub Pages 端已部署修正。
+- \`data-query/tests/data.test.mjs\` 新增虛構姓名 fixture，涵蓋舊／新表、人名+研習AND、分類交集、研究員／顧問老師，以及學生姓名不得成為新的人名索引；另以Google原始資料小樣本實測2023/01/07與2021/12/11確實可用「胡翠君 研習」命中（原始名不提交repo）。
+- 本回合發現既有 \`teaching-data.test.mjs\` 的「USR 112-1」測試 fixture 缺學年度/學期欄，造成完整 Actions CI 即使新搜尋測試PASS也紅燈；補齊**測試 fixture** 的 \`academic_year:112,semester:"上學期"\`，未修改 \`teaching-data.js\` 或任何統計數值。公開 \`PASSION data-query tests\` run 41570917629 success、\`pages build and deployment\` run 41570917115 success；私有 \`tests\` run 41570942048 success（均為上述程式碼提交後、文檔補記前）。
+- 公開 \`data-query/js/data.js,js/app.js,index.html,tests/data.test.mjs,tests/teaching-data.test.mjs\` 均已與私有 \`futurenowchen/passion-activity-data/web/\` 同步。正式 \`https://passiontw.net/data-query/\` 是學校主機**另行ZIP部署**，不能以GitHub Pages綠燈宣稱學校主機已更新；必須用最新網站檔案重新覆蓋部署、登入實測才能稱正式網域驗收完成。
+- 本輪只修「已具名的教授、研究員、顧問老師」檢索；未填姓名的紀錄無法據此排除人員實際參與，\`研習\`篩選表示「參與」不是「擔任主講」。未來若需更多人員角色，應先界定隱私及用途，不直接開放學生姓名檢索。
